@@ -1,3 +1,6 @@
+//Enums
+import { CreepRole } from "../enums/enum.roles"
+
 export class spawner {
 
 
@@ -40,7 +43,7 @@ export class spawner {
 
     //Region spawn specific
     private static spawnHarvesters(room: Room) {
-        let harvesters = this.getCreepsByType(room, 0);
+        let harvesters = this.getCreepsByType(room, CreepRole.harvester);
 
         if (harvesters.length < room.find(FIND_SOURCES).length) {
             let spawns = room.find(FIND_MY_SPAWNS);
@@ -48,7 +51,7 @@ export class spawner {
             if (spawns.length > 0) {
                 spawns[0].spawnCreep(basicBody,
                     `Harvester${Game.time.toString()}`,
-                    { memory: { role: 0, working: false } });
+                    { memory: { role: CreepRole.harvester, working: false } });
                 return false;
             }
         }
@@ -56,7 +59,7 @@ export class spawner {
     }
 
     private static spawnUpgraders(room: Room) {
-        let upgraders = this.getCreepsByType(room, 1);
+        let upgraders = this.getCreepsByType(room, CreepRole.upgrader);
 
         if (upgraders.length < (room.find(FIND_SOURCES).length * 3) - 1) {
             let spawns = room.find(FIND_MY_SPAWNS);
@@ -64,7 +67,7 @@ export class spawner {
             if (spawns.length > 0) {
                 spawns[0].spawnCreep(basicBody,
                     `Upgrader${Game.time.toString()}`,
-                    { memory: { role: 1, working: false } });
+                    { memory: { role: CreepRole.upgrader, working: false } });
                 return false;
             }
         }
@@ -72,13 +75,13 @@ export class spawner {
     }
 
     private static spawnBuilders(room: Room, body: any[]) {
-        let builders = this.getCreepsByType(room, 2);
+        let builders = this.getCreepsByType(room, CreepRole.builder);
 
         if (builders.length < 5) {
             let spawns = room.find(FIND_MY_SPAWNS);
 
             if (spawns.length > 0) {
-                this.spawnACreep(spawns[0], body, 'Builder', 2);
+                this.spawnACreep(spawns[0], body, 'Builder', CreepRole.builder);
                 return false;
             }
         }
@@ -113,6 +116,7 @@ const basicBody = [WORK, CARRY, MOVE]; // 200 Energy
 const basicBodyPlus = [WORK, WORK, CARRY, CARRY, MOVE, MOVE] // 400 Energy, for testing
 const dropMinerBody = [WORK, WORK, WORK, WORK, WORK, MOVE]; // 550 Energy
 const haulerBody = [CARRY, CARRY, CARRY, WORK, WORK, MOVE, MOVE, MOVE, MOVE] //550 Energy
+
 
 
 
