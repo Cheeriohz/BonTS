@@ -20,13 +20,13 @@ export const loop = ErrorMapper.wrapLoop(() => {
       delete Memory.creeps[name];
     }
 
-    if (Memory.creeps[name].role == CreepRole.harvester) {
+    if (Memory.creeps[name]?.role == CreepRole.harvester) {
       roleHarvester.run(Game.creeps[name]);
     }
-    else if (Memory.creeps[name].role == CreepRole.upgrader) {
+    else if (Memory.creeps[name]?.role == CreepRole.upgrader) {
       roleUpgrader.run(Game.creeps[name]);
     }
-    else if (Memory.creeps[name].role == CreepRole.builder) {
+    else if (Memory.creeps[name]?.role == CreepRole.builder) {
       roleBuilder.run(Game.creeps[name]);
     }
   }
