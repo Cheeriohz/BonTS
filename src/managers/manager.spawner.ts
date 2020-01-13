@@ -18,17 +18,21 @@ export class spawner {
     //Region eras
     private static copperSpawning(room: Room) {
         if (this.canSpawn(room)) {
-            this.spawnHarvesters(room);
-            this.spawnUpgraders(room);
-            this.spawnBuilders(room, basicBody);
+            if (this.spawnHarvesters(room)) {
+                if (this.spawnUpgraders(room)) {
+                    this.spawnBuilders(room, basicBodyPlus);
+                }
+            }
         }
     }
 
     private static stoneSpawning(room: Room) {
         if (this.canSpawn(room)) {
-            this.spawnBuilders(room, basicBodyPlus);
-            this.spawnUpgraders(room);
-            this.spawnHarvesters(room);
+            if (this.spawnHarvesters(room)) {
+                if (this.spawnUpgraders(room)) {
+                    this.spawnBuilders(room, basicBodyPlus);
+                }
+            }
         }
     }
 
@@ -44,9 +48,11 @@ export class spawner {
             if (spawns.length > 0) {
                 spawns[0].spawnCreep(basicBody,
                     `Harvester${Game.time.toString()}`,
-                    { memory: { role: 0, working: false } })
+                    { memory: { role: 0, working: false } });
+                return false;
             }
         }
+        return true;
     }
 
     private static spawnUpgraders(room: Room) {
@@ -58,9 +64,11 @@ export class spawner {
             if (spawns.length > 0) {
                 spawns[0].spawnCreep(basicBody,
                     `Upgrader${Game.time.toString()}`,
-                    { memory: { role: 1, working: false } })
+                    { memory: { role: 1, working: false } });
+                return false;
             }
         }
+        return true;
     }
 
     private static spawnBuilders(room: Room, body: any[]) {
@@ -71,8 +79,10 @@ export class spawner {
 
             if (spawns.length > 0) {
                 this.spawnACreep(spawns[0], body, 'Builder', 2);
+                return false;
             }
         }
+        return true;
     }
 
     //Region internal shared
