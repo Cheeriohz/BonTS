@@ -1,17 +1,21 @@
 //Enums
 import { CreepRole } from "../enums/enum.roles"
+import { RoomEra } from "../enums/enum.roomEra"
+
+//Helpers
+import { managerHelperSpawner } from "./helpers/manager.helper.spawner"
 
 export class spawner {
 
 
     public static run() {
-        let myRooms = Game.rooms;
-        for (let room in myRooms) {
+        const myRooms = Game.rooms;
+        for (const room in myRooms) {
             //check to see if we can spawn.
-            if (myRooms[room].memory.era == 0) {
+            if (myRooms[room].memory.era == RoomEra.stone) {
                 this.stoneSpawning(myRooms[room]);
             }
-            else if (myRooms[room].memory.era == 1) {
+            else if (myRooms[room].memory.era == RoomEra.copper) {
                 this.copperSpawning(myRooms[room]);
             }
         }
@@ -20,19 +24,19 @@ export class spawner {
 
     //Region eras
     private static copperSpawning(room: Room) {
-        if (this.canSpawn(room)) {
-            if (this.spawnHarvesters(room)) {
-                if (this.spawnUpgraders(room)) {
-                    this.spawnBuilders(room, basicBodyPlus);
+        if (managerHelperSpawner.canSpawn(room)) {
+            if (this.spawnHarvesters(room, basicBody)) {
+                if (this.spawnUpgraders(room, basicBody)) {
+                    this.spawnBuilders(room, basicBody);
                 }
             }
         }
     }
 
     private static stoneSpawning(room: Room) {
-        if (this.canSpawn(room)) {
-            if (this.spawnHarvesters(room)) {
-                if (this.spawnUpgraders(room)) {
+        if (managerHelperSpawner.canSpawn(room)) {
+            if (this.spawnHarvesters(room, basicBodyPlus)) {
+                if (this.spawnUpgraders(room, basicBodyPlus)) {
                     this.spawnBuilders(room, basicBodyPlus);
                 }
             }
@@ -42,32 +46,28 @@ export class spawner {
 
 
     //Region spawn specific
-    private static spawnHarvesters(room: Room) {
-        let harvesters = this.getCreepsByType(room, CreepRole.harvester);
+    private static spawnHarvesters(room: Room, body: any[]) {
+        const harvesters = managerHelperSpawner.getCreepsByType(room, CreepRole.harvester);
 
         if (harvesters.length < room.find(FIND_SOURCES).length) {
-            let spawns = room.find(FIND_MY_SPAWNS);
+            const spawns = room.find(FIND_MY_SPAWNS);
 
             if (spawns.length > 0) {
-                spawns[0].spawnCreep(basicBody,
-                    `Harvester${Game.time.toString()}`,
-                    { memory: { role: CreepRole.harvester, working: false } });
+                managerHelperSpawner.spawnACreep(spawns[0], body, 'Harvester', CreepRole.harvester);
                 return false;
             }
         }
         return true;
     }
 
-    private static spawnUpgraders(room: Room) {
-        let upgraders = this.getCreepsByType(room, CreepRole.upgrader);
+    private static spawnUpgraders(room: Room, body: any[]) {
+        const upgraders = managerHelperSpawner.getCreepsByType(room, CreepRole.upgrader);
 
         if (upgraders.length < (room.find(FIND_SOURCES).length * 3) - 1) {
-            let spawns = room.find(FIND_MY_SPAWNS);
+            const spawns = room.find(FIND_MY_SPAWNS);
 
             if (spawns.length > 0) {
-                spawns[0].spawnCreep(basicBody,
-                    `Upgrader${Game.time.toString()}`,
-                    { memory: { role: CreepRole.upgrader, working: false } });
+                managerHelperSpawner.spawnACreep(spawns[0], body, 'Upgrader', CreepRole.upgrader);
                 return false;
             }
         }
@@ -75,39 +75,17 @@ export class spawner {
     }
 
     private static spawnBuilders(room: Room, body: any[]) {
-        let builders = this.getCreepsByType(room, CreepRole.builder);
+        const builders = managerHelperSpawner.getCreepsByType(room, CreepRole.builder);
 
         if (builders.length < 5) {
-            let spawns = room.find(FIND_MY_SPAWNS);
+            const spawns = room.find(FIND_MY_SPAWNS);
 
             if (spawns.length > 0) {
-                this.spawnACreep(spawns[0], body, 'Builder', CreepRole.builder);
+                managerHelperSpawner.spawnACreep(spawns[0], body, 'Builder', CreepRole.builder);
                 return false;
             }
         }
         return true;
-    }
-
-    //Region internal shared
-    private static spawnACreep(spawn: StructureSpawn, body: any[], name: string, assignedRole: number) {
-        spawn.spawnCreep(body,
-            `${name}${Game.time.toString()}`,
-            { memory: { role: assignedRole, working: false } });
-    }
-
-    private static getCreepsByType(room: Room, roleNumber: number) {
-        return _.filter(Game.creeps, (creep) => creep.memory.role == roleNumber
-            && creep.room.name == room.name);
-    }
-
-    private static canSpawn(room: Room) {
-        let spawns = room.find(FIND_MY_SPAWNS);
-        for (let spawn in spawns) {
-            if (!spawns[spawn].spawning) {
-                return true;
-            }
-        }
-        return false;
     }
 }
 

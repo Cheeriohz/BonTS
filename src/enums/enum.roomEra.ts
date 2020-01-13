@@ -1,5 +1,5 @@
 
-enum RoomEra {
+export enum RoomEra {
     stone = 0,
     copper
 }
