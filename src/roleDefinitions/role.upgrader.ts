@@ -1,9 +1,10 @@
 export class roleUpgrader {
 
     /** @param {Creep} creep **/
-    public static run(creep: Creep) {
+    public static run(creep: Creep, sources: Source[]) {
+        const currentEnergy = creep.store[RESOURCE_ENERGY]
 
-        if (creep.memory.working && creep.store[RESOURCE_ENERGY] == 0) {
+        if (creep.memory.working && currentEnergy == 0) {
             creep.memory.working = false;
             creep.say('🔄 harvest');
         }
@@ -16,9 +17,21 @@ export class roleUpgrader {
             roleUpgrader.upgradeController(creep);
         }
         else {
-            var sources = creep.room.find(FIND_SOURCES);
-            if (creep.harvest(sources[0]) == ERR_NOT_IN_RANGE) {
-                creep.moveTo(sources[0], { visualizePathStyle: { stroke: '#AE02E6', strokeWidth: .15 } });
+            if (currentEnergy != 0) {
+                let sourceFound: boolean = false;
+                for (const source in sources) {
+                    if (!sourceFound && creep.harvest(sources[source]) != ERR_NOT_IN_RANGE) {
+                        sourceFound = true;
+                    }
+                }
+                if (!sourceFound) {
+                    creep.moveTo(sources[0], { visualizePathStyle: { stroke: '#ffaa00' } });
+                }
+            }
+            else {
+                if (creep.harvest(sources[0]) == ERR_NOT_IN_RANGE) {
+                    creep.moveTo(sources[0], { reusePath: 20, visualizePathStyle: { stroke: '#AE02E6', strokeWidth: .15 } });
+                }
             }
         }
     }

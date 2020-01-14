@@ -1,9 +1,10 @@
 export class roleBuilder {
 
     /** @param {Creep} creep **/
-    public static run(creep: Creep) {
+    public static run(creep: Creep, sources: Source[]) {
+        const currentEnergy = creep.store[RESOURCE_ENERGY]
 
-        if (creep.memory.working && creep.store[RESOURCE_ENERGY] == 0) {
+        if (creep.memory.working && currentEnergy == 0) {
             creep.memory.working = false;
             creep.say('🔄 harvest');
         }
@@ -16,9 +17,21 @@ export class roleBuilder {
             this.construct(creep);
         }
         else {
-            let sources = creep.room.find(FIND_SOURCES);
-            if (creep.harvest(sources[sources.length - 1]) == ERR_NOT_IN_RANGE) { //SUBOPTIMAL TODO FIX THIS WITH MULTI SOURCE ALLOCATION CODE
-                creep.moveTo(sources[sources.length - 1], { visualizePathStyle: { stroke: '#FAAC58' } });
+            if (currentEnergy != 0) {
+                let sourceFound: boolean = false;
+                for (const source in sources) {
+                    if (!sourceFound && creep.harvest(sources[source]) != ERR_NOT_IN_RANGE) {
+                        sourceFound = true;
+                    }
+                }
+                if (!sourceFound) {
+                    creep.moveTo(sources[0], { visualizePathStyle: { stroke: '#ffaa00' } });
+                }
+            }
+            else {
+                if (creep.harvest(sources[0]) == ERR_NOT_IN_RANGE) {
+                    creep.moveTo(sources[0], { reusePath: 20, visualizePathStyle: { stroke: '#AE02E6', strokeWidth: .15 } });
+                }
             }
         }
     }
@@ -43,6 +56,7 @@ export class roleBuilder {
         });
         if (targets.length > 0) {
             if (creep.repair(targets[0]) == ERR_NOT_IN_RANGE) {
+                creep.say("🔧 Repair");
                 creep.moveTo(targets[0], { visualizePathStyle: { stroke: '#3ADF00' } });
             }
         }

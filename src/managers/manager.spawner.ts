@@ -23,7 +23,7 @@ export class spawner {
     }
 
     //Region eras
-    private static copperSpawning(room: Room) {
+    private static stoneSpawning(room: Room) {
         if (managerHelperSpawner.canSpawn(room)) {
             if (this.spawnHarvesters(room, basicBody)) {
                 if (this.spawnUpgraders(room, basicBody)) {
@@ -33,7 +33,7 @@ export class spawner {
         }
     }
 
-    private static stoneSpawning(room: Room) {
+    private static copperSpawning(room: Room) {
         if (managerHelperSpawner.canSpawn(room)) {
             if (this.spawnHarvesters(room, basicBodyPlus)) {
                 if (this.spawnUpgraders(room, basicBodyPlus)) {
@@ -49,7 +49,7 @@ export class spawner {
     private static spawnHarvesters(room: Room, body: any[]) {
         const harvesters = managerHelperSpawner.getCreepsByType(room, CreepRole.harvester);
 
-        if (harvesters.length < room.find(FIND_SOURCES).length) {
+        if (harvesters.length < room.find(FIND_SOURCES).length + room.memory.era) {
             const spawns = room.find(FIND_MY_SPAWNS);
 
             if (spawns.length > 0) {
@@ -63,7 +63,7 @@ export class spawner {
     private static spawnUpgraders(room: Room, body: any[]) {
         const upgraders = managerHelperSpawner.getCreepsByType(room, CreepRole.upgrader);
 
-        if (upgraders.length < (room.find(FIND_SOURCES).length * 3) - 1) {
+        if (upgraders.length < (room.find(FIND_SOURCES).length * 3 - room.memory.era) - 1) { //TODO Figure out something better here
             const spawns = room.find(FIND_MY_SPAWNS);
 
             if (spawns.length > 0) {
