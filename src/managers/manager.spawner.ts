@@ -2,11 +2,14 @@
 import { CreepRole } from "../enums/enum.roles"
 import { RoomEra } from "../enums/enum.roomEra"
 
+//Configurable
+import { spawnErasConfig } from "../configurable/configurable.spawnEras"
+
 //Helpers
 import { managerHelperSpawner } from "./helpers/manager.helper.spawner"
 
 export class spawner {
-
+    private static spawnConfig: spawnErasConfig = new spawnErasConfig();
 
     public static run() {
         const myRooms = Game.rooms;
@@ -25,9 +28,9 @@ export class spawner {
     //Region eras
     private static stoneSpawning(room: Room) {
         if (managerHelperSpawner.canSpawn(room)) {
-            if (this.spawnHarvesters(room, basicBody)) {
-                if (this.spawnUpgraders(room, basicBody)) {
-                    this.spawnBuilders(room, basicBody);
+            if (this.spawnHarvesters(room, basicBody, this.spawnConfig.stoneEraConfig.harvesters)) {
+                if (this.spawnUpgraders(room, basicBody, this.spawnConfig.stoneEraConfig.upgraders)) {
+                    this.spawnBuilders(room, basicBody, this.spawnConfig.stoneEraConfig.builders);
                 }
             }
         }
@@ -35,9 +38,9 @@ export class spawner {
 
     private static copperSpawning(room: Room) {
         if (managerHelperSpawner.canSpawn(room)) {
-            if (this.spawnHarvesters(room, basicBodyPlus)) {
-                if (this.spawnUpgraders(room, basicBodyPlus)) {
-                    this.spawnBuilders(room, basicBodyPlus);
+            if (this.spawnHarvesters(room, basicBodyPlus, this.spawnConfig.copperEraConfig.harvesters)) {
+                if (this.spawnUpgraders(room, basicBodyPlus, this.spawnConfig.copperEraConfig.upgraders)) {
+                    this.spawnBuilders(room, basicBodyPlus, this.spawnConfig.copperEraConfig.builders);
                 }
             }
         }
@@ -46,10 +49,10 @@ export class spawner {
 
 
     //Region spawn specific
-    private static spawnHarvesters(room: Room, body: any[]) {
+    private static spawnHarvesters(room: Room, body: any[], sourceModifierCap: number) {
         const harvesters = managerHelperSpawner.getCreepsByType(room, CreepRole.harvester);
 
-        if (harvesters.length < room.find(FIND_SOURCES).length + room.memory.era) {
+        if (harvesters.length < room.find(FIND_SOURCES).length * sourceModifierCap) {
             const spawns = room.find(FIND_MY_SPAWNS);
 
             if (spawns.length > 0) {
@@ -60,10 +63,10 @@ export class spawner {
         return true;
     }
 
-    private static spawnUpgraders(room: Room, body: any[]) {
+    private static spawnUpgraders(room: Room, body: any[], cap: number) {
         const upgraders = managerHelperSpawner.getCreepsByType(room, CreepRole.upgrader);
 
-        if (upgraders.length < (room.find(FIND_SOURCES).length * 3 - room.memory.era) - 1) { //TODO Figure out something better here
+        if (upgraders.length < cap) { //TODO Figure out something better here
             const spawns = room.find(FIND_MY_SPAWNS);
 
             if (spawns.length > 0) {
@@ -74,10 +77,10 @@ export class spawner {
         return true;
     }
 
-    private static spawnBuilders(room: Room, body: any[]) {
+    private static spawnBuilders(room: Room, body: any[], cap: number) {
         const builders = managerHelperSpawner.getCreepsByType(room, CreepRole.builder);
 
-        if (builders.length < 5) {
+        if (builders.length < cap) {
             const spawns = room.find(FIND_MY_SPAWNS);
 
             if (spawns.length > 0) {
