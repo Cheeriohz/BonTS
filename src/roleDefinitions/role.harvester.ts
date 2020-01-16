@@ -1,25 +1,13 @@
+import { sourceSelector } from "../managers/manager.sourceSelector"
+
 export class roleHarvester {
 
     /** @param {Creep} creep **/
-    public static run(creep: Creep, sources: Source[]) {
+    public static run(creep: Creep) {
         //determine nearest source and harvest energy
         if (creep.store.getFreeCapacity() > 0) {
-            if (creep.store.energy != 0) {
-                let sourceFound: boolean = false;
-                for (const source in sources) {
-                    if (!sourceFound && creep.harvest(sources[source]) != ERR_NOT_IN_RANGE) {
-                        sourceFound = true;
-                    }
-                }
-                if (!sourceFound) {
-                    creep.moveTo(sources[0], { visualizePathStyle: { stroke: '#ffaa00' } });
-                }
-            }
-            else {
-                if (creep.harvest(sources[0]) == ERR_NOT_IN_RANGE) {
-                    creep.moveTo(sources[0], { reusePath: 20, visualizePathStyle: { stroke: '#ffaa00' } });
-                }
-            }
+            //roleHarvester.harvestSourceDeprecated(creep, sources);
+            sourceSelector.harvestSourceSmart(creep);
         }
         //energy full, time to find deposit location. TODO: Refactor for a single targets lookup that is globally stored.
         else {
@@ -45,6 +33,25 @@ export class roleHarvester {
         }
     }
 
+    private static harvestSourceDeprecated(creep: Creep, sources: Source[]) {
+        if (creep.store.energy != 0) {
+            let sourceFound: boolean = false;
+            for (const source in sources) {
+                if (!sourceFound && creep.harvest(sources[source]) != ERR_NOT_IN_RANGE) {
+                    sourceFound = true;
+                }
+            }
+            if (!sourceFound) {
+                creep.moveTo(sources[0], { visualizePathStyle: { stroke: '#ffaa00' } });
+            }
+        }
+        else {
+            if (creep.harvest(sources[0]) == ERR_NOT_IN_RANGE) {
+                creep.moveTo(sources[0], { reusePath: 20, visualizePathStyle: { stroke: '#ffaa00' } });
+            }
+        }
+    }
+
     private static goHome(creep: Creep) {
         let targets = this.findSpawn(creep);
         if (targets.length > 0) {
@@ -60,6 +67,22 @@ export class roleHarvester {
             if (creep.build(targets[0]) == ERR_NOT_IN_RANGE) {
                 creep.say("⛏️ Build");
                 creep.moveTo(targets[0], { visualizePathStyle: { stroke: '#FAAC58' } });
+            }
+        }
+        else {
+            this.upgradeController(creep);
+        }
+    }
+
+    private static upgradeController(creep: Creep) {
+        let targets = creep.room.find<StructureController>(FIND_STRUCTURES, {
+            filter: (structure) => {
+                return (structure.structureType == STRUCTURE_CONTROLLER);
+            }
+        });
+        if (targets.length > 0) {
+            if (creep.upgradeController(targets[0]) == ERR_NOT_IN_RANGE) {
+                creep.moveTo(targets[0], { visualizePathStyle: { stroke: '#AE02E6', strokeWidth: .15 } });
             }
         }
         else {
@@ -94,5 +117,3 @@ export class roleHarvester {
         });
     }
 };
-
-//module.exports = roleHarvester;

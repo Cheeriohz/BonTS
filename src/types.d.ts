@@ -1,3 +1,5 @@
+import { Dictionary } from "lodash";
+
 interface CreepMemory {
   role: number;
   working: boolean;
@@ -5,6 +7,7 @@ interface CreepMemory {
 
 interface RoomMemory {
   era: number;
+  sourceMap: Array<Array<string>>;
 }
 
 interface Memory {

@@ -1,7 +1,8 @@
+import { sourceSelector } from "../managers/manager.sourceSelector"
 export class roleUpgrader {
 
     /** @param {Creep} creep **/
-    public static run(creep: Creep, sources: Source[]) {
+    public static run(creep: Creep) {
         const currentEnergy = creep.store[RESOURCE_ENERGY]
 
         if (creep.memory.working && currentEnergy == 0) {
@@ -17,22 +18,7 @@ export class roleUpgrader {
             roleUpgrader.upgradeController(creep);
         }
         else {
-            if (currentEnergy != 0) {
-                let sourceFound: boolean = false;
-                for (const source in sources) {
-                    if (!sourceFound && creep.harvest(sources[source]) != ERR_NOT_IN_RANGE) {
-                        sourceFound = true;
-                    }
-                }
-                if (!sourceFound) {
-                    creep.moveTo(sources[0], { visualizePathStyle: { stroke: '#ffaa00' } });
-                }
-            }
-            else {
-                if (creep.harvest(sources[0]) == ERR_NOT_IN_RANGE) {
-                    creep.moveTo(sources[0], { reusePath: 20, visualizePathStyle: { stroke: '#AE02E6', strokeWidth: .15 } });
-                }
-            }
+            sourceSelector.harvestSourceSmart(creep);
         }
     }
 
