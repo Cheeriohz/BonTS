@@ -1,5 +1,3 @@
-import { Dictionary } from "lodash";
-
 interface CreepMemory {
   role: number;
   working: boolean;
