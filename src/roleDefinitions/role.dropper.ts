@@ -16,11 +16,11 @@ export class roleDropper {
         const container = Game.getObjectById<StructureContainer>(containerSelector.getSource(creep));
         //use the working bit to determine which of two max sources can be harvested from. TODO this might have issues if my assumption is wrong.
         if (container) {
-            if (creep.pos != container.pos) {
-                creep.moveTo(container);
+            if (creep.pos.x == container.pos.x && creep.pos.y == container.pos.y) {
+                creep.memory.working = true;
             }
             else {
-                creep.memory.working = true;
+                creep.moveTo(container);
             }
 
         }
