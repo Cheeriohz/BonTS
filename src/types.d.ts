@@ -6,6 +6,7 @@ interface CreepMemory {
 interface RoomMemory {
   era: number;
   sourceMap: Array<Array<string>>;
+  containerMap: Array<Array<string>>;
 }
 
 interface Memory {

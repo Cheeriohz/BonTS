@@ -12,10 +12,8 @@ export class sourceSelector {
         if (sourceMap == null) {
             sourceMap = [];
             for (const source in creep.room.find(FIND_SOURCES)) {
-                console.log(JSON.stringify(source));
                 sourceMap[source] = [];
             }
-            console.log(JSON.stringify(sourceMap));
         }
         if (sourceMap.length == 1) {
             return 0;
@@ -42,9 +40,7 @@ export class sourceSelector {
 
     private static getAssignment(sourceMap: string[][], room: Room) {
         let sourceRatings: sourceRating[] = [];
-        console.log(JSON.stringify(sourceMap));
         for (let i = 0; i < sourceMap.length; i++) {
-            console.log(JSON.stringify(i));
             sourceRatings.push(this.getRate(i, sourceMap[i].length, room))
         }
         sourceRatings.sort((a, b) => a.rate - b.rate);

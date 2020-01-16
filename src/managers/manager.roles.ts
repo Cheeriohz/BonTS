@@ -8,6 +8,8 @@ import { sourceSelector } from "./manager.sourceSelector"
 import { roleHarvester } from "roleDefinitions/role.harvester";
 import { roleUpgrader } from "roleDefinitions/role.upgrader";
 import { roleBuilder } from "roleDefinitions/role.builder";
+import { roleDropper } from "roleDefinitions/role.dropper";
+import { roleHauler } from "roleDefinitions/role.hauler";
 
 export class rolesManager {
     public static run() {
@@ -24,6 +26,12 @@ export class rolesManager {
             }
             else if (Memory.creeps[name]?.role == CreepRole.builder) {
                 roleBuilder.run(Game.creeps[name]);
+            }
+            else if (Memory.creeps[name]?.role == CreepRole.dropper) {
+                roleDropper.run(Game.creeps[name]);
+            }
+            else if (Memory.creeps[name]?.role == CreepRole.hauler) {
+                roleHauler.run(Game.creeps[name]);
             }
         }
     }
