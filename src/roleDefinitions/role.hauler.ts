@@ -17,18 +17,18 @@ export class roleHauler {
 
         //energy full, time to find deposit location.
         if (creep.memory.working) {
-            let targets = this.findEnergyDeposits(creep)
+            let target = this.findEnergyDeposits(creep)
 
-            if (targets.length > 0) {
-                if (creep.transfer(targets[0], RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
-                    creep.moveTo(targets[0], { visualizePathStyle: { stroke: '#ffffff' } });
+            if (target) {
+                if (creep.transfer(target, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
+                    creep.moveTo(target, { visualizePathStyle: { stroke: '#ffffff' } });
                 }
             }
             else {
-                let targets = this.findSpawnEnergyDeprived(creep);
-                if (targets.length > 0) {
-                    if (creep.transfer(targets[0], RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
-                        creep.moveTo(targets[0], { visualizePathStyle: { stroke: '#ffffff' } });
+                let target = this.findSpawnEnergyDeprived(creep);
+                if (target) {
+                    if (creep.transfer(target, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
+                        creep.moveTo(target, { visualizePathStyle: { stroke: '#ffffff' } });
                     }
                 }
             }
@@ -39,7 +39,7 @@ export class roleHauler {
     }
 
     private static findEnergyDeposits(creep: Creep) {
-        return creep.room.find(FIND_STRUCTURES, {
+        return creep.pos.findClosestByRange(FIND_STRUCTURES, {
             filter: (structure) => {
                 return (structure.structureType == STRUCTURE_EXTENSION
                     || structure.structureType == STRUCTURE_TOWER) &&
@@ -49,7 +49,7 @@ export class roleHauler {
     }
 
     private static findSpawnEnergyDeprived(creep: Creep) {
-        return creep.room.find(FIND_STRUCTURES, {
+        return creep.pos.findClosestByRange(FIND_STRUCTURES, {
             filter: (structure) => {
                 return (structure.structureType == STRUCTURE_SPAWN) &&
                     structure.store.getFreeCapacity(RESOURCE_ENERGY) > 0;

@@ -3,7 +3,7 @@ export class sourceSelector {
     public static harvestSourceSmart(creep: Creep) {
         const source: Source = creep.room.find(FIND_SOURCES)[sourceSelector.getSource(creep)];
         if (creep.harvest(source) == ERR_NOT_IN_RANGE)
-            creep.moveTo(source, { reusePath: 20, visualizePathStyle: { stroke: '#ffaa00' } });
+            creep.moveTo(source, { reusePath: 5, visualizePathStyle: { stroke: '#ffaa00' } });
     }
 
     public static getSource(creep: Creep): number {
