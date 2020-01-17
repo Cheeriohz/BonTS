@@ -28,15 +28,11 @@ export class roleDropper {
 
     //Checks to see if in range to havest from a source
     private static harvest(creep: Creep) {
-        let sources = creep.room.find(FIND_SOURCES);
-        for (let source of sources) {
-            if (creep.harvest(source) != ERR_NOT_IN_RANGE) {
-                return true;
-            }
+        let source = creep.pos.findClosestByRange(FIND_SOURCES);
+        if (source) {
+            creep.harvest(source);
         }
-        return false;
     }
-
 };
 
 //module.exports = roleHarvester;
