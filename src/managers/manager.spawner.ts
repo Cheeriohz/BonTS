@@ -23,6 +23,9 @@ export class spawner {
             else if (myRooms[room].memory.era == RoomEra.copper) {
                 this.copperSpawning(myRooms[room]);
             }
+            else if (myRooms[room].memory.era == RoomEra.bronze) {
+                this.bronzeSpawning(myRooms[room]);
+            }
         }
     }
 

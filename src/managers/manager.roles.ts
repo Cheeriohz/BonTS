@@ -10,6 +10,7 @@ import { roleUpgrader } from "roleDefinitions/role.upgrader";
 import { roleBuilder } from "roleDefinitions/role.builder";
 import { roleDropper } from "roleDefinitions/role.dropper";
 import { roleHauler } from "roleDefinitions/role.hauler";
+import { roleDrone } from "roleDefinitions/role.drone";
 
 export class rolesManager {
     public static run() {
@@ -32,6 +33,9 @@ export class rolesManager {
             }
             else if (Memory.creeps[name]?.role == CreepRole.hauler) {
                 roleHauler.run(Game.creeps[name]);
+            }
+            else if (Memory.creeps[name]?.role == CreepRole.drone) {
+                roleDrone.run(Game.creeps[name]);
             }
         }
     }
