@@ -1,4 +1,5 @@
 export class towerManager {
+    private static priorityStructures: StructureConstant[] = [STRUCTURE_CONTAINER, STRUCTURE_ROAD, STRUCTURE_SPAWN, STRUCTURE_EXTENSION];
     public static run() {
         for (const room in Game.rooms) {
             for (const tower of Game.rooms[room].find<StructureTower>(FIND_STRUCTURES, {
@@ -19,12 +20,28 @@ export class towerManager {
         }
         else {
             if (tower.energy > 200) {
-                this.repairDamage(tower);
+                if (!this.repairImportant(tower)) {
+                    this.repairAny(tower);
+                }
             }
         }
     }
 
-    private static repairDamage(tower: StructureTower): boolean {
+    private static repairImportant(tower: StructureTower): boolean {
+        const damagedStructures = tower.room.find(FIND_STRUCTURES, {
+            filter: (structure) => {
+                return (structure.hits < structure.hitsMax && towerManager.priorityStructures.includes(structure.structureType))
+            }
+        });
+
+        if (damagedStructures.length > 0) {
+            tower.repair(damagedStructures[0]);
+            return true;
+        }
+        return false;
+    }
+
+    private static repairAny(tower: StructureTower): boolean {
         const damagedStructures = tower.room.find(FIND_STRUCTURES, {
             filter: (structure) => {
                 return (structure.hits < structure.hitsMax)
@@ -32,13 +49,8 @@ export class towerManager {
         });
 
         if (damagedStructures.length > 0) {
-            if (tower.repair(damagedStructures[0]) == ERR_NOT_IN_RANGE) {
-                console.log("hmm range issue?");
-
-            }
-            else {
-                return true;
-            }
+            tower.repair(damagedStructures[0]);
+            return true;
         }
         return false;
     }
