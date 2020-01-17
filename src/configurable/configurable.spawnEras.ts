@@ -4,7 +4,7 @@ import { RoomEra } from "../enums/enum.roomEra"
 export class spawnErasConfig {
     public stoneEraConfig: stoneEra = new stoneEra();
     public copperEraConfig: stoneEra = new copperEra();
-
+    public bronzeEraConfig: bronzeEra = new bronzeEra();
 }
 
 class stoneEra {
@@ -27,5 +27,14 @@ class copperEra {
     public harvesters!: number;
     public upgraders!: number;
     public builders!: number;
+}
+
+class bronzeEra {
+    public constructor() {
+        this.drones = 6;
+        this.haulers = 2;
+    }
+    public drones!: number;
+    public haulers!: number;
 }
 

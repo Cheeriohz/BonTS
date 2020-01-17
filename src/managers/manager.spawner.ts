@@ -1,12 +1,14 @@
 //Enums
-import { CreepRole } from "../enums/enum.roles"
-import { RoomEra } from "../enums/enum.roomEra"
+import { CreepRole } from "../enums/enum.roles";
+import { RoomEra } from "../enums/enum.roomEra";
 
 //Configurable
-import { spawnErasConfig } from "../configurable/configurable.spawnEras"
+import { spawnErasConfig } from "../configurable/configurable.spawnEras";
 
 //Helpers
-import { managerHelperSpawner } from "./helpers/manager.helper.spawner"
+import { managerHelperSpawner } from "./helpers/manager.helper.spawner";
+import { simpleEraSpawnHelper } from "./helpers/manager.helper.simpleEraSpawns";
+import { civilizedEraSpawnHelper } from "./helpers/manager.helper.civilizedEraSpawns";
 
 export class spawner {
     private static spawnConfig: spawnErasConfig = new spawnErasConfig();
@@ -22,81 +24,42 @@ export class spawner {
                 this.copperSpawning(myRooms[room]);
             }
         }
-
     }
 
     //Region eras
     private static stoneSpawning(room: Room) {
-        if (managerHelperSpawner.canSpawn(room)) {
-            if (this.spawnHarvesters(room, basicBody, this.spawnConfig.stoneEraConfig.harvesters)) {
-                if (this.spawnUpgraders(room, basicBody, this.spawnConfig.stoneEraConfig.upgraders)) {
-                    this.spawnBuilders(room, basicBody, this.spawnConfig.stoneEraConfig.builders);
-                }
-            }
-        }
+        simpleEraSpawnHelper.simpleEraSpawn(room,
+            basicBody,
+            this.spawnConfig.stoneEraConfig.harvesters,
+            this.spawnConfig.stoneEraConfig.upgraders,
+            this.spawnConfig.stoneEraConfig.builders);
     }
 
     private static copperSpawning(room: Room) {
+        simpleEraSpawnHelper.simpleEraSpawn(room,
+            basicBodyPlus,
+            this.spawnConfig.copperEraConfig.harvesters,
+            this.spawnConfig.copperEraConfig.upgraders,
+            this.spawnConfig.copperEraConfig.builders);
+    }
+
+    private static bronzeSpawning(room: Room) {
         if (managerHelperSpawner.canSpawn(room)) {
-            if (this.spawnHarvesters(room, basicBodyPlus, this.spawnConfig.copperEraConfig.harvesters)) {
-                if (this.spawnUpgraders(room, basicBodyPlus, this.spawnConfig.copperEraConfig.upgraders)) {
-                    this.spawnBuilders(room, basicBodyPlus, this.spawnConfig.copperEraConfig.builders);
+            if (civilizedEraSpawnHelper.spawnDroppers(room, dropMinerBody)) {
+                if (simpleEraSpawnHelper.spawnGeneric(room, haulerBody, this.spawnConfig.bronzeEraConfig.haulers, CreepRole.hauler)) {
+                    simpleEraSpawnHelper.spawnGeneric(room, droneBody, this.spawnConfig.bronzeEraConfig.drones, CreepRole.drone)
                 }
             }
         }
-    }
-
-
-
-    //Region spawn specific
-    private static spawnHarvesters(room: Room, body: any[], sourceModifierCap: number) {
-        const harvesters = managerHelperSpawner.getCreepsByType(room, CreepRole.harvester);
-
-        if (harvesters.length < room.find(FIND_SOURCES).length * sourceModifierCap) {
-            const spawns = room.find(FIND_MY_SPAWNS);
-
-            if (spawns.length > 0) {
-                managerHelperSpawner.spawnACreep(spawns[0], body, 'Harvester', CreepRole.harvester);
-                return false;
-            }
-        }
-        return true;
-    }
-
-    private static spawnUpgraders(room: Room, body: any[], cap: number) {
-        const upgraders = managerHelperSpawner.getCreepsByType(room, CreepRole.upgrader);
-
-        if (upgraders.length < cap) { //TODO Figure out something better here
-            const spawns = room.find(FIND_MY_SPAWNS);
-
-            if (spawns.length > 0) {
-                managerHelperSpawner.spawnACreep(spawns[0], body, 'Upgrader', CreepRole.upgrader);
-                return false;
-            }
-        }
-        return true;
-    }
-
-    private static spawnBuilders(room: Room, body: any[], cap: number) {
-        const builders = managerHelperSpawner.getCreepsByType(room, CreepRole.builder);
-
-        if (builders.length < cap) {
-            const spawns = room.find(FIND_MY_SPAWNS);
-
-            if (spawns.length > 0) {
-                managerHelperSpawner.spawnACreep(spawns[0], body, 'Builder', CreepRole.builder);
-                return false;
-            }
-        }
-        return true;
     }
 }
 
 // Body Definitions
 const basicBody = [WORK, CARRY, MOVE]; // 200 Energy
 const basicBodyPlus = [WORK, WORK, CARRY, CARRY, MOVE, MOVE] // 400 Energy, for testing
-const dropMinerBody = [WORK, WORK, WORK, WORK, WORK, MOVE]; // 550 Energy
-const haulerBody = [CARRY, CARRY, CARRY, WORK, WORK, MOVE, MOVE, MOVE, MOVE] //550 Energy
+const dropMinerBody = [WORK, WORK, WORK, WORK, WORK, WORK, MOVE]; // 650 Energy
+const haulerBody = [CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE] //600 Energy
+const droneBody = [CARRY, CARRY, WORK, WORK, WORK, WORK, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE] // 800 Energy
 
 
 
