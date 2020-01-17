@@ -14,6 +14,9 @@
 # TypeScript definitions installed by Typings
 /typings
 
+# Manual Logs for Debug
+/logs
+
 # Screeps Config
 screeps.json
 
