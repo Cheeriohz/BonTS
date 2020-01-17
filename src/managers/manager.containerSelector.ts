@@ -18,6 +18,7 @@ export class containerSelector {
             }
         }
         if (containerMap.length == 1) {
+            creep.room.memory.containerMap = containerMap;
             return this.findContainers(creep.room)[0].id;
         }
         let assignment: number = this.checkIfAssigned(containerMap, creep.name);
