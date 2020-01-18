@@ -1,5 +1,7 @@
 
 import { sourceSelector } from "../managers/manager.sourceSelector"
+import { constructHelper } from "./helpers/role.helper.construct";
+import { upgradeControllerHelper } from "./helpers/role.helper.upgradeController";
 
 export class roleBuilder {
 
@@ -17,22 +19,12 @@ export class roleBuilder {
         }
 
         if (creep.memory.working) {
-            this.construct(creep);
-        }
-        else {
-            sourceSelector.harvestSourceSmart(creep);
-        }
-    }
-
-    private static construct(creep: Creep) {
-        let targets = creep.room.find(FIND_CONSTRUCTION_SITES);
-        if (targets.length) {
-            if (creep.build(targets[0]) == ERR_NOT_IN_RANGE) {
-                creep.moveTo(targets[0], { visualizePathStyle: { stroke: '#FAAC58' } });
+            if (!(constructHelper.construct(creep))) {
+                this.repair(creep);
             }
         }
         else {
-            this.repair(creep);
+            sourceSelector.harvestSourceSmart(creep);
         }
     }
 
@@ -49,20 +41,7 @@ export class roleBuilder {
             }
         }
         else {
-            this.upgradeController(creep);
-        }
-    }
-
-    private static upgradeController(creep: Creep) {
-        let targets = creep.room.find<StructureController>(FIND_STRUCTURES, {
-            filter: (structure) => {
-                return (structure.structureType == STRUCTURE_CONTROLLER);
-            }
-        });
-        if (targets.length > 0) {
-            if (creep.upgradeController(targets[0]) == ERR_NOT_IN_RANGE) {
-                creep.moveTo(targets[0], { visualizePathStyle: { stroke: '#AE02E6', strokeWidth: .15 } });
-            }
+            upgradeControllerHelper.upgradeController(creep);
         }
     }
 };

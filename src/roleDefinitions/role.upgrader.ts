@@ -1,4 +1,5 @@
-import { sourceSelector } from "../managers/manager.sourceSelector"
+import { sourceSelector } from "../managers/manager.sourceSelector";
+import { upgradeControllerHelper } from "./helpers/role.helper.upgradeController";
 export class roleUpgrader {
 
     /** @param {Creep} creep **/
@@ -15,23 +16,10 @@ export class roleUpgrader {
         }
 
         if (creep.memory.working) {
-            roleUpgrader.upgradeController(creep);
+            upgradeControllerHelper.upgradeController(creep);
         }
         else {
             sourceSelector.harvestSourceSmart(creep);
-        }
-    }
-
-    private static upgradeController(creep: Creep) {
-        let targets = creep.room.find<StructureController>(FIND_STRUCTURES, {
-            filter: (structure) => {
-                return (structure.structureType == STRUCTURE_CONTROLLER);
-            }
-        });
-        if (targets.length > 0) {
-            if (creep.upgradeController(targets[0]) == ERR_NOT_IN_RANGE) {
-                creep.moveTo(targets[0], { visualizePathStyle: { stroke: '#AE02E6', strokeWidth: .15 } });
-            }
         }
     }
 };
