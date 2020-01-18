@@ -52,7 +52,7 @@ export class constructionSiteCacher {
     }
 
     public static updateConstructionSites(room: Room) {
-        room.memory.constructionSites = _.map(room.find(FIND_CONSTRUCTION_SITES), 'id');
+        room.memory.constructionSites = _.map(_.filter(Game.constructionSites, function (cs) { return cs?.room?.name === room.name }), 'id');
     }
 
 
