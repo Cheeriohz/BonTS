@@ -2,6 +2,7 @@ import { containerSelector } from "managers/manager.containerSelector";
 import { sourceSelector } from "managers/manager.sourceSelector";
 import { constructionSiteCacher } from "managers/manager.constructionSiteCacher";
 import { controllerCacher } from "managers/manager.controllerCacher"
+import { spawner } from "./manager.spawner";
 
 export class cycleManager {
 
@@ -32,6 +33,7 @@ export class cycleManager {
 
     private static manageShortTermTasks() {
         this.updateSpawnConstructionSiteMaps();
+        spawner.populateCreepCounts();
     }
 
     private static everyCycle() {

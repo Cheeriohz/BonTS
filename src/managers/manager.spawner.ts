@@ -16,10 +16,6 @@ export class spawner {
 
     public static run() {
 
-        if (Memory.cycle % 5 === 0) {
-            this.populateCreepCounts();
-        }
-
         const myRooms = Game.rooms;
         for (const room in myRooms) {
             //check to see if we can spawn.
@@ -35,7 +31,7 @@ export class spawner {
         }
     }
 
-    private static populateCreepCounts() {
+    public static populateCreepCounts() {
         let roomCreepMap: Dictionary<number[]> = {};
         const roleArray: number[] = this.createCreepRoleArray();
         for (const creepName in Game.creeps) {
