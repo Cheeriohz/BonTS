@@ -1,6 +1,7 @@
 import { containerSelector } from "managers/manager.containerSelector";
 import { sourceSelector } from "managers/manager.sourceSelector";
 import { constructionManager } from "managers/manager.constructionManager";
+import { controllerObjectManager } from "managers/manager.controllerObjectManager"
 
 export class cycleManager {
 
@@ -21,7 +22,7 @@ export class cycleManager {
 
 
     private static manageLongTermTasks() {
-        this.cleanUpTrees();
+        this.roomLevelTasksLongTerm();
         this.manageMediumTermTasks();
     }
 
@@ -44,11 +45,20 @@ export class cycleManager {
         }
     }
 
-    private static cleanUpTrees() {
+    private static roomLevelTasksLongTerm() {
         for (const room in Game.rooms) {
-            sourceSelector.externalClean(Game.rooms[room]);
-            containerSelector.externalClean(Game.rooms[room]);
+            this.cleanUpTrees(Game.rooms[room]);
+            this.storeControllerIds(Game.rooms[room]);
         }
+    }
+
+    private static cleanUpTrees(room: Room) {
+        sourceSelector.externalClean(room);
+        containerSelector.externalClean(room);
+    }
+
+    private static storeControllerIds(room: Room) {
+        controllerObjectManager.checkForController(room);
     }
 
 }

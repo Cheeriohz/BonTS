@@ -7,7 +7,8 @@ interface RoomMemory {
   era: number;
   sourceMap: Array<Array<string>>;
   containerMap: Array<Array<string>>;
-  constructionSites: Array<string>;
+  constructionSites: Array<Id<ConstructionSite<BuildableStructureConstant>>>;
+  controller: Id<StructureController>
 }
 
 interface Memory {
