@@ -61,10 +61,16 @@ export class containerSelector {
         return containerRatings[0].index;
     }
 
+    public static externalClean(room: Room) {
+        if (room.memory.containerMap) {
+            room.memory.containerMap = this.cleanTree(room.memory.containerMap);
+        }
+    }
+
     private static cleanTree(containerMap: string[][]): string[][] {
         for (let i = 0; i < containerMap.length; i++) {
             for (let index = 0; index < containerMap[i].length; index++) {
-                if (!(containerMap[i][index] in Game.creeps)) {
+                while (index < containerMap[i].length && !(containerMap[i][index] in Game.creeps)) {
                     containerMap[i].splice(index, 1);
                 }
             }

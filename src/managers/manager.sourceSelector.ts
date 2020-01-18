@@ -47,10 +47,16 @@ export class sourceSelector {
         return sourceRatings[0].index;
     }
 
+    public static externalClean(room: Room) {
+        if (room.memory.sourceMap) {
+            room.memory.sourceMap = this.cleanTree(room.memory.sourceMap);
+        }
+    }
+
     private static cleanTree(sourceMap: string[][]): string[][] {
         for (let i = 0; i < sourceMap.length; i++) {
             for (let index = 0; index < sourceMap[i].length; index++) {
-                if (!(sourceMap[i][index] in Game.creeps)) {
+                while (index < sourceMap[i].length && !(sourceMap[i][index] in Game.creeps)) {
                     sourceMap[i].splice(index, 1);
                 }
             }

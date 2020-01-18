@@ -12,6 +12,7 @@ interface RoomMemory {
 interface Memory {
   uuid: number;
   log: any;
+  cycle: number;
 }
 
 // `global` extension samples
