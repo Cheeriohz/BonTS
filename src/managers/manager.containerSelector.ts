@@ -1,3 +1,5 @@
+import _ from "lodash";
+
 export class containerSelector {
 
     public static withdraw(creep: Creep) {
