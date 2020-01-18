@@ -7,6 +7,7 @@ interface RoomMemory {
   era: number;
   sourceMap: Array<Array<string>>;
   containerMap: Array<Array<string>>;
+  constructionSites: Array<string>;
 }
 
 interface Memory {

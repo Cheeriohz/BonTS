@@ -1,4 +1,5 @@
 import { containerSelector } from "../managers/manager.containerSelector"
+import { constructionManager } from "managers/manager.constructionManager"
 
 export class roleDrone {
     /** @param {Creep} creep **/
@@ -48,10 +49,11 @@ export class roleDrone {
     }
 
     private static construct(creep: Creep): boolean {
-        let targets = creep.room.find(FIND_CONSTRUCTION_SITES);
-        if (targets.length) {
-            if (creep.build(targets[0]) == ERR_NOT_IN_RANGE) {
-                creep.moveTo(targets[0], { visualizePathStyle: { stroke: '#FAAC58' } });
+        const target = constructionManager.getConstructionSiteRoom(creep.room);
+        console.log(`Retrieved construction site ${target}`);
+        if (target) {
+            if (creep.build(target) == ERR_NOT_IN_RANGE) {
+                creep.moveTo(target, { visualizePathStyle: { stroke: '#FAAC58' } });
                 return true;
             }
             else {

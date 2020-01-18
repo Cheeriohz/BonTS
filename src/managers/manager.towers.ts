@@ -21,7 +21,7 @@ export class towerManager {
         else {
             if (tower.energy > 200) {
                 if (!this.repairImportant(tower)) {
-                    this.repairAny(tower);
+                    //this.repairAny(tower);
                 }
             }
         }
