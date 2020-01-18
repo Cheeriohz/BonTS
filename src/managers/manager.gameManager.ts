@@ -8,11 +8,12 @@ import { cycleManager } from "managers/manager.cycle";
 export class gameManager {
 
     public static run() {
-        //this.runClean();
-        this.runLogging();
+        this.runClean();
+        //this.runLogging();
     }
 
     private static runClean() {
+        let executionTime = Game.cpu.getUsed();
         //Spawn creeps
         spawner.run();
 
@@ -24,6 +25,7 @@ export class gameManager {
 
         //Manage cycles
         cycleManager.check();
+        console.log(`Cycle ${Memory.cycle} Execution Time: ${Game.cpu.getUsed() - executionTime}`);
     }
 
     private static runLogging() {

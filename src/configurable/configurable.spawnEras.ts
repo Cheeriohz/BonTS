@@ -31,7 +31,7 @@ class copperEra {
 
 class bronzeEra {
     public constructor() {
-        this.drones = 6;
+        this.drones = 4;
         this.haulers = 2;
     }
     public drones!: number;
