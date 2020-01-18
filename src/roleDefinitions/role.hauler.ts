@@ -37,6 +37,14 @@ export class roleHauler {
                             creep.moveTo(target, { visualizePathStyle: { stroke: '#ffffff' } });
                         }
                     }
+                    else {
+                        let target = this.findDump(creep);
+                        if (target) {
+                            if (creep.transfer(target, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
+                                creep.moveTo(target, { visualizePathStyle: { stroke: '#ffffff' } });
+                            }
+                        }
+                    }
                 }
             }
 
@@ -44,6 +52,15 @@ export class roleHauler {
         else {
             containerSelector.withdraw(creep);
         }
+    }
+
+    private static findDump(creep: Creep): StructureStorage | null {
+        return creep.pos.findClosestByRange<StructureStorage>(FIND_STRUCTURES, {
+            filter: (structure) => {
+                return (structure.structureType == STRUCTURE_STORAGE) &&
+                    structure.store.getFreeCapacity(RESOURCE_ENERGY) > 0;
+            }
+        });
     }
 
     private static findEnergyTopPriorityDeposit(creep: Creep) {
