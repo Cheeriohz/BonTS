@@ -1,7 +1,7 @@
 import { containerSelector } from "managers/manager.containerSelector";
 import { sourceSelector } from "managers/manager.sourceSelector";
-import { constructionManager } from "managers/manager.constructionManager";
-import { controllerObjectManager } from "managers/manager.controllerObjectManager"
+import { constructionSiteCacher } from "managers/manager.constructionManager";
+import { controllerCacher } from "managers/manager.controllerCacher"
 
 export class cycleManager {
 
@@ -35,13 +35,14 @@ export class cycleManager {
     }
 
     private static everyCycle() {
-        constructionManager.dispose();
+        constructionSiteCacher.dispose();
+        controllerCacher.dispose();
         Memory.cycle++;
     }
 
     private static updateSpawnConstructionSiteMaps() {
         for (const spawn in Game.spawns) {
-            constructionManager.updateConstructionSites(Game.spawns[spawn].room);
+            constructionSiteCacher.updateConstructionSites(Game.spawns[spawn].room);
         }
     }
 
@@ -58,7 +59,7 @@ export class cycleManager {
     }
 
     private static storeControllerIds(room: Room) {
-        controllerObjectManager.checkForController(room);
+        controllerCacher.checkForController(room);
     }
 
 }

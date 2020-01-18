@@ -1,6 +1,6 @@
 import _ from "lodash";
 
-export class constructionManager {
+export class constructionSiteCacher {
     private static roomSiteMap: Dictionary<ConstructionSite<BuildableStructureConstant>> = {};
 
     public static getConstructionSiteRoom(room: Room) {

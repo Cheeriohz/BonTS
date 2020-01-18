@@ -1,5 +1,6 @@
 import { containerSelector } from "../managers/manager.containerSelector"
-import { constructionManager } from "managers/manager.constructionManager"
+import { constructionSiteCacher } from "managers/manager.constructionManager"
+import { upgradeControllerHelper } from "./helpers/role.helper.upgradeController";
 
 export class roleDrone {
     /** @param {Creep} creep **/
@@ -26,30 +27,14 @@ export class roleDrone {
 
     private static performDuty(creep: Creep) {
         if (!this.construct(creep)) {
-            this.upgradeController(creep);
+            upgradeControllerHelper.upgradeController(creep);
         }
     }
 
-    private static upgradeController(creep: Creep): boolean {
-        let targets = creep.room.find<StructureController>(FIND_STRUCTURES, {
-            filter: (structure) => {
-                return (structure.structureType == STRUCTURE_CONTROLLER);
-            }
-        });
-        if (targets.length > 0) {
-            if (creep.upgradeController(targets[0]) == ERR_NOT_IN_RANGE) {
-                creep.moveTo(targets[0], { visualizePathStyle: { stroke: '#AE02E6', strokeWidth: .15 } });
-                return true;
-            }
-            else {
-                return true;
-            }
-        }
-        return false;
-    }
+
 
     private static construct(creep: Creep): boolean {
-        const target = constructionManager.getConstructionSiteRoom(creep.room);
+        const target = constructionSiteCacher.getConstructionSiteRoom(creep.room);
         if (target) {
             if (creep.build(target) == ERR_NOT_IN_RANGE) {
                 creep.moveTo(target, { visualizePathStyle: { stroke: '#FAAC58' } });

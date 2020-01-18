@@ -1,6 +1,6 @@
 import _ from "lodash";
 
-export class controllerObjectManager {
+export class controllerCacher {
     private static roomControllerMap: Dictionary<StructureController> = {};
 
 
