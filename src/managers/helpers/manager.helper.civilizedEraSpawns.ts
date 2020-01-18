@@ -7,8 +7,6 @@ import { CreepRole } from "../../enums/enum.roles"
 export class civilizedEraSpawnHelper {
 
     public static spawnDroppers(room: Room, body: any[]): boolean {
-        //Check for count
-        const droppers: number = managerHelperSpawner.getCreepsByType(room, CreepRole.dropper).length;
 
         const containers: number = room.find<StructureContainer>(FIND_STRUCTURES, {
             filter: (structure) => {
@@ -16,7 +14,7 @@ export class civilizedEraSpawnHelper {
             }
         }).length;
 
-        if (droppers != containers) {
+        if (Memory.roleRoomMap[room.name][CreepRole.dropper] < containers) {
             const spawns = room.find(FIND_MY_SPAWNS);
 
             if (spawns.length > 0) {

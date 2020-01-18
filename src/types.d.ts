@@ -13,6 +13,11 @@ interface Memory {
   uuid: number;
   log: any;
   cycle: number;
+  roleRoomMap: Dictionary<number[]>;
+}
+
+interface Dictionary<T> {
+  [index: string]: T;
 }
 
 // `global` extension samples

@@ -20,9 +20,8 @@ export class simpleEraSpawnHelper {
 
     //Region spawn specific
     public static spawnHarvesters(room: Room, body: any[], sourceModifierCap: number): boolean {
-        const harvesters = managerHelperSpawner.getCreepsByType(room, CreepRole.harvester);
 
-        if (harvesters.length < room.find(FIND_SOURCES).length * sourceModifierCap) {
+        if (Memory.roleRoomMap[room.name][CreepRole.harvester] < room.find(FIND_SOURCES).length * sourceModifierCap) {
             const spawns = room.find(FIND_MY_SPAWNS);
 
             if (spawns.length > 0) {
@@ -38,9 +37,8 @@ export class simpleEraSpawnHelper {
     }
 
     public static spawnGeneric(room: Room, body: any[], cap: number, role: CreepRole): boolean {
-        const upgraders = managerHelperSpawner.getCreepsByType(room, role);
 
-        if (upgraders.length < cap) { //TODO Figure out something better here
+        if (Memory.roleRoomMap[room.name][role] < cap) {
             const spawns = room.find(FIND_MY_SPAWNS);
 
             if (spawns.length > 0) {
@@ -52,9 +50,8 @@ export class simpleEraSpawnHelper {
     }
 
     public static spawnBuilders(room: Room, body: any[], cap: number): boolean {
-        const builders = managerHelperSpawner.getCreepsByType(room, CreepRole.builder);
 
-        if (builders.length < cap) {
+        if (Memory.roleRoomMap[room.name][CreepRole.builder] < cap) {
             const spawns = room.find(FIND_MY_SPAWNS);
 
             if (spawns.length > 0) {
