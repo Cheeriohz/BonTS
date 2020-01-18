@@ -12,15 +12,30 @@ export class cycleManager {
         else if (Memory.cycle % 20 == 0) {
             this.manageMediumTermTasks();
         }
-        Memory.cycle++;
+        else if (Memory.cycle % 5 == 0) {
+            this.manageShortTermTasks();
+        }
+        this.everyCycle();
     }
+
+
 
     private static manageLongTermTasks() {
         this.cleanUpTrees();
+        this.manageMediumTermTasks();
     }
 
     private static manageMediumTermTasks() {
+        this.manageShortTermTasks();
+    }
+
+    private static manageShortTermTasks() {
         this.updateSpawnConstructionSiteMaps();
+    }
+
+    private static everyCycle() {
+        constructionManager.dispose();
+        Memory.cycle++;
     }
 
     private static updateSpawnConstructionSiteMaps() {
@@ -34,7 +49,6 @@ export class cycleManager {
             sourceSelector.externalClean(Game.rooms[room]);
             containerSelector.externalClean(Game.rooms[room]);
         }
-        this.updateSpawnConstructionSiteMaps();
     }
 
 }

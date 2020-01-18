@@ -50,7 +50,6 @@ export class roleDrone {
 
     private static construct(creep: Creep): boolean {
         const target = constructionManager.getConstructionSiteRoom(creep.room);
-        console.log(`Retrieved construction site ${target}`);
         if (target) {
             if (creep.build(target) == ERR_NOT_IN_RANGE) {
                 creep.moveTo(target, { visualizePathStyle: { stroke: '#FAAC58' } });
