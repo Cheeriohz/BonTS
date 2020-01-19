@@ -1,5 +1,4 @@
 import _ from "lodash";
-import { cpus } from "os";
 
 /* tslint:disable:ban-types */
 export function init(): Profiler {
@@ -84,6 +83,9 @@ function wrapFunction(obj: object, key: PropertyKey, className?: string) {
   });
 }
 
+
+;
+
 export function profile(target: Function): void;
 export function profile(target: object, key: string | symbol, _descriptor: TypedPropertyDescriptor<Function>): void;
 export function profile(
@@ -91,8 +93,9 @@ export function profile(
   key?: string | symbol,
   _descriptor?: TypedPropertyDescriptor<Function>,
 ): void {
-  if (!global.__PROFILER_ENABLED__) { return; }
-
+  //Had to hard code this for now because the profiler variable is getting lost in the rollup.
+  //__PROFILER_ENABLED__
+  if (!true) { return; }
   if (key) {
     // case of method decorator
     wrapFunction(target, key);
@@ -114,8 +117,19 @@ export function profile(
 function isEnabled(): boolean {
   return Memory.profiler.start !== undefined;
 }
-//function record(key: string | symbol, time: number) {
-function record(key: string, time: number) {
+
+function record(key: string | symbol, time: number) {
+  if (typeof key === 'symbol') {
+    let symbolString = key.toString();
+    recordSafely(symbolString, time);
+  }
+  else {
+    recordSafely(key, time);
+  }
+
+}
+
+function recordSafely(key: string, time: number) {
   if (!Memory.profiler.data[key]) {
     Memory.profiler.data[key] = {
       calls: 0,
@@ -159,8 +173,8 @@ function outputProfilerData() {
     result = {};
     result.name = `${s}`;
     result.calls = Memory.profiler.data[s].calls;
-    result.cpuPerCall = Memory.profiler.data[s].time / calls;
-    result.callsPerTick = calls / totalTicks;
+    result.cpuPerCall = Memory.profiler.data[s].time / result.calls;
+    result.callsPerTick = result.calls / totalTicks;
     result.cpuPerTick = Memory.profiler.data[s].time / totalTicks;
     totalCpu += result.cpuPerTick;
     return result as OutputData;
@@ -193,10 +207,11 @@ function outputProfilerData() {
       if (d?.cpuPerTick) {
         output += _.padStart(`${(d.cpuPerTick / totalCpu * 100).toFixed(0)} %\n`, 12);
       }
-      //// Footer line
-      output += `${totalTicks} total ticks measured`;
-      output += `\t\t\t${totalCpu.toFixed(2)} average CPU profiled per tick`;
-      console.log(output);
+
     });
+    //// Footer line
+    output += `${totalTicks} total ticks measured`;
+    output += `\t\t\t${totalCpu.toFixed(2)} average CPU profiled per tick`;
+    console.log(output);
   }
 }

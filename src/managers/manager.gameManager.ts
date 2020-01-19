@@ -18,7 +18,8 @@ export class gameManager {
         spawner.run();
 
         //Manage roles
-        rolesManager.run();
+        const rm: rolesManager = new rolesManager();
+        rm.run();
 
         //Manage structures
         towerManager.run();
@@ -37,7 +38,8 @@ export class gameManager {
         let executionTimeSpawner = Game.cpu.getUsed();
 
         //Manage roles
-        rolesManager.run();
+        const rm: rolesManager = new rolesManager();
+        rm.run();
 
         let executionTimeRoles = Game.cpu.getUsed();
 

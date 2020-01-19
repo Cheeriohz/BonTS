@@ -25,9 +25,10 @@ interface Dictionary<T> {
 // `global` extension samples
 declare namespace NodeJS {
   interface Global {
-    __PROFILER_ENABLED__: boolean;
-    Profiler: Profiler;
+    pr: Profiler;
     log: any;
   }
 }
+
+
 
