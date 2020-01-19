@@ -1,57 +1,56 @@
-//Mangers
-import { spawner } from "managers/manager.spawner";
+// Managers
+import { CycleManager } from "managers/manager.cycle";
+import { RolesManager } from "managers/manager.roles";
+import { Spawner } from "managers/manager.spawner";
+import { TowerManager } from "managers/manager.towers";
 
-import { rolesManager } from "managers/manager.roles";
-import { towerManager } from "managers/manager.towers";
-import { cycleManager } from "managers/manager.cycle";
-
-export class gameManager {
+export class GameManager {
 
     public static run() {
         this.runClean();
-        //this.runLogging();
+        // this.runLogging();
     }
 
     private static runClean() {
-        let executionTime = Game.cpu.getUsed();
-        //Spawn creeps
-        spawner.run();
+        const executionTime = Game.cpu.getUsed();
+        // Spawn creeps
+        Spawner.run();
 
-        //Manage roles
-        const rm: rolesManager = new rolesManager();
+        // Manage roles
+        const rm: RolesManager = new RolesManager();
         rm.run();
 
-        //Manage structures
-        towerManager.run();
+        // Manage structures
+        TowerManager.run();
 
-        //Manage cycles
-        cycleManager.check();
+        // Manage cycles
+        CycleManager.check();
         console.log(`Cycle ${Memory.cycle} Execution Time: ${Game.cpu.getUsed() - executionTime}`);
     }
 
     private static runLogging() {
-        let executionTime = Game.cpu.getUsed();
+        const executionTime = Game.cpu.getUsed();
 
-        //Spawn creeps
-        spawner.run();
+        // Spawn creeps
+        Spawner.run();
 
-        let executionTimeSpawner = Game.cpu.getUsed();
+        const executionTimeSpawner = Game.cpu.getUsed();
 
-        //Manage roles
-        const rm: rolesManager = new rolesManager();
+        // Manage roles
+        const rm: RolesManager = new RolesManager();
         rm.run();
 
-        let executionTimeRoles = Game.cpu.getUsed();
+        const executionTimeRoles = Game.cpu.getUsed();
 
-        //Manage structures
-        towerManager.run();
+        // Manage structures
+        TowerManager.run();
 
-        let executionTimeStructures = Game.cpu.getUsed();
+        const executionTimeStructures = Game.cpu.getUsed();
 
-        //Manage cycles
-        cycleManager.check();
+        // Manage cycles
+        CycleManager.check();
 
-        let executionTimeCycles = Game.cpu.getUsed();
+        const executionTimeCycles = Game.cpu.getUsed();
 
 
         console.log(`Cycle ${Memory.cycle} Execution Time: ${executionTimeCycles - executionTime}`);

@@ -1,48 +1,48 @@
-import { containerSelector } from "../managers/manager.containerSelector"
+import { withdraw } from "../managers/manager.containerSelector"
+
 import { profile } from "Profiler";
 
 @profile
-export class roleHauler {
+export class RoleHauler {
 
-    /** @param {Creep} creep **/
     public run(creep: Creep) {
         const currentEnergy = creep.store[RESOURCE_ENERGY]
 
-        if (creep.memory.working && currentEnergy == 0) {
+        if (creep.memory.working && currentEnergy === 0) {
             creep.memory.working = false;
             creep.say('🏗️ pickup');
         }
-        if (!creep.memory.working && creep.store.getFreeCapacity() == 0) {
+        if (!creep.memory.working && creep.store.getFreeCapacity() === 0) {
             creep.memory.working = true;
             creep.say('💦');
         }
 
-        //energy full, time to find deposit location.
+        // energy full, time to find deposit location.
         if (creep.memory.working) {
             let target = this.findEnergyTopPriorityDeposit(creep)
             if (target) {
-                if (creep.transfer(target, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
+                if (creep.transfer(target, RESOURCE_ENERGY) === ERR_NOT_IN_RANGE) {
                     creep.moveTo(target, { visualizePathStyle: { stroke: '#ffffff' } });
                 }
             }
             else {
-                let target = this.findSpawnEnergyDeprived(creep);
+                target = this.findSpawnEnergyDeprived(creep);
                 if (target) {
-                    if (creep.transfer(target, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
+                    if (creep.transfer(target, RESOURCE_ENERGY) === ERR_NOT_IN_RANGE) {
                         creep.moveTo(target, { visualizePathStyle: { stroke: '#ffffff' } });
                     }
                 }
                 else {
-                    let target = this.findEnergyLowPriorityDeposit(creep)
+                    target = this.findEnergyLowPriorityDeposit(creep)
                     if (target) {
-                        if (creep.transfer(target, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
+                        if (creep.transfer(target, RESOURCE_ENERGY) === ERR_NOT_IN_RANGE) {
                             creep.moveTo(target, { visualizePathStyle: { stroke: '#ffffff' } });
                         }
                     }
                     else {
-                        let target = this.findDump(creep);
+                        target = this.findDump(creep);
                         if (target) {
-                            if (creep.transfer(target, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
+                            if (creep.transfer(target, RESOURCE_ENERGY) === ERR_NOT_IN_RANGE) {
                                 creep.moveTo(target, { visualizePathStyle: { stroke: '#ffffff' } });
                             }
                         }
@@ -57,13 +57,13 @@ export class roleHauler {
     }
 
     private withdraw(creep: Creep) {
-        containerSelector.withdraw(creep);
+        withdraw(creep);
     }
 
     private findDump(creep: Creep): StructureStorage | null {
         return creep.pos.findClosestByRange<StructureStorage>(FIND_STRUCTURES, {
             filter: (structure) => {
-                return (structure.structureType == STRUCTURE_STORAGE) &&
+                return (structure.structureType === STRUCTURE_STORAGE) &&
                     structure.store.getFreeCapacity(RESOURCE_ENERGY) > 0;
             }
         });
@@ -72,7 +72,7 @@ export class roleHauler {
     private findEnergyTopPriorityDeposit(creep: Creep) {
         return creep.pos.findClosestByRange(FIND_STRUCTURES, {
             filter: (structure) => {
-                return (structure.structureType == STRUCTURE_EXTENSION) &&
+                return (structure.structureType === STRUCTURE_EXTENSION) &&
                     structure.store.getFreeCapacity(RESOURCE_ENERGY) > 0;
             }
         });
@@ -81,7 +81,7 @@ export class roleHauler {
     private findEnergyLowPriorityDeposit(creep: Creep) {
         return creep.pos.findClosestByRange(FIND_STRUCTURES, {
             filter: (structure) => {
-                return (structure.structureType == STRUCTURE_TOWER) &&
+                return (structure.structureType === STRUCTURE_TOWER) &&
                     structure.store.getFreeCapacity(RESOURCE_ENERGY) > 0;
             }
         });
@@ -90,7 +90,7 @@ export class roleHauler {
     private findSpawnEnergyDeprived(creep: Creep) {
         return creep.pos.findClosestByRange(FIND_STRUCTURES, {
             filter: (structure) => {
-                return (structure.structureType == STRUCTURE_SPAWN) &&
+                return (structure.structureType === STRUCTURE_SPAWN) &&
                     structure.store.getFreeCapacity(RESOURCE_ENERGY) > 0;
             }
         });

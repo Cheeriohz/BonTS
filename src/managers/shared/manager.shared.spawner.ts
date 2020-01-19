@@ -1,6 +1,6 @@
 import _ from "lodash";
 
-export class managerHelperSpawner {
+export class ManagerHelperSpawner {
 
     public static spawnACreep(spawn: StructureSpawn, body: any[], name: string, assignedRole: number) {
         spawn.spawnCreep(body,
@@ -9,8 +9,8 @@ export class managerHelperSpawner {
     }
 
     public static getCreepsByType(room: Room, roleNumber: number) {
-        return _.filter(Game.creeps, (creep) => creep.memory.role == roleNumber
-            && creep.room.name == room.name);
+        return _.filter(Game.creeps, (creep) => creep.memory.role === roleNumber
+            && creep.room.name === room.name);
     }
 
     public static canSpawn(room: Room) {

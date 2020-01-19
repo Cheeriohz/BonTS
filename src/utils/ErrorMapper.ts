@@ -1,6 +1,6 @@
 // tslint:disable:no-conditional-assignment
-import { SourceMapConsumer } from "source-map";
 import _ from "lodash";
+import { SourceMapConsumer } from "source-map";
 
 export class ErrorMapper {
   // Cache consumer

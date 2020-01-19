@@ -1,11 +1,11 @@
-import { containerSelector } from "../managers/manager.containerSelector"
+import { getContainer } from "../managers/manager.containerSelector"
+
 import { profile } from "Profiler";
 @profile
-export class roleDropper {
+export class RoleDropper {
 
-    /** @param {Creep} creep **/
     public run(creep: Creep) {
-        //Check if in range to harvest
+        // Check if in range to harvest
         if (creep.memory.working) {
             this.harvest(creep)
         }
@@ -16,9 +16,9 @@ export class roleDropper {
 
     private relocate(creep: Creep) {
         const container = Game.getObjectById<StructureContainer>(this.getContainer(creep));
-        //use the working bit to determine which of two max sources can be harvested from. TODO this might have issues if my assumption is wrong.
+        // use the working bit to determine which of two max sources can be harvested from. TODO this might have issues if my assumption is wrong.
         if (container) {
-            if (creep.pos.x == container.pos.x && creep.pos.y == container.pos.y) {
+            if (creep.pos.x === container.pos.x && creep.pos.y === container.pos.y) {
                 creep.memory.working = true;
             }
             else {
@@ -29,12 +29,12 @@ export class roleDropper {
     }
 
     private getContainer(creep: Creep): string {
-        return containerSelector.getContainer(creep);
+        return getContainer(creep);
     }
 
-    //Checks to see if in range to havest from a source
+    // Checks to see if in range to havest from a source
     private harvest(creep: Creep) {
-        let source = this.locateSource(creep);
+        const source = this.locateSource(creep);
         if (source) {
             this.harvestSource(creep, source);
         }

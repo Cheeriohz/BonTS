@@ -1,16 +1,16 @@
-//Helpers
-import { managerHelperSpawner } from "./manager.helper.spawner"
+// Helpers
+import { ManagerHelperSpawner } from "./manager.shared.spawner"
 
-//Enums
+// Enums
 import { CreepRole } from "../../enums/enum.roles"
 
-export class civilizedEraSpawnHelper {
+export class CivilizedEraSpawnHelper {
 
     public static spawnDroppers(room: Room, body: any[]): boolean {
 
         const containers: number = room.find<StructureContainer>(FIND_STRUCTURES, {
             filter: (structure) => {
-                return (structure.structureType == STRUCTURE_CONTAINER)
+                return (structure.structureType === STRUCTURE_CONTAINER)
             }
         }).length;
 
@@ -18,7 +18,7 @@ export class civilizedEraSpawnHelper {
             const spawns = room.find(FIND_MY_SPAWNS);
 
             if (spawns.length > 0) {
-                managerHelperSpawner.spawnACreep(spawns[0], body, "dropper", CreepRole.dropper);
+                ManagerHelperSpawner.spawnACreep(spawns[0], body, "dropper", CreepRole.dropper);
                 return false;
             }
         }

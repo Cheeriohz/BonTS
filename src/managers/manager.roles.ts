@@ -1,30 +1,31 @@
-//Enums
+// Enums
 import { CreepRole } from "../enums/enum.roles"
 
-//Roles
-import { roleHarvester } from "roleDefinitions/role.harvester";
-import { roleUpgrader } from "roleDefinitions/role.upgrader";
-import { roleBuilder } from "roleDefinitions/role.builder";
-import { roleDropper } from "roleDefinitions/role.dropper";
-import { roleHauler } from "roleDefinitions/role.hauler";
-import { roleDrone } from "roleDefinitions/role.drone";
+// Roles
+import { RoleBuilder } from "roleDefinitions/role.builder";
+import { RoleDrone } from "roleDefinitions/role.drone";
+import { RoleDropper } from "roleDefinitions/role.dropper";
+import { RoleHarvester } from "roleDefinitions/role.harvester";
+import { RoleHauler } from "roleDefinitions/role.hauler";
+import { RoleUpgrader } from "roleDefinitions/role.upgrader";
+
 export
-    class rolesManager {
-    private mHarvester!: roleHarvester;
-    private mUpgrader!: roleUpgrader;
-    private mBuilder!: roleBuilder;
-    private mDropper!: roleDropper;
-    private mHauler!: roleHauler;
-    private mDrone!: roleDrone;
+    class RolesManager {
+    private mHarvester!: RoleHarvester;
+    private mUpgrader!: RoleUpgrader;
+    private mBuilder!: RoleBuilder;
+    private mDropper!: RoleDropper;
+    private mHauler!: RoleHauler;
+    private mDrone!: RoleDrone;
 
 
     constructor() {
-        this.mHarvester = new roleHarvester();
-        this.mUpgrader = new roleUpgrader();
-        this.mBuilder = new roleBuilder();
-        this.mDropper = new roleDropper();
-        this.mHauler = new roleHauler();
-        this.mDrone = new roleDrone();
+        this.mHarvester = new RoleHarvester();
+        this.mUpgrader = new RoleUpgrader();
+        this.mBuilder = new RoleBuilder();
+        this.mDropper = new RoleDropper();
+        this.mHauler = new RoleHauler();
+        this.mDrone = new RoleDrone();
     }
 
     public run() {
@@ -34,14 +35,14 @@ export
             }
             else {
                 this.manageRoles(name);
-                //this.manageRolesLogged(name);
+                // this.manageRolesLogged(name);
             }
         }
     }
 
 
     public manageRolesLogged(name: string) {
-        let startTime = Game.cpu.getUsed();
+        const startTime = Game.cpu.getUsed();
         this.manageRoles(name);
         console.log(`Execution time for ${name}: ${Game.cpu.getUsed() - startTime}`);
 

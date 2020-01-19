@@ -1,9 +1,9 @@
-import { constructionSiteCacher } from "managers/manager.constructionSiteCacher";
+import { ConstructionSiteCacher } from "managers/manager.constructionSiteCacher";
 
 export function construct(creep: Creep): boolean {
-    const target = constructionSiteCacher.getConstructionSiteRoom(creep.room);
+    const target = ConstructionSiteCacher.getConstructionSiteRoom(creep.room);
     if (target) {
-        if (creep.build(target) == ERR_NOT_IN_RANGE) {
+        if (creep.build(target) === ERR_NOT_IN_RANGE) {
             creep.moveTo(target, { visualizePathStyle: { stroke: '#FAAC58' } });
             return true;
         }

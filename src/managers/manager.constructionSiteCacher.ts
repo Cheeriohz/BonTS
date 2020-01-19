@@ -1,26 +1,26 @@
 import _ from "lodash";
 
-export class constructionSiteCacher {
+export class ConstructionSiteCacher {
     private static roomSiteMap: Dictionary<ConstructionSite<BuildableStructureConstant>> = {};
 
     public static getConstructionSiteRoom(room: Room) {
         if (!(room.memory.constructionSites == null)) {
             if (room.memory.constructionSites.length > 0) {
-                //Check if site already pulled and still valid.
-                let roomSite = this.roomSiteMap[room.name];
+                // Check if site already pulled and still valid.
+                const roomSite = this.roomSiteMap[room.name];
                 if (roomSite) {
                     return roomSite
                 }
                 else {
-                    //See if we need to refresh our target.
+                    // See if we need to refresh our target.
                     const site = Game.getObjectById<ConstructionSite<BuildableStructureConstant>>(room.memory.constructionSites[room.memory.constructionSites.length - 1])
                     if (site) {
-                        //Store object for local cycle memory and return it.
+                        // Store object for local cycle memory and return it.
                         _.set(this.roomSiteMap, room.name, site);
                         return site;
                     }
                     else {
-                        //Refresh our object list.
+                        // Refresh our object list.
                         return this.popAndRefreshLazy(room);
                     }
                 }
@@ -52,7 +52,7 @@ export class constructionSiteCacher {
     }
 
     public static updateConstructionSites(room: Room) {
-        room.memory.constructionSites = _.map(_.filter(Game.constructionSites, function (cs) { return cs?.room?.name === room.name }), 'id');
+        room.memory.constructionSites = _.map(_.filter(Game.constructionSites, (cs) => cs?.room?.name === room.name), 'id');
     }
 
 

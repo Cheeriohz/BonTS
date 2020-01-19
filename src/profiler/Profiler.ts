@@ -93,9 +93,9 @@ export function profile(
   key?: string | symbol,
   _descriptor?: TypedPropertyDescriptor<Function>,
 ): void {
-  //Had to hard code this for now because the profiler variable is getting lost in the rollup.
-  //__PROFILER_ENABLED__
-  if (!true) { return; }
+  // Had to hard code this for now because the profiler variable is getting lost in the rollup.
+  // __PROFILER_ENABLED__
+  if (!false) { return; }
   if (key) {
     // case of method decorator
     wrapFunction(target, key);
@@ -120,7 +120,7 @@ function isEnabled(): boolean {
 
 function record(key: string | symbol, time: number) {
   if (typeof key === 'symbol') {
-    let symbolString = key.toString();
+    const symbolString = key.toString();
     recordSafely(symbolString, time);
   }
   else {
@@ -157,16 +157,15 @@ function outputProfilerData() {
   ///////
   // Process data
   let totalCpu = 0;  // running count of average total CPU use per tick
-  let calls: number;
   let result: Partial<OutputData>;
   const data = _.map(Reflect.ownKeys(Memory.profiler.data), (s) => {
     if (typeof s === 'symbol') {
       result = {
-        name: "Symbols don't work",
         calls: 0,
-        cpuPerCall: 0,
         callsPerTick: 0,
-        cpuPerTick: 0
+        cpuPerCall: 0,
+        cpuPerTick: 0,
+        name: "Symbols don't work"
       };
       return result as OutputData;
     }

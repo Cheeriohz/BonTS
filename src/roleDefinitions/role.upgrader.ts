@@ -1,16 +1,15 @@
-import { sourceSelector } from "../managers/manager.sourceSelector";
-import { upgradeController } from "./helpers/role.helper.upgradeController";
-export class roleUpgrader {
+import { harvestSourceSmart } from "../managers/manager.sourceSelector";
+import { upgradeController } from "./shared/role.shared.upgradeController";
+export class RoleUpgrader {
 
-    /** @param {Creep} creep **/
     public run(creep: Creep) {
         const currentEnergy = creep.store[RESOURCE_ENERGY]
 
-        if (creep.memory.working && currentEnergy == 0) {
+        if (creep.memory.working && currentEnergy === 0) {
             creep.memory.working = false;
             creep.say('🔄 harvest');
         }
-        if (!creep.memory.working && creep.store.getFreeCapacity() == 0) {
+        if (!creep.memory.working && creep.store.getFreeCapacity() === 0) {
             creep.memory.working = true;
             creep.say('⚡ upgrade');
         }
@@ -19,7 +18,7 @@ export class roleUpgrader {
             upgradeController(creep);
         }
         else {
-            sourceSelector.harvestSourceSmart(creep);
+            harvestSourceSmart(creep);
         }
     }
 };

@@ -5,9 +5,9 @@ interface CreepMemory {
 
 interface RoomMemory {
   era: number;
-  sourceMap: Array<Array<string>>;
-  containerMap: Array<Array<string>>;
-  constructionSites: Array<Id<ConstructionSite<BuildableStructureConstant>>>;
+  sourceMap: string[][];
+  containerMap: string[][];
+  constructionSites: Id<ConstructionSite<BuildableStructureConstant>>[];
   controller: Id<StructureController>
 }
 

@@ -1,15 +1,15 @@
-//Helpers
-import { managerHelperSpawner } from "./manager.helper.spawner"
+// Helpers
+import { ManagerHelperSpawner } from "./manager.shared.spawner"
 
-//Enums
+// Enums
 import { CreepRole } from "../../enums/enum.roles"
 
-export class simpleEraSpawnHelper {
+export class SimpleEraSpawnHelper {
 
 
 
     public static simpleEraSpawn(room: Room, body: any[], harvesters: number, upgraders: number, builders: number) {
-        if (managerHelperSpawner.canSpawn(room)) {
+        if (ManagerHelperSpawner.canSpawn(room)) {
             if (this.spawnHarvesters(room, body, harvesters)) {
                 if (this.spawnUpgraders(room, body, upgraders)) {
                     this.spawnBuilders(room, body, builders);
@@ -18,14 +18,14 @@ export class simpleEraSpawnHelper {
         }
     }
 
-    //Region spawn specific
+    // Region spawn specific
     public static spawnHarvesters(room: Room, body: any[], sourceModifierCap: number): boolean {
 
         if (Memory.roleRoomMap[room.name][CreepRole.harvester] < room.find(FIND_SOURCES).length * sourceModifierCap) {
             const spawns = room.find(FIND_MY_SPAWNS);
 
             if (spawns.length > 0) {
-                managerHelperSpawner.spawnACreep(spawns[0], body, 'Harvester', CreepRole.harvester);
+                ManagerHelperSpawner.spawnACreep(spawns[0], body, 'Harvester', CreepRole.harvester);
                 return false;
             }
         }
@@ -42,7 +42,7 @@ export class simpleEraSpawnHelper {
             const spawns = room.find(FIND_MY_SPAWNS);
 
             if (spawns.length > 0) {
-                managerHelperSpawner.spawnACreep(spawns[0], body, CreepRole[role], role);
+                ManagerHelperSpawner.spawnACreep(spawns[0], body, CreepRole[role], role);
                 return false;
             }
         }
@@ -55,7 +55,7 @@ export class simpleEraSpawnHelper {
             const spawns = room.find(FIND_MY_SPAWNS);
 
             if (spawns.length > 0) {
-                managerHelperSpawner.spawnACreep(spawns[0], body, 'Builder', CreepRole.builder);
+                ManagerHelperSpawner.spawnACreep(spawns[0], body, 'Builder', CreepRole.builder);
                 return false;
             }
         }

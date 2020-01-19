@@ -1,20 +1,24 @@
-import { containerSelector } from "managers/manager.containerSelector";
-import { sourceSelector } from "managers/manager.sourceSelector";
-import { constructionSiteCacher } from "managers/manager.constructionSiteCacher";
-import { controllerCacher } from "managers/manager.controllerCacher"
-import { spawner } from "./manager.spawner";
 
-export class cycleManager {
+import { ConstructionSiteCacher } from "./manager.constructionSiteCacher";
+import { pruneContainerTree } from "./manager.containerSelector";
+import { ControllerCacher } from "./manager.controllerCacher"
+import { pruneSourceTree } from "./manager.sourceSelector";
+import { Spawner } from "./manager.spawner";
+
+
+
+
+export class CycleManager {
 
     public static check() {
         if (Memory.cycle > 99) {
             this.manageLongTermTasks();
             Memory.cycle = 0;
         }
-        else if (Memory.cycle % 20 == 0) {
+        else if (Memory.cycle % 20 === 0) {
             this.manageMediumTermTasks();
         }
-        else if (Memory.cycle % 5 == 0) {
+        else if (Memory.cycle % 5 === 0) {
             this.manageShortTermTasks();
         }
         this.everyCycle();
@@ -33,18 +37,18 @@ export class cycleManager {
 
     private static manageShortTermTasks() {
         this.updateSpawnConstructionSiteMaps();
-        spawner.populateCreepCounts();
+        Spawner.populateCreepCounts();
     }
 
     private static everyCycle() {
-        constructionSiteCacher.dispose();
-        controllerCacher.dispose();
+        ConstructionSiteCacher.dispose();
+        ControllerCacher.dispose();
         Memory.cycle++;
     }
 
     private static updateSpawnConstructionSiteMaps() {
         for (const spawn in Game.spawns) {
-            constructionSiteCacher.updateConstructionSites(Game.spawns[spawn].room);
+            ConstructionSiteCacher.updateConstructionSites(Game.spawns[spawn].room);
         }
     }
 
@@ -56,12 +60,12 @@ export class cycleManager {
     }
 
     private static cleanUpTrees(room: Room) {
-        sourceSelector.externalClean(room);
-        containerSelector.externalClean(room);
+        pruneSourceTree(room);
+        pruneContainerTree(room);
     }
 
     private static storeControllerIds(room: Room) {
-        controllerCacher.checkForController(room);
+        ControllerCacher.checkForController(room);
     }
 
 }

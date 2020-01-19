@@ -1,29 +1,29 @@
-import { sourceSelector } from "../managers/manager.sourceSelector"
-import { upgradeController } from "./helpers/role.helper.upgradeController";
-import { construct } from "./helpers/role.helper.construct";
+import { harvestSourceSmart } from "../managers/manager.sourceSelector"
 
-export class roleHarvester {
+import { construct } from "./shared/role.shared.construct";
+import { upgradeController } from "./shared/role.shared.upgradeController";
 
-    /** @param {Creep} creep **/
+export class RoleHarvester {
+
     public run(creep: Creep) {
-        //determine nearest source and harvest energy
+        // determine nearest source and harvest energy
         if (creep.store.getFreeCapacity() > 0) {
-            //roleHarvester.harvestSourceDeprecated(creep, sources);
-            sourceSelector.harvestSourceSmart(creep);
+            // roleHarvester.harvestSourceDeprecated(creep, sources);
+            harvestSourceSmart(creep);
         }
-        //energy full, time to find deposit location. TODO: Refactor for a single targets lookup that is globally stored.
+        // energy full, time to find deposit location. TODO: Refactor for a single targets lookup that is globally stored.
         else {
             let targets = this.findEnergyDeposits(creep)
 
             if (targets.length > 0) {
-                if (creep.transfer(targets[0], RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
+                if (creep.transfer(targets[0], RESOURCE_ENERGY) === ERR_NOT_IN_RANGE) {
                     creep.moveTo(targets[0], { visualizePathStyle: { stroke: '#ffffff' } });
                 }
             }
             else {
-                let targets = this.findSpawnEnergyDeprived(creep);
+                targets = this.findSpawnEnergyDeprived(creep);
                 if (targets.length > 0) {
-                    if (creep.transfer(targets[0], RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
+                    if (creep.transfer(targets[0], RESOURCE_ENERGY) === ERR_NOT_IN_RANGE) {
                         creep.moveTo(targets[0], { visualizePathStyle: { stroke: '#ffffff' } });
                     }
                 }
@@ -40,8 +40,8 @@ export class roleHarvester {
     private findEnergyDeposits(creep: Creep) {
         return creep.room.find(FIND_STRUCTURES, {
             filter: (structure) => {
-                return (structure.structureType == STRUCTURE_EXTENSION
-                    || structure.structureType == STRUCTURE_TOWER) &&
+                return (structure.structureType === STRUCTURE_EXTENSION
+                    || structure.structureType === STRUCTURE_TOWER) &&
                     structure.store.getFreeCapacity(RESOURCE_ENERGY) > 0;
             }
         });
@@ -50,7 +50,7 @@ export class roleHarvester {
     private findSpawnEnergyDeprived(creep: Creep) {
         return creep.room.find(FIND_STRUCTURES, {
             filter: (structure) => {
-                return (structure.structureType == STRUCTURE_SPAWN) &&
+                return (structure.structureType === STRUCTURE_SPAWN) &&
                     structure.store.getFreeCapacity(RESOURCE_ENERGY) > 0;
             }
         });

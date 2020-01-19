@@ -1,28 +1,26 @@
-import { containerSelector } from "../managers/manager.containerSelector"
-import { upgradeController } from "./helpers/role.helper.upgradeController";
-import { construct } from "./helpers/role.helper.construct";
+
+import { withdraw } from "../managers/manager.containerSelector"
+import { construct } from "./shared/role.shared.construct";
+import { upgradeController } from "./shared/role.shared.upgradeController";
+
 import { profile } from "Profiler";
 
 @profile
-export class roleDrone {
-    constructor() {
+export class RoleDrone {
 
-    }
-
-    /** @param {Creep} creep **/
     public run(creep: Creep) {
         const currentEnergy = creep.store[RESOURCE_ENERGY]
 
-        if (creep.memory.working && currentEnergy == 0) {
+        if (creep.memory.working && currentEnergy === 0) {
             creep.memory.working = false;
             creep.say('🍯 bzz');
         }
-        if (!creep.memory.working && creep.store.getFreeCapacity() == 0) {
+        if (!creep.memory.working && creep.store.getFreeCapacity() === 0) {
             creep.memory.working = true;
             creep.say('🐝 bzz');
         }
 
-        //energy full, time to find deposit location.
+        // energy full, time to find deposit location.
         if (creep.memory.working) {
             this.performDuty(creep);
         }
@@ -32,7 +30,7 @@ export class roleDrone {
     }
 
     private withdraw(creep: Creep) {
-        containerSelector.withdraw(creep);
+        withdraw(creep);
     }
 
     private performDuty(creep: Creep) {

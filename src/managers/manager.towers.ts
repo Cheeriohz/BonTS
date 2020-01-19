@@ -1,10 +1,10 @@
-export class towerManager {
+export class TowerManager {
     private static priorityStructures: StructureConstant[] = [STRUCTURE_CONTAINER, STRUCTURE_ROAD, STRUCTURE_SPAWN, STRUCTURE_EXTENSION];
     public static run() {
         for (const room in Game.rooms) {
             for (const tower of Game.rooms[room].find<StructureTower>(FIND_STRUCTURES, {
                 filter: (structure) => {
-                    return (structure.structureType == STRUCTURE_TOWER)
+                    return (structure.structureType === STRUCTURE_TOWER)
                 }
             })) {
                 this.handleTower(tower);
@@ -13,7 +13,7 @@ export class towerManager {
     }
 
     private static handleTower(tower: StructureTower) {
-        let enemies = tower.room.find(FIND_HOSTILE_CREEPS);
+        const enemies = tower.room.find(FIND_HOSTILE_CREEPS);
         if (enemies.length > 0) {
             enemies.sort((a, b) => a.hits - b.hits);
             tower.attack(enemies[0]);
@@ -21,7 +21,7 @@ export class towerManager {
         else {
             if (tower.energy > 200) {
                 if (!this.repairImportant(tower)) {
-                    //this.repairAny(tower);
+                    // this.repairAny(tower);
                 }
             }
         }
@@ -30,7 +30,7 @@ export class towerManager {
     private static repairImportant(tower: StructureTower): boolean {
         const damagedStructures = tower.room.find(FIND_STRUCTURES, {
             filter: (structure) => {
-                return (structure.hits < structure.hitsMax && towerManager.priorityStructures.includes(structure.structureType))
+                return (structure.hits < structure.hitsMax && TowerManager.priorityStructures.includes(structure.structureType))
             }
         });
 
