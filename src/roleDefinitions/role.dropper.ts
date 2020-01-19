@@ -35,4 +35,3 @@ export class roleDropper {
     }
 };
 
-//module.exports = roleHarvester;

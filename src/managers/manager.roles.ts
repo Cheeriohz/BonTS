@@ -11,9 +11,6 @@ import { roleDrone } from "roleDefinitions/role.drone";
 
 export class rolesManager {
     public static run() {
-
-
-
         for (const name in Memory.creeps) {
             if (!(name in Game.creeps)) {
                 delete Memory.creeps[name];
