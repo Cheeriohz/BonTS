@@ -1,5 +1,7 @@
 import { containerSelector } from "../managers/manager.containerSelector"
+import { profile } from "Profiler";
 
+@profile
 export class roleHauler {
 
     /** @param {Creep} creep **/
@@ -50,8 +52,12 @@ export class roleHauler {
 
         }
         else {
-            containerSelector.withdraw(creep);
+            this.withdraw(creep);
         }
+    }
+
+    private withdraw(creep: Creep) {
+        containerSelector.withdraw(creep);
     }
 
     private findDump(creep: Creep): StructureStorage | null {

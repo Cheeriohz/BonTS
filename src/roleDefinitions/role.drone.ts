@@ -27,13 +27,25 @@ export class roleDrone {
             this.performDuty(creep);
         }
         else {
-            containerSelector.withdraw(creep);
+            this.withdraw(creep);
         }
     }
 
+    private withdraw(creep: Creep) {
+        containerSelector.withdraw(creep);
+    }
+
     private performDuty(creep: Creep) {
-        if (!construct(creep)) {
-            upgradeController(creep);
+        if (!this.construct(creep)) {
+            this.upgradeController(creep);
         }
+    }
+
+    private construct(creep: Creep) {
+        return construct(creep);
+    }
+
+    private upgradeController(creep: Creep) {
+        upgradeController(creep);
     }
 };
