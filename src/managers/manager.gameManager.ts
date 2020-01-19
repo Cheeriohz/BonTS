@@ -1,7 +1,7 @@
 // Managers
 import { CycleManager } from "managers/manager.cycle";
 import { RolesManager } from "managers/manager.roles";
-import { Spawner } from "managers/manager.spawner";
+import { Spawn } from "managers/manager.spawn";
 import { TowerManager } from "managers/manager.towers";
 
 export class GameManager {
@@ -14,7 +14,7 @@ export class GameManager {
     private static runClean() {
         const executionTime = Game.cpu.getUsed();
         // Spawn creeps
-        Spawner.run();
+        Spawn.run();
 
         // Manage roles
         const rm: RolesManager = new RolesManager();
@@ -32,7 +32,7 @@ export class GameManager {
         const executionTime = Game.cpu.getUsed();
 
         // Spawn creeps
-        Spawner.run();
+        Spawn.run();
 
         const executionTimeSpawner = Game.cpu.getUsed();
 

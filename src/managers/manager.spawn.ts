@@ -13,7 +13,7 @@ import { ManagerHelperSpawner } from "./shared/manager.shared.spawner";
 // Dependencies
 import _ from "lodash";
 
-export class Spawner {
+export class Spawn {
     private static spawnConfig: SpawnErasConfig = new SpawnErasConfig();
 
     public static run() {
@@ -86,7 +86,9 @@ export class Spawner {
         if (ManagerHelperSpawner.canSpawn(room)) {
             if (CivilizedEraSpawnHelper.spawnDroppers(room, dropMinerBody)) {
                 if (SimpleEraSpawnHelper.spawnGeneric(room, haulerBody, this.spawnConfig.bronzeEraConfig.haulers, CreepRole.hauler)) {
-                    SimpleEraSpawnHelper.spawnGeneric(room, droneBody, this.spawnConfig.bronzeEraConfig.drones, CreepRole.drone)
+                    if (SimpleEraSpawnHelper.spawnGeneric(room, droneBody, this.spawnConfig.bronzeEraConfig.drones, CreepRole.drone)) {
+                        SimpleEraSpawnHelper.spawnBuilders(room, repairBody, this.spawnConfig.bronzeEraConfig.builders);
+                    }
                 }
             }
         }
@@ -99,7 +101,7 @@ const basicBodyPlus = [WORK, WORK, CARRY, CARRY, MOVE, MOVE] // 400 Energy, for 
 const dropMinerBody = [WORK, WORK, WORK, WORK, WORK, WORK, MOVE]; // 650 Energy
 const haulerBody = [CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE] // 600 Energy
 const droneBody = [CARRY, CARRY, WORK, WORK, WORK, WORK, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE] // 800 Energy
-
+const repairBody = [MOVE, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE, WORK, WORK, WORK, WORK, WORK, CARRY, CARRY, CARRY, CARRY, CARRY]
 
 
 

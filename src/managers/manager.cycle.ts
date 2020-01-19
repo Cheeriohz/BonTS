@@ -3,10 +3,8 @@ import { ConstructionSiteCacher } from "./manager.constructionSiteCacher";
 import { pruneContainerTree } from "./manager.containerSelector";
 import { ControllerCacher } from "./manager.controllerCacher"
 import { pruneSourceTree } from "./manager.sourceSelector";
-import { Spawner } from "./manager.spawner";
-
-
-
+import { Spawn } from "./manager.spawn";
+import { TerrainScanner } from "./manager.terrainScanner";
 
 export class CycleManager {
 
@@ -37,7 +35,7 @@ export class CycleManager {
 
     private static manageShortTermTasks() {
         this.updateSpawnConstructionSiteMaps();
-        Spawner.populateCreepCounts();
+        Spawn.populateCreepCounts();
     }
 
     private static everyCycle() {
