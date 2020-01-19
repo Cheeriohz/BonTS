@@ -8,16 +8,23 @@ import { roleBuilder } from "roleDefinitions/role.builder";
 import { roleDropper } from "roleDefinitions/role.dropper";
 import { roleHauler } from "roleDefinitions/role.hauler";
 import { roleDrone } from "roleDefinitions/role.drone";
-
-import { profile } from "../Profiler/Profiler";
-
-@profile
 export
     class rolesManager {
+    private mHarvester!: roleHarvester;
+    private mUpgrader!: roleUpgrader;
+    private mBuilder!: roleBuilder;
+    private mDropper!: roleDropper;
+    private mHauler!: roleHauler;
+    private mDrone!: roleDrone;
 
 
     constructor() {
-
+        this.mHarvester = new roleHarvester();
+        this.mUpgrader = new roleUpgrader();
+        this.mBuilder = new roleBuilder();
+        this.mDropper = new roleDropper();
+        this.mHauler = new roleHauler();
+        this.mDrone = new roleDrone();
     }
 
     public run() {
@@ -71,22 +78,22 @@ export
     }
 
     private manageHarvester(creep: Creep) {
-        roleHarvester.run(creep);
+        this.mHarvester.run(creep);
     }
     private manageUpgrader(creep: Creep) {
-        roleUpgrader.run(creep);
+        this.mUpgrader.run(creep);
     }
     private manageBuilder(creep: Creep) {
-        roleBuilder.run(creep);
+        this.mBuilder.run(creep);
     }
     private manageDropper(creep: Creep) {
-        roleDropper.run(creep);
+        this.mDropper.run(creep);
     }
     private manageHauler(creep: Creep) {
-        roleHauler.run(creep);
+        this.mHauler.run(creep);
     }
     private manageDrone(creep: Creep) {
-        roleDrone.run(creep);
+        this.mDrone.run(creep);
     }
 }
 

@@ -2,7 +2,7 @@ import { containerSelector } from "../managers/manager.containerSelector"
 export class roleDropper {
 
     /** @param {Creep} creep **/
-    public static run(creep: Creep) {
+    public run(creep: Creep) {
         //Check if in range to harvest
         if (creep.memory.working) {
             this.harvest(creep)
@@ -12,7 +12,7 @@ export class roleDropper {
         }
     }
 
-    static relocate(creep: Creep) {
+    private relocate(creep: Creep) {
         const container = Game.getObjectById<StructureContainer>(containerSelector.getSource(creep));
         //use the working bit to determine which of two max sources can be harvested from. TODO this might have issues if my assumption is wrong.
         if (container) {
@@ -27,7 +27,7 @@ export class roleDropper {
     }
 
     //Checks to see if in range to havest from a source
-    private static harvest(creep: Creep) {
+    private harvest(creep: Creep) {
         let source = creep.pos.findClosestByRange(FIND_SOURCES);
         if (source) {
             creep.harvest(source);

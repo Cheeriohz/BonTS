@@ -1,20 +1,16 @@
 import { controllerCacher } from "managers/manager.controllerCacher";
 
-export class upgradeControllerHelper {
-
-
-    public static upgradeController(creep: Creep): boolean {
-        let target = controllerCacher.getcontrollerRoom(creep.room);
-        if (target) {
-            if (creep.upgradeController(target) == ERR_NOT_IN_RANGE) {
-                creep.moveTo(target, { visualizePathStyle: { stroke: '#AE02E6', strokeWidth: .15 } });
-                return true;
-            }
-            else {
-                return true;
-            }
+export function upgradeController(creep: Creep): boolean {
+    let target = controllerCacher.getcontrollerRoom(creep.room);
+    if (target) {
+        if (creep.upgradeController(target) == ERR_NOT_IN_RANGE) {
+            creep.moveTo(target, { visualizePathStyle: { stroke: '#AE02E6', strokeWidth: .15 } });
+            return true;
         }
-        return false;
+        else {
+            return true;
+        }
     }
+    return false;
 }
 

@@ -1,12 +1,12 @@
 
 import { sourceSelector } from "../managers/manager.sourceSelector"
-import { constructHelper } from "./helpers/role.helper.construct";
-import { upgradeControllerHelper } from "./helpers/role.helper.upgradeController";
+import { construct } from "./helpers/role.helper.construct";
+import { upgradeController } from "./helpers/role.helper.upgradeController";
 
 export class roleBuilder {
 
     /** @param {Creep} creep **/
-    public static run(creep: Creep) {
+    public run(creep: Creep) {
         const currentEnergy = creep.store[RESOURCE_ENERGY]
 
         if (creep.memory.working && currentEnergy == 0) {
@@ -19,7 +19,7 @@ export class roleBuilder {
         }
 
         if (creep.memory.working) {
-            if (!(constructHelper.construct(creep))) {
+            if (!(construct(creep))) {
                 this.repair(creep);
             }
         }
@@ -28,7 +28,7 @@ export class roleBuilder {
         }
     }
 
-    private static repair(creep: Creep) {
+    private repair(creep: Creep) {
         let targets = creep.room.find(FIND_STRUCTURES, {
             filter: (structure) => {
                 return (structure.hits < structure.hitsMax)
@@ -41,7 +41,7 @@ export class roleBuilder {
             }
         }
         else {
-            upgradeControllerHelper.upgradeController(creep);
+            upgradeController(creep);
         }
     }
 };

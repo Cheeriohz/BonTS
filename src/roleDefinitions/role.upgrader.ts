@@ -1,9 +1,9 @@
 import { sourceSelector } from "../managers/manager.sourceSelector";
-import { upgradeControllerHelper } from "./helpers/role.helper.upgradeController";
+import { upgradeController } from "./helpers/role.helper.upgradeController";
 export class roleUpgrader {
 
     /** @param {Creep} creep **/
-    public static run(creep: Creep) {
+    public run(creep: Creep) {
         const currentEnergy = creep.store[RESOURCE_ENERGY]
 
         if (creep.memory.working && currentEnergy == 0) {
@@ -16,7 +16,7 @@ export class roleUpgrader {
         }
 
         if (creep.memory.working) {
-            upgradeControllerHelper.upgradeController(creep);
+            upgradeController(creep);
         }
         else {
             sourceSelector.harvestSourceSmart(creep);

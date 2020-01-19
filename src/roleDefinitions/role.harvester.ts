@@ -1,11 +1,11 @@
 import { sourceSelector } from "../managers/manager.sourceSelector"
-import { upgradeControllerHelper } from "./helpers/role.helper.upgradeController";
-import { constructHelper } from "./helpers/role.helper.construct";
+import { upgradeController } from "./helpers/role.helper.upgradeController";
+import { construct } from "./helpers/role.helper.construct";
 
 export class roleHarvester {
 
     /** @param {Creep} creep **/
-    public static run(creep: Creep) {
+    public run(creep: Creep) {
         //determine nearest source and harvest energy
         if (creep.store.getFreeCapacity() > 0) {
             //roleHarvester.harvestSourceDeprecated(creep, sources);
@@ -28,8 +28,8 @@ export class roleHarvester {
                     }
                 }
                 else {
-                    if (!constructHelper.construct(creep)) {
-                        upgradeControllerHelper.upgradeController(creep);
+                    if (!construct(creep)) {
+                        upgradeController(creep);
                     }
                 }
 
@@ -37,7 +37,7 @@ export class roleHarvester {
         }
     }
 
-    private static findEnergyDeposits(creep: Creep) {
+    private findEnergyDeposits(creep: Creep) {
         return creep.room.find(FIND_STRUCTURES, {
             filter: (structure) => {
                 return (structure.structureType == STRUCTURE_EXTENSION
@@ -47,19 +47,11 @@ export class roleHarvester {
         });
     }
 
-    private static findSpawnEnergyDeprived(creep: Creep) {
+    private findSpawnEnergyDeprived(creep: Creep) {
         return creep.room.find(FIND_STRUCTURES, {
             filter: (structure) => {
                 return (structure.structureType == STRUCTURE_SPAWN) &&
                     structure.store.getFreeCapacity(RESOURCE_ENERGY) > 0;
-            }
-        });
-    }
-
-    private static findSpawn(creep: Creep) {
-        return creep.room.find(FIND_STRUCTURES, {
-            filter: (structure) => {
-                return (structure.structureType == STRUCTURE_SPAWN);
             }
         });
     }

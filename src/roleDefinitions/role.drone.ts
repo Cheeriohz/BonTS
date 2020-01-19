@@ -1,11 +1,16 @@
 import { containerSelector } from "../managers/manager.containerSelector"
-import { constructionSiteCacher } from "managers/manager.constructionSiteCacher"
-import { upgradeControllerHelper } from "./helpers/role.helper.upgradeController";
-import { constructHelper } from "./helpers/role.helper.construct";
+import { upgradeController } from "./helpers/role.helper.upgradeController";
+import { construct } from "./helpers/role.helper.construct";
+import { profile } from "Profiler";
 
+@profile
 export class roleDrone {
+    constructor() {
+
+    }
+
     /** @param {Creep} creep **/
-    public static run(creep: Creep) {
+    public run(creep: Creep) {
         const currentEnergy = creep.store[RESOURCE_ENERGY]
 
         if (creep.memory.working && currentEnergy == 0) {
@@ -26,9 +31,9 @@ export class roleDrone {
         }
     }
 
-    private static performDuty(creep: Creep) {
-        if (!constructHelper.construct(creep)) {
-            upgradeControllerHelper.upgradeController(creep);
+    private performDuty(creep: Creep) {
+        if (!construct(creep)) {
+            upgradeController(creep);
         }
     }
 };

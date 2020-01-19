@@ -3,7 +3,7 @@ import { containerSelector } from "../managers/manager.containerSelector"
 export class roleHauler {
 
     /** @param {Creep} creep **/
-    public static run(creep: Creep) {
+    public run(creep: Creep) {
         const currentEnergy = creep.store[RESOURCE_ENERGY]
 
         if (creep.memory.working && currentEnergy == 0) {
@@ -54,7 +54,7 @@ export class roleHauler {
         }
     }
 
-    private static findDump(creep: Creep): StructureStorage | null {
+    private findDump(creep: Creep): StructureStorage | null {
         return creep.pos.findClosestByRange<StructureStorage>(FIND_STRUCTURES, {
             filter: (structure) => {
                 return (structure.structureType == STRUCTURE_STORAGE) &&
@@ -63,7 +63,7 @@ export class roleHauler {
         });
     }
 
-    private static findEnergyTopPriorityDeposit(creep: Creep) {
+    private findEnergyTopPriorityDeposit(creep: Creep) {
         return creep.pos.findClosestByRange(FIND_STRUCTURES, {
             filter: (structure) => {
                 return (structure.structureType == STRUCTURE_EXTENSION) &&
@@ -72,7 +72,7 @@ export class roleHauler {
         });
     }
 
-    private static findEnergyLowPriorityDeposit(creep: Creep) {
+    private findEnergyLowPriorityDeposit(creep: Creep) {
         return creep.pos.findClosestByRange(FIND_STRUCTURES, {
             filter: (structure) => {
                 return (structure.structureType == STRUCTURE_TOWER) &&
@@ -81,19 +81,11 @@ export class roleHauler {
         });
     }
 
-    private static findSpawnEnergyDeprived(creep: Creep) {
+    private findSpawnEnergyDeprived(creep: Creep) {
         return creep.pos.findClosestByRange(FIND_STRUCTURES, {
             filter: (structure) => {
                 return (structure.structureType == STRUCTURE_SPAWN) &&
                     structure.store.getFreeCapacity(RESOURCE_ENERGY) > 0;
-            }
-        });
-    }
-
-    private static findSpawn(creep: Creep) {
-        return creep.room.find(FIND_STRUCTURES, {
-            filter: (structure) => {
-                return (structure.structureType == STRUCTURE_SPAWN);
             }
         });
     }
