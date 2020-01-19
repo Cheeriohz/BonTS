@@ -5,7 +5,7 @@ export class ManagerHelperSpawner {
     public static spawnACreep(spawn: StructureSpawn, body: any[], name: string, assignedRole: number) {
         spawn.spawnCreep(body,
             `${name}${Game.time.toString()}`,
-            { memory: { role: assignedRole, working: false } });
+            { memory: { role: assignedRole, working: false, orders: null } });
     }
 
     public static getCreepsByType(room: Room, roleNumber: number) {
