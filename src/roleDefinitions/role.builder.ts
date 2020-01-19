@@ -1,5 +1,7 @@
 
 import { harvestSourceSmart } from "../managers/manager.sourceSelector"
+import { StorageManager } from "../managers/manager.storage"
+
 import { construct } from "./shared/role.shared.construct";
 import { upgradeController } from "./shared/role.shared.upgradeController";
 
@@ -23,14 +25,15 @@ export class RoleBuilder {
             }
         }
         else {
-            harvestSourceSmart(creep);
+            StorageManager.excessEnergyWithdrawal(creep);
         }
     }
 
     private repair(creep: Creep) {
+        const maxRepairThreshold: number = 500000
         const targets = creep.room.find(FIND_STRUCTURES, {
             filter: (structure) => {
-                return (structure.hits < structure.hitsMax)
+                return (structure.hits < structure.hitsMax && structure.hits < maxRepairThreshold)
             }
         });
         if (targets.length > 0) {
