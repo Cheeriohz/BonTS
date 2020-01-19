@@ -9,6 +9,9 @@ import { roleDropper } from "roleDefinitions/role.dropper";
 import { roleHauler } from "roleDefinitions/role.hauler";
 import { roleDrone } from "roleDefinitions/role.drone";
 
+import { profile } from "../Profiler/Profiler";
+
+@profile
 export class rolesManager {
     public static run() {
         for (const name in Memory.creeps) {
