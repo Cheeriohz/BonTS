@@ -3,7 +3,7 @@ import _ from "lodash";
 export class ManagerHelperSpawner {
 
     public static spawnACreep(spawn: StructureSpawn, body: any[], name: string, assignedRole: number) {
-        spawn.spawnCreep(body,
+        return spawn.spawnCreep(body,
             `${name}${Game.time.toString()}`,
             { memory: { role: assignedRole, working: false, orders: null } });
     }

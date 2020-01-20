@@ -8,6 +8,8 @@ import { RoleDropper } from "roleDefinitions/role.dropper";
 import { RoleHarvester } from "roleDefinitions/role.harvester";
 import { RoleHauler } from "roleDefinitions/role.hauler";
 import { RoleUpgrader } from "roleDefinitions/role.upgrader";
+import { RoleScout } from "roleDefinitions/role.scout";
+import { ExpeditionManager } from "./manager.expedition";
 
 export
     class RolesManager {
@@ -17,6 +19,8 @@ export
     private mDropper!: RoleDropper;
     private mHauler!: RoleHauler;
     private mDrone!: RoleDrone;
+    private mScout!: RoleScout;
+    private mExpeditionManager: ExpeditionManager | undefined;
 
 
     constructor() {
@@ -26,6 +30,7 @@ export
         this.mDropper = new RoleDropper();
         this.mHauler = new RoleHauler();
         this.mDrone = new RoleDrone();
+        this.mScout = new RoleScout();
     }
 
     public run() {
@@ -75,6 +80,9 @@ export
                 this.manageDrone(Game.creeps[name]);
                 break;
             }
+            case CreepRole.scout: {
+                //this.manageScout(Game.creeps[name]);
+            }
         }
     }
 
@@ -95,6 +103,13 @@ export
     }
     private manageDrone(creep: Creep) {
         this.mDrone.run(creep);
+    }
+
+    private manageScout(creep: Creep) {
+        if (!this.mExpeditionManager) {
+            this.mExpeditionManager = new ExpeditionManager();
+        }
+        this.mScout.run(creep, this.mExpeditionManager);
     }
 }
 

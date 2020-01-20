@@ -18,17 +18,17 @@ export class Spawn {
 
     public static run() {
 
-        const myRooms = Game.rooms;
-        for (const room in myRooms) {
+        const spawns = Game.spawns;
+        for (const spawn in spawns) {
             // check to see if we can spawn.
-            if (myRooms[room].memory.era === RoomEra.stone) {
-                this.stoneSpawning(myRooms[room]);
+            if (Game.spawns[spawn].room.memory.era === RoomEra.stone) {
+                this.stoneSpawning(Game.spawns[spawn].room);
             }
-            else if (myRooms[room].memory.era === RoomEra.copper) {
-                this.copperSpawning(myRooms[room]);
+            else if (Game.spawns[spawn].room.memory.era === RoomEra.copper) {
+                this.copperSpawning(Game.spawns[spawn].room);
             }
-            else if (myRooms[room].memory.era === RoomEra.bronze) {
-                this.bronzeSpawning(myRooms[room]);
+            else if (Game.spawns[spawn].room.memory.era === RoomEra.bronze) {
+                this.bronzeSpawning(Game.spawns[spawn]);
             }
         }
     }
@@ -82,17 +82,33 @@ export class Spawn {
             this.spawnConfig.copperEraConfig.builders);
     }
 
-    private static bronzeSpawning(room: Room) {
+    private static bronzeSpawning(spawn: StructureSpawn) {
+        const room: Room = spawn.room;
         if (ManagerHelperSpawner.canSpawn(room)) {
             if (CivilizedEraSpawnHelper.spawnDroppers(room, dropMinerBody)) {
                 if (SimpleEraSpawnHelper.spawnGeneric(room, haulerBody, this.spawnConfig.bronzeEraConfig.haulers, CreepRole.hauler)) {
                     if (SimpleEraSpawnHelper.spawnGeneric(room, droneBody, this.spawnConfig.bronzeEraConfig.drones, CreepRole.drone)) {
-                        SimpleEraSpawnHelper.spawnBuilders(room, repairBody, this.spawnConfig.bronzeEraConfig.builders);
+                        if (SimpleEraSpawnHelper.spawnBuilders(room, repairBody, this.spawnConfig.bronzeEraConfig.builders)) {
+                            this.checkForSpawnRequest(spawn)
+                        }
                     }
                 }
             }
         }
     }
+
+    private static checkForSpawnRequest(spawn: StructureSpawn) {
+        if (spawn.memory.remoteCreepRequest?.length > 0) {
+            const request: CreepRequest = spawn.memory.remoteCreepRequest[0];
+            if (ManagerHelperSpawner.spawnACreep(spawn, request.body, CreepRole[request.role], request.role) == OK) {
+                spawn.memory.remoteCreepRequest = _.takeRight(spawn.memory.remoteCreepRequest, spawn.memory.remoteCreepRequest.length - 1);
+            }
+        }
+
+    }
+
+
+
 }
 
 // Body Definitions

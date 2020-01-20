@@ -5,6 +5,7 @@ export enum CreepRole {
     builder,
     dropper,
     hauler,
-    drone
+    drone,
+    scout
 }
 

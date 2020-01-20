@@ -5,6 +5,7 @@ import { ControllerCacher } from "./manager.controllerCacher"
 import { pruneSourceTree } from "./manager.sourceSelector";
 import { Spawn } from "./manager.spawn";
 import { TerrainScanner } from "./manager.terrainScanner";
+import { Expander } from "./manager.expander";
 
 export class CycleManager {
 
@@ -26,6 +27,7 @@ export class CycleManager {
 
     private static manageLongTermTasks() {
         this.roomLevelTasksLongTerm();
+        this.spawnLevelTasksLongTerm();
         this.manageMediumTermTasks();
     }
 
@@ -54,6 +56,13 @@ export class CycleManager {
         for (const room in Game.rooms) {
             this.cleanUpTrees(Game.rooms[room]);
             this.storeControllerIds(Game.rooms[room]);
+        }
+    }
+
+    private static spawnLevelTasksLongTerm() {
+        const expander: Expander = new Expander();
+        for (const spawn in Game.spawns) {
+            expander.mineExpansion(Game.spawns[spawn]);
         }
     }
 
