@@ -1,6 +1,7 @@
 import _ from "lodash";
 import { ErrorMapper } from "utils/ErrorMapper";
 import { CreepRole } from "enums/enum.roles";
+import { ServerResponse } from "http";
 
 export class ExpeditionManager {
     private branchTraversalDebugging!: boolean;
@@ -12,7 +13,7 @@ export class ExpeditionManager {
     public reportForInitialAssignment(creep: Creep) {
         if (Memory.expeditions.length > 0) {
             for (let expedition of Memory.expeditions) {
-                if (expedition.additionalPersonnelNeeded > 0) {
+                if (expedition?.additionalPersonnelNeeded > 0) {
                     return this.processOriginalOrders(expedition, creep);
                 }
             }
@@ -30,12 +31,14 @@ export class ExpeditionManager {
                 }
             }
 
-            if (!this.searchForAssignee(creep.name, assignedExpedition.progress.searchTreeOriginNode)) {
-                // Shouldn't be possible, but again, log it.
-                console.log(`Could not update scanned flag for creep: ${creep.name}. Tree is below.`);
-                console.log(JSON.stringify(assignedExpedition.progress.searchTreeOriginNode));
+            if (creep.memory.orders?.independentOperator === false) {
+                if (!this.searchForAssignee(creep.name, assignedExpedition.progress.searchTreeOriginNode)) {
+                    // Shouldn't be possible, but again, log it.
+                    console.log(`Could not update scanned flag for creep: ${creep.name}. Tree is below.`);
+                    console.log(JSON.stringify(assignedExpedition.progress.searchTreeOriginNode));
+                }
             }
-            this.checkForAdditionalAssignments(creep, assignedExpedition);
+            this.checkForAdditionalAssignments(creep, assignedExpedition, true);
 
         }
         else {
@@ -48,7 +51,7 @@ export class ExpeditionManager {
     public reassignmentRequest(creep: Creep) {
         const assignedExpedition = this.getExpeditionAssignment(creep.name);
         if (assignedExpedition) {
-            this.checkForAdditionalAssignments(creep, assignedExpedition);
+            this.checkForAdditionalAssignments(creep, assignedExpedition, false);
         }
         else {
             this.reportForInitialAssignment(creep);
@@ -59,7 +62,7 @@ export class ExpeditionManager {
         if (Memory.expeditions.length > 0) {
             for (const expedition of Memory.expeditions) {
                 //console.log(`Assigned Creeps are ${JSON.stringify(expedition.assignedCreeps)}`);
-                if (expedition.assignedCreeps.includes(name)) {
+                if (expedition?.assignedCreeps.includes(name)) {
                     //console.log(`${name} was found in the assigned creeps array.`);
                     return expedition;
                 }
@@ -69,38 +72,36 @@ export class ExpeditionManager {
     }
 
     private processOriginalOrders(expedition: Expedition, creep: Creep) {
-        if (this.determineTargetLeaf(expedition.progress.searchTreeOriginNode, creep, { leafTraversalCount: 0, nodeCount: expedition.progress.plottedRooms.length })) {
+        creep.memory.orders = null;
+        if (this.determineTargetLeaf(expedition.progress.searchTreeOriginNode, creep)) {
             // Check if we can get directions
             this.createOrders(creep, expedition);
             expedition.additionalPersonnelNeeded -= 1;
             expedition.assignedCreeps.push(creep.name);
         }
         else {
-            // Should not really happen. If it does, log this.
-            console.log(`Could not process expeditions orders for ${creep.name}. Full expedition is:`);
-            console.log(JSON.stringify(expedition));
-            this.terminateCreep(creep);
+            creep.memory.working = false;
         }
     }
 
     private createOrders(creep: Creep, expedition: Expedition) {
         if (creep.memory.orders) {
-            const roomPath = this.determineDirections(creep, expedition.progress.searchTreeOriginNode);
-            if (roomPath && roomPath.length > 0) {
-                // Update creep memory
-                const CreepOrders: ScoutOrder = {
-                    target: creep.memory.orders.target,
-                    searchTarget: expedition.target,
-                    independentOperator: creep.memory.orders.independentOperator,
-                    roomPath: roomPath
-                };
-                creep.memory.orders = CreepOrders;
-                creep.memory.working = true;
-            }
-            else {
-                // Failure should already be logged, just kill the creep as this shouldn't happen.
-                this.terminateCreep(creep);
-            }
+            //const roomPath = this.determineDirections(creep, expedition.progress.searchTreeOriginNode);
+            //if (roomPath && roomPath.length > 0) {
+            // Update creep memory
+            const CreepOrders: ScoutOrder = {
+                target: creep.memory.orders.target,
+                searchTarget: expedition.target,
+                independentOperator: creep.memory.orders.independentOperator,
+                //roomPath: roomPath
+            };
+            creep.memory.orders = CreepOrders;
+            creep.memory.working = true;
+            //}
+            //else {
+            // Failure should already be logged, just kill the creep as this shouldn't happen.
+            //  this.terminateCreep(creep);
+            //}
         }
         else {
             // Code should not be called this way.
@@ -109,13 +110,13 @@ export class ExpeditionManager {
 
     }
 
-    private checkForAdditionalAssignments(creep: Creep, expedition: Expedition) {
+    private checkForAdditionalAssignments(creep: Creep, expedition: Expedition, increaseSearchDepth: boolean) {
         if (creep.memory?.orders) {
             // Check if we have finished the traversal.
-            if (this.determineTargetLeaf(expedition.progress.searchTreeOriginNode, creep, { leafTraversalCount: 0, nodeCount: expedition.progress.plottedRooms.length })) {
+            if (this.determineTargetLeaf(expedition.progress.searchTreeOriginNode, creep)) {
                 this.createOrders(creep, expedition);
             }
-            else {
+            else if (increaseSearchDepth) {
                 // No remaining targets, check if we have a hit and can end the expedition.
                 if (expedition.progress.foundTargets.length > 0) {
                     console.log(`Ending expedition, found targets: ${JSON.stringify(expedition.progress.foundTargets)}`)
@@ -126,11 +127,14 @@ export class ExpeditionManager {
                     this.expandExpedition(creep, expedition);
                 }
             }
+            else {
+                creep.memory.working = false;
+            }
         }
     }
 
     private endExpedition(creep: Creep, expedition: Expedition) {
-        if (expedition.progress.foundTargets.length > 0) {
+        if (expedition.progress.foundTargets.length === 0) {
             console.log("Expedition was an abject failure chaps");
             console.log(JSON.stringify(expedition));
             delete Memory.expeditions[_.indexOf(Memory.expeditions, expedition)];
@@ -151,6 +155,16 @@ export class ExpeditionManager {
         else {
             expedition.progress.searchDepth += 1;
             this.recursiveExpand(expedition.progress.searchTreeOriginNode, expedition);
+        }
+        this.assignMembersToWorking(expedition);
+    }
+
+    private assignMembersToWorking(expedition: Expedition) {
+        for (const creepName in expedition.assignedCreeps) {
+            const creep: Creep = Game.creeps[creepName];
+            if (creep) {
+                creep.memory.working = true;
+            }
         }
     }
 
@@ -173,6 +187,15 @@ export class ExpeditionManager {
 
     }
 
+    public initialExpansion(tree: ScreepsSearchTree, expedition: Expedition): boolean {
+        if (expedition.progress.searchDepth === 0) {
+            expedition.progress.searchDepth++;
+            if (this.recursiveExpand(tree, expedition)) {
+                return true;
+            }
+        }
+        return false;
+    }
 
     private recursiveExpand(tree: ScreepsSearchTree, expedition: Expedition): ScreepsSearchTree {
         if (tree.children.length === 0) {
@@ -312,8 +335,8 @@ export class ExpeditionManager {
         //console.log(`Searching for assignee: ${assigneeName}. In ${tree.nodeName}`);
         if (tree.assignedCreep !== assigneeName) {
             if (tree.children.length > 0) {
-                for (let childLeaf of tree.children) {
-                    if (this.searchForAssignee(assigneeName, childLeaf)) {
+                for (let childTree of tree.children) {
+                    if (this.searchForAssignee(assigneeName, childTree)) {
                         return true;
                     }
                 }
@@ -330,26 +353,48 @@ export class ExpeditionManager {
         return false;
     }
 
-    // Finds an unscanned leaf and assigns the creep to it.
-    private determineTargetLeaf(tree: ScreepsSearchTree, creep: Creep, counter: TraversalCounter): boolean {
-        //console.log(`Node: ${tree.nodeName} | Creep ${creep.name} | Scanned: ${tree.scanned} | LeafTraversalCount ${counter.leafTraversalCount} | nodeCount: ${counter.nodeCount}`);
-        if (tree.scanned) {
-            counter.leafTraversalCount++;
+    private findLeaf(nodeName: string, tree: ScreepsSearchTree): ScreepsSearchTree | null {
+        if (tree.nodeName !== nodeName) {
             for (let childLeaf of tree.children) {
-                if (this.determineTargetLeaf(childLeaf, creep, counter)) {
+                if (this.findLeaf(nodeName, childLeaf)) {
+                    return childLeaf;
+                }
+            }
+        }
+        else {
+            return tree;
+        }
+        return null;
+    }
+
+    // Finds an unscanned leaf and assigns the creep to it.
+    private determineTargetLeaf(tree: ScreepsSearchTree, creep: Creep): boolean {
+        //console.log(`Node: ${tree.nodeName} | Creep ${creep.name} | Scanned: ${tree.scanned} | LeafTraversalCount ${counter.leafTraversalCount} | nodeCount: ${counter.nodeCount}`);
+        if (tree.nodeName !== creep.room.name) {
+            //Check if we can do a direct path to a child.
+            let subTree = this.findLeaf(creep.room.name, tree);
+            if (subTree) {
+                if (this.searchAndAssignForTarget(subTree, creep)) {
+                    return true;
+                }
+            }
+        }
+        return this.searchAndAssignForTarget(tree, creep);
+
+    }
+
+    private searchAndAssignForTarget(tree: ScreepsSearchTree, creep: Creep) {
+        if (tree.scanned) {
+            for (let childLeaf of tree.children) {
+                if (this.searchAndAssignForTarget(childLeaf, creep)) {
                     return true;
                 }
             }
         }
         else {
-            counter.leafTraversalCount++;
             if (tree.assignedCreep == "") {
                 tree.assignedCreep = creep.name;
                 this.setOrdersTarget(creep, tree, false);
-                return true;
-            }
-            else if (counter.leafTraversalCount === counter.nodeCount) {
-                this.setOrdersTarget(creep, tree, true);
                 return true;
             }
         }

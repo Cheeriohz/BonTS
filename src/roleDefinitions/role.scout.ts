@@ -15,6 +15,32 @@ export class RoleScout {
 
     private embark(creep: Creep, expeditionManager: ExpeditionManager) {
         let orders = <ScoutOrder>creep.memory.orders;
+        if (orders?.target) {
+            if (creep.room.name === orders.target) {
+                if (creep.pos.isNearTo(25, 25)) {
+                    if (!orders.independentOperator) {
+                        this.report(creep, expeditionManager);
+                    }
+                    else {
+                        expeditionManager.reassignmentRequest(creep);
+                    }
+                }
+                else {
+                    creep.moveTo(25, 25, { reusePath: 1500, ignoreCreeps: true });
+                }
+            }
+            else {
+                this.travelToRoom(creep, orders.target);
+            }
+        }
+        else {
+            expeditionManager.reassignmentRequest(creep);
+            this.logOrders(creep);
+        }
+    }
+    /*
+    private _embark(creep: Creep, expeditionManager: ExpeditionManager) {
+        let orders = <ScoutOrder>creep.memory.orders;
         if (orders.roomPath.length > 0) {
             if (creep.room.name === orders.roomPath[0]) {
                 // console.log(` ${creep.name}: Room Identified`);
@@ -49,7 +75,7 @@ export class RoleScout {
         }
         //console.log(` ${creep.name}: I have embarked`);
 
-    }
+    }*/
 
     private report(creep: Creep, expeditionManager: ExpeditionManager) {
         // First scan the surroundings.
@@ -79,7 +105,7 @@ export class RoleScout {
             const destination = creep.pos.findClosestByPath(<ExitConstant>target);
             if (destination) {
                 creep.moveTo(destination, {
-                    reusePath: 25
+                    reusePath: 1500, ignoreCreeps: true
                 });
             }
         }

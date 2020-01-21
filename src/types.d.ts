@@ -11,7 +11,7 @@ interface CreepOrder {
 }
 
 interface ScoutOrder extends CreepOrder {
-  roomPath: string[];
+  //roomPath: string[];
   searchTarget: FindConstant;
 }
 

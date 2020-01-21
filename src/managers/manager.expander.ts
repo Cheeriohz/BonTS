@@ -1,4 +1,5 @@
 import { CreepRole } from "enums/enum.roles";
+import { ExpeditionManager } from "./manager.expedition";
 
 export class Expander {
 
@@ -24,7 +25,7 @@ export class Expander {
         const searchTreeOrigin: ScreepsSearchTree = {
             nodeName: spawn.room.name,
             children: [],
-            scanned: false,
+            scanned: true,
             assignedCreep: "",
         };
         const expeditionProgress: ExpeditionProgress = {
@@ -46,6 +47,8 @@ export class Expander {
             Memory.expeditions = [];
         }
         Memory.expeditions.push(expedition);
+        const em: ExpeditionManager = new ExpeditionManager(false);
+        em.initialExpansion(searchTreeOrigin, expedition);
         spawn.memory.remoteMineExpansionInProgress = true;
     }
 
