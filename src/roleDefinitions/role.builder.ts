@@ -30,7 +30,7 @@ export class RoleBuilder {
     }
 
     private repair(creep: Creep) {
-        const maxRepairThreshold: number = 10000000
+        const maxRepairThreshold: number = 1000000
         const targets = creep.room.find(FIND_STRUCTURES, {
             filter: (structure) => {
                 return (structure.hits < structure.hitsMax && structure.hits < maxRepairThreshold)
