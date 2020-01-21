@@ -7,11 +7,11 @@ interface CreepMemory {
 
 interface CreepOrder {
   target: string;
+  independentOperator: boolean;
 }
 
 interface ScoutOrder extends CreepOrder {
   roomPath: string[];
-  independentOperator: boolean;
   searchTarget: FindConstant;
 }
 
@@ -52,17 +52,24 @@ interface Expedition {
 
 interface ExpeditionProgress {
   searchTreeOriginNode: ScreepsSearchTree;
+  plottedRooms: string[];
   complete: boolean;
   foundTargets: string[];
+  searchDepth: number;
+  maxDepth: number;
 }
 
 interface ScreepsSearchTree {
-  roomName: string;
+  nodeName: string;
   children: ScreepsSearchTree[];
   scanned: boolean;
   assignedCreep: string;
 }
 
+interface TraversalCounter {
+  leafTraversalCount: number;
+  nodeCount: number;
+}
 
 interface Dictionary<T> {
   [index: string]: T;

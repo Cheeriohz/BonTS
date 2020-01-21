@@ -81,7 +81,7 @@ export
                 break;
             }
             case CreepRole.scout: {
-                //this.manageScout(Game.creeps[name]);
+                this.manageScout(Game.creeps[name]);
             }
         }
     }
@@ -107,7 +107,7 @@ export
 
     private manageScout(creep: Creep) {
         if (!this.mExpeditionManager) {
-            this.mExpeditionManager = new ExpeditionManager();
+            this.mExpeditionManager = new ExpeditionManager(true);
         }
         this.mScout.run(creep, this.mExpeditionManager);
     }

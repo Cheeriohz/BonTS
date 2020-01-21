@@ -16,24 +16,27 @@ export class Expander {
 
     public remoteMineExpansion(spawn: StructureSpawn) {
         // Create the expedition object to find a source.
-        this.createExpedition(spawn);
+        this.createExpedition(spawn, 4, FIND_SOURCES);
         this.requestScout(spawn);
     }
 
-    private createExpedition(spawn: StructureSpawn) {
+    private createExpedition(spawn: StructureSpawn, searchDepth: number, findConstant: FindConstant) {
         const searchTreeOrigin: ScreepsSearchTree = {
-            roomName: spawn.room.name,
+            nodeName: spawn.room.name,
             children: [],
             scanned: false,
-            assignedCreep: ""
+            assignedCreep: "",
         };
         const expeditionProgress: ExpeditionProgress = {
             searchTreeOriginNode: searchTreeOrigin,
             complete: false,
-            foundTargets: []
+            foundTargets: [],
+            searchDepth: 0,
+            maxDepth: searchDepth,
+            plottedRooms: [spawn.room.name]
         };
         const expedition: Expedition = {
-            target: FIND_SOURCES,
+            target: findConstant,
             additionalPersonnelNeeded: 1,
             spawnOrigin: spawn.name,
             progress: expeditionProgress,
