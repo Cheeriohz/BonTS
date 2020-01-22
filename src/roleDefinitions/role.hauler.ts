@@ -69,13 +69,25 @@ export class RoleHauler {
         });
     }
 
-    private findEnergyTopPriorityDeposit(creep: Creep) {
-        return creep.pos.findClosestByRange(FIND_STRUCTURES, {
-            filter: (structure) => {
-                return (structure.structureType === STRUCTURE_EXTENSION) &&
-                    structure.store.getFreeCapacity(RESOURCE_ENERGY) > 0;
-            }
-        });
+    private findEnergyTopPriorityDeposit(creep: Creep): Structure | null {
+        const link: Structure | null = creep.pos.findInRange(FIND_STRUCTURES, 3,
+            {
+                filter: (structure) => {
+                    return (structure.structureType === STRUCTURE_LINK && structure.store.getCapacity(RESOURCE_ENERGY) < 700)
+                }
+            })[0];
+        if (link) {
+            return (link);
+        }
+        else {
+            return creep.pos.findClosestByRange(FIND_STRUCTURES, {
+                filter: (structure) => {
+                    return (structure.structureType === STRUCTURE_EXTENSION &&
+                        structure.store.getFreeCapacity(RESOURCE_ENERGY) > 0)
+                }
+            });
+
+        }
     }
 
     private findEnergyLowPriorityDeposit(creep: Creep) {

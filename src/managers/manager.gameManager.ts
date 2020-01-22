@@ -25,7 +25,7 @@ export class GameManager {
 
         // Manage cycles
         CycleManager.check();
-        //console.log(`Cycle ${Memory.cycle} Execution Time: ${Game.cpu.getUsed() - executionTime}`);
+        console.log(`Cycle ${Memory.cycle} Execution Time: ${Game.cpu.getUsed() - executionTime}`);
     }
 
     private static runLogging() {

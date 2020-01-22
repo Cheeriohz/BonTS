@@ -6,6 +6,7 @@ import { pruneSourceTree } from "./manager.sourceSelector";
 import { Spawn } from "./manager.spawn";
 import { TerrainScanner } from "./manager.terrainScanner";
 import { Expander } from "./manager.expander";
+import { LinkManager } from "./manager.links";
 
 export class CycleManager {
 
@@ -36,7 +37,9 @@ export class CycleManager {
     }
 
     private static manageShortTermTasks() {
+        this.spawnLevelTasksShortTerm();
         this.updateSpawnConstructionSiteMaps();
+        // Global Creep Map
         Spawn.populateCreepCounts();
     }
 
@@ -61,8 +64,21 @@ export class CycleManager {
 
     private static spawnLevelTasksLongTerm() {
         const expander: Expander = new Expander();
+        const linkManager: LinkManager = new LinkManager();
+        for (const spawnName in Game.spawns) {
+            const spawn = Game.spawns[spawnName];
+            expander.mineExpansion(spawn);
+            if (spawn.memory?.reassess) {
+                linkManager.populateLinkMemory(spawn);
+                spawn.memory.reassess = false;
+            }
+        }
+    }
+
+    private static spawnLevelTasksShortTerm() {
+        const linkManager: LinkManager = new LinkManager();
         for (const spawn in Game.spawns) {
-            expander.mineExpansion(Game.spawns[spawn]);
+            linkManager.balanceEnergyForSpawn(Game.spawns[spawn]);
         }
     }
 
