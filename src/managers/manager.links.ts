@@ -11,32 +11,32 @@ export class LinkManager {
                     return (structure.structureType === STRUCTURE_LINK);
                 }
             });
-            if (this.findSourceLinks(spawn, sources, allLinks)) {
-                this.findDumpLinks(spawn, allLinks);
+            if (this.findSourceLinks(spawn.room, sources, allLinks)) {
+                this.findDumpLinks(spawn.room, allLinks);
             }
         }
     }
 
-    private findSourceLinks(spawn: StructureSpawn, sources: Source[], allLinks: StructureLink[]): boolean {
+    private findSourceLinks(spawnRoom: Room, sources: Source[], allLinks: StructureLink[]): boolean {
         let sourceLinks = _.flatten(_.compact(_.map(sources, (source) => source.pos.findInRange<StructureLink>(allLinks, 3))));
         if (sourceLinks.length > 0) {
-            spawn.memory.sourceLinks = _.map(sourceLinks, (sourcelink) => _.get(sourcelink, 'id'));
+            spawnRoom.memory.sourceLinks = _.map(sourceLinks, (sourcelink) => _.get(sourcelink, 'id'));
             return true;
         }
         return false;
     }
 
-    private findDumpLinks(spawn: StructureSpawn, allLinks: StructureLink[]) {
-        if (spawn.memory.sourceLinks) {
-            spawn.memory.dumpLinks = _.compact(_.difference(_.map(allLinks, (allLinks) => _.get(allLinks, 'id')), spawn.memory.sourceLinks));
+    private findDumpLinks(spawnRoom: Room, allLinks: StructureLink[]) {
+        if (spawnRoom.memory.sourceLinks) {
+            spawnRoom.memory.dumpLinks = _.compact(_.difference(_.map(allLinks, (allLinks) => _.get(allLinks, 'id')), spawnRoom.memory.sourceLinks));
         }
 
     }
 
     public balanceEnergyForSpawn(spawn: StructureSpawn) {
-        if (spawn && spawn.memory.dumpLinks && spawn.memory.sourceLinks) {
-            if (spawn.memory.dumpLinks.length > 0 && spawn.memory.sourceLinks.length > 0) {
-                this.balanceEnergy(spawn.memory.sourceLinks, spawn.memory.dumpLinks);
+        if (spawn && spawn.room.memory.dumpLinks && spawn.room.memory.sourceLinks) {
+            if (spawn.room.memory.dumpLinks.length > 0 && spawn.room.memory.sourceLinks.length > 0) {
+                this.balanceEnergy(spawn.room.memory.sourceLinks, spawn.room.memory.dumpLinks);
             }
         }
     }

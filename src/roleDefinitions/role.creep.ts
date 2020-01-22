@@ -1,7 +1,9 @@
 import _ from "lodash";
 import { getContainer } from "managers/manager.containerSelector";
 import { harvestSourceSmart } from "managers/manager.sourceSelector";
+import { profile } from "Profiler";
 
+@profile
 export class RoleCreep {
 
 
@@ -158,23 +160,44 @@ export class RoleCreep {
     }
 
     protected checkForNearbyLink(creep: Creep): StructureLink | null {
-        const queryItem: StructureLink | null = creep.pos.findInRange<StructureLink>(FIND_STRUCTURES, 3,
-            { filter: (structure) => { return structure.structureType === STRUCTURE_LINK && structure.store.getUsedCapacity(RESOURCE_ENERGY) > 50; } })[0];
-        return queryItem
+        if (creep.room.memory.dumpLinks) {
+            const links: StructureLink[] = _.compact(_.map(creep.room.memory?.dumpLinks, (id) => { return this.checkLinkForEnergy(id); }));
+            if (links.length > 0) {
+                const queryItem: StructureLink | null = creep.pos.findInRange<StructureLink>(links, 3)[0];
+                return queryItem;
+            }
+        }
+        return null
+    }
+
+    private checkLinkForEnergy(id: Id<StructureLink>): StructureLink | null {
+        const link = Game.getObjectById(id);
+        if (link && link.store.energy > 50) {
+            return link;
+        }
+        else {
+            return null;
+        }
+    }
+
+    private checkLinkForFillable(id: Id<StructureLink>): StructureLink | null {
+        const link = Game.getObjectById(id);
+        if (link && link.store.energy < 700) {
+            return link;
+        }
+        else {
+            return null;
+        }
     }
 
     protected checkForLinktoFill(creep: Creep): StructureLink | null {
-        const link: StructureLink | null = creep.pos.findInRange<StructureLink>(FIND_STRUCTURES, 3,
-            {
-                filter: (structure) => {
-                    return (structure.structureType === STRUCTURE_LINK && structure.store.getCapacity(RESOURCE_ENERGY) < 700);
-                }
-            })[0];
-        return link
+        if (creep.room.memory.sourceLinks) {
+            const links: StructureLink[] = _.compact(_.map(creep.room.memory?.sourceLinks, (id) => { return this.checkLinkForFillable(id); }));
+            if (links.length > 0) {
+                const queryItem: StructureLink | null = creep.pos.findInRange<StructureLink>(links, 3)[0];
+                return queryItem;
+            }
+        }
+        return null
     }
-
-
-
-
-
 }

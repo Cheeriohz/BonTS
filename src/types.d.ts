@@ -20,7 +20,9 @@ interface RoomMemory {
   sourceMap: string[][];
   containerMap: string[][];
   constructionSites: Id<ConstructionSite<BuildableStructureConstant>>[];
-  controller: Id<StructureController>;
+  controller: Id<StructureController> | null;
+  sourceLinks: Id<StructureLink>[] | null
+  dumpLinks: Id<StructureLink>[] | null
 }
 
 interface SpawnMemory {
@@ -28,8 +30,6 @@ interface SpawnMemory {
   remoteCreepRequest: CreepRequest[];
   remoteMineCount: number;
   remoteMineExpansionInProgress: boolean;
-  sourceLinks: Id<StructureLink>[] | null
-  dumpLinks: Id<StructureLink>[] | null
 }
 
 interface CreepRequest {
