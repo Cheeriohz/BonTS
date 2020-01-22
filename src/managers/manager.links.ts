@@ -59,10 +59,10 @@ export class LinkManager {
     }
 
     private linkEnergyAvailable(links: StructureLink[]): boolean {
-        return (_.filter(links, (link) => link.store.energy > 200).length > 0)
+        return (_.filter(links, (link) => link.store.energy > 100).length > 0)
     }
 
     private linkEnergyNeeded(links: StructureLink[]): boolean {
-        return (_.filter(links, (link) => link.store.energy < 600).length > 0)
+        return (_.filter(links, (link) => link.store.energy < 800).length > 0)
     }
 }

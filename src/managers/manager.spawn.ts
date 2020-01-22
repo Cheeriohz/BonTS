@@ -88,9 +88,7 @@ export class Spawn {
             if (CivilizedEraSpawnHelper.spawnDroppers(room, dropMinerBody)) {
                 if (SimpleEraSpawnHelper.spawnGeneric(room, haulerBody, this.spawnConfig.bronzeEraConfig.haulers, CreepRole.hauler)) {
                     if (SimpleEraSpawnHelper.spawnGeneric(room, droneBody, this.spawnConfig.bronzeEraConfig.drones, CreepRole.drone)) {
-                        if (SimpleEraSpawnHelper.spawnBuilders(room, repairBody, this.spawnConfig.bronzeEraConfig.builders)) {
-                            this.checkForSpawnRequest(spawn)
-                        }
+                        this.checkForSpawnRequest(spawn)
                     }
                 }
             }

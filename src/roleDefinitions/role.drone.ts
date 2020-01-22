@@ -4,9 +4,10 @@ import { construct } from "./shared/role.shared.construct";
 import { upgradeController } from "./shared/role.shared.upgradeController";
 
 import { profile } from "Profiler";
+import { RoleCreep } from "./role.creep";
 
 @profile
-export class RoleDrone {
+export class RoleDrone extends RoleCreep {
 
     public run(creep: Creep) {
         const currentEnergy = creep.store[RESOURCE_ENERGY]
@@ -25,7 +26,7 @@ export class RoleDrone {
             this.performDuty(creep);
         }
         else {
-            this.withdraw(creep);
+            this.fillUp(creep);
         }
     }
 

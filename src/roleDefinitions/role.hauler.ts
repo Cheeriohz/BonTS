@@ -1,9 +1,10 @@
-import { withdraw } from "../managers/manager.containerSelector"
+import { withdraw, getContainer } from "../managers/manager.containerSelector"
 
 import { profile } from "Profiler";
+import { RoleCreep } from "./role.creep";
 
 @profile
-export class RoleHauler {
+export class RoleHauler extends RoleCreep {
 
     public run(creep: Creep) {
         const currentEnergy = creep.store[RESOURCE_ENERGY]
@@ -19,92 +20,20 @@ export class RoleHauler {
 
         // energy full, time to find deposit location.
         if (creep.memory.working) {
-            let target = this.findEnergyTopPriorityDeposit(creep)
-            if (target) {
-                if (creep.transfer(target, RESOURCE_ENERGY) === ERR_NOT_IN_RANGE) {
-                    creep.moveTo(target, { visualizePathStyle: { stroke: '#ffffff' } });
-                }
-            }
-            else {
-                target = this.findSpawnEnergyDeprived(creep);
-                if (target) {
-                    if (creep.transfer(target, RESOURCE_ENERGY) === ERR_NOT_IN_RANGE) {
-                        creep.moveTo(target, { visualizePathStyle: { stroke: '#ffffff' } });
-                    }
-                }
-                else {
-                    target = this.findEnergyLowPriorityDeposit(creep)
-                    if (target) {
-                        if (creep.transfer(target, RESOURCE_ENERGY) === ERR_NOT_IN_RANGE) {
-                            creep.moveTo(target, { visualizePathStyle: { stroke: '#ffffff' } });
-                        }
-                    }
-                    else {
-                        target = this.findDump(creep);
-                        if (target) {
-                            if (creep.transfer(target, RESOURCE_ENERGY) === ERR_NOT_IN_RANGE) {
-                                creep.moveTo(target, { visualizePathStyle: { stroke: '#ffffff' } });
-                            }
-                        }
-                    }
-                }
-            }
-
+            this.fillClosest(creep);
         }
         else {
-            this.withdraw(creep);
+            this.fillUpHauler(creep);
         }
     }
 
-    private withdraw(creep: Creep) {
-        withdraw(creep);
-    }
-
-    private findDump(creep: Creep): StructureStorage | null {
-        return creep.pos.findClosestByRange<StructureStorage>(FIND_STRUCTURES, {
-            filter: (structure) => {
-                return (structure.structureType === STRUCTURE_STORAGE) &&
-                    structure.store.getFreeCapacity(RESOURCE_ENERGY) > 0;
-            }
-        });
-    }
-
-    private findEnergyTopPriorityDeposit(creep: Creep): Structure | null {
-        const link: Structure | null = creep.pos.findInRange(FIND_STRUCTURES, 3,
-            {
-                filter: (structure) => {
-                    return (structure.structureType === STRUCTURE_LINK && structure.store.getCapacity(RESOURCE_ENERGY) < 700)
-                }
-            })[0];
-        if (link) {
-            return (link);
-        }
-        else {
-            return creep.pos.findClosestByRange(FIND_STRUCTURES, {
-                filter: (structure) => {
-                    return (structure.structureType === STRUCTURE_EXTENSION &&
-                        structure.store.getFreeCapacity(RESOURCE_ENERGY) > 0)
-                }
-            });
-
+    protected fillUpHauler(creep: Creep) {
+        const container = Game.getObjectById<StructureContainer>(getContainer(creep));
+        if (container) {
+            return this.withdrawMove(creep, container);
         }
     }
 
-    private findEnergyLowPriorityDeposit(creep: Creep) {
-        return creep.pos.findClosestByRange(FIND_STRUCTURES, {
-            filter: (structure) => {
-                return (structure.structureType === STRUCTURE_TOWER) &&
-                    structure.store.getFreeCapacity(RESOURCE_ENERGY) > 0;
-            }
-        });
-    }
 
-    private findSpawnEnergyDeprived(creep: Creep) {
-        return creep.pos.findClosestByRange(FIND_STRUCTURES, {
-            filter: (structure) => {
-                return (structure.structureType === STRUCTURE_SPAWN) &&
-                    structure.store.getFreeCapacity(RESOURCE_ENERGY) > 0;
-            }
-        });
-    }
+
 };
