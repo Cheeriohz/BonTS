@@ -1,4 +1,3 @@
-
 interface CreepMemory {
   role: number;
   working: boolean;
@@ -11,7 +10,6 @@ interface CreepOrder {
 }
 
 interface ScoutOrder extends CreepOrder {
-  //roomPath: string[];
   searchTarget: FindConstant;
 }
 
@@ -30,6 +28,7 @@ interface SpawnMemory {
   remoteCreepRequest: CreepRequest[];
   remoteMineCount: number;
   remoteMineExpansionInProgress: boolean;
+  expeditionResults: IExpeditionResults[] | null;
 }
 
 interface CreepRequest {
@@ -49,6 +48,7 @@ interface Expedition {
   target: FindConstant;
   additionalPersonnelNeeded: number;
   spawnOrigin: string;
+  expeditionTypeName: string;
   progress: ExpeditionProgress;
   assignedCreeps: string[];
 }

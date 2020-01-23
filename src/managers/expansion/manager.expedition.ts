@@ -2,12 +2,16 @@ import _ from "lodash";
 import { ErrorMapper } from "utils/ErrorMapper";
 import { CreepRole } from "enums/enum.roles";
 import { ServerResponse } from "http";
+import { remoteMineExpeditionHandler } from "./manager.remoteMineExpedition";
 
 export class ExpeditionManager {
     private branchTraversalDebugging!: boolean;
+    private expeditionResultsHandlerMap: Map<string, IExpeditionResultsHandlerConstructor>;
 
     constructor(branchTraversalDebugging: boolean) {
         this.branchTraversalDebugging = branchTraversalDebugging;
+        this.expeditionResultsHandlerMap = new Map<string, IExpeditionResultsHandlerConstructor>()
+        this.expeditionResultsHandlerMap.set('remoteMiningSource', remoteMineExpeditionHandler)
     }
 
     public reportForInitialAssignment(creep: Creep) {
@@ -120,11 +124,11 @@ export class ExpeditionManager {
                 // No remaining targets, check if we have a hit and can end the expedition.
                 if (expedition.progress.foundTargets.length > 0) {
                     console.log(`Ending expedition, found targets: ${JSON.stringify(expedition.progress.foundTargets)}`)
-                    this.endExpedition(creep, expedition);
+                    this.endExpedition(expedition);
                 }
                 else {
                     // Need to expand our search window.
-                    this.expandExpedition(creep, expedition);
+                    this.expandExpedition(expedition);
                 }
             }
             else {
@@ -133,7 +137,7 @@ export class ExpeditionManager {
         }
     }
 
-    private endExpedition(creep: Creep, expedition: Expedition) {
+    private endExpedition(expedition: Expedition) {
         if (expedition.progress.foundTargets.length === 0) {
             console.log("Expedition was an abject failure chaps");
             console.log(JSON.stringify(expedition));
@@ -142,15 +146,24 @@ export class ExpeditionManager {
         else {
             expedition.progress.complete = true;
             expedition.assignedCreeps = [];
+            this.createAndStoreExpeditionResults(expedition.expeditionTypeName, expedition.progress.foundTargets, Game.spawns[expedition.spawnOrigin]);
             //delete Memory.expeditions[_.indexOf(Memory.expeditions, expedition)];
         }
     }
 
-    private expandExpedition(creep: Creep, expedition: Expedition) {
+    private createAndStoreExpeditionResults(expeditionTypeName: string, targetIds: string[], spawn: StructureSpawn) {
+        const ExpeditionResultsHandler = this.expeditionResultsHandlerMap.get(expeditionTypeName);
+        if (typeof ExpeditionResultsHandler !== 'undefined') {
+            const expeditionResultsHandler = new ExpeditionResultsHandler(targetIds, expeditionTypeName);
+            expeditionResultsHandler.storeResults(spawn);
+        }
+    }
+
+    private expandExpedition(expedition: Expedition) {
         // Recursively expand the search tree, adding children only to childless nodes.
         if (expedition.progress.searchDepth === expedition.progress.maxDepth) {
             console.log("Max search depth has been reached for expedition.");
-            this.endExpedition(creep, expedition);
+            this.endExpedition(expedition);
         }
         else {
             expedition.progress.searchDepth += 1;

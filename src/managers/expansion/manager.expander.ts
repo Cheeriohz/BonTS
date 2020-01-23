@@ -1,5 +1,5 @@
 import { CreepRole } from "enums/enum.roles";
-import { ExpeditionManager } from "../expansion/manager.expedition";
+import { ExpeditionManager } from "./manager.expedition";
 
 export class Expander {
 
@@ -17,11 +17,11 @@ export class Expander {
 
     public remoteMineExpansion(spawn: StructureSpawn) {
         // Create the expedition object to find a source.
-        this.createExpedition(spawn, 4, FIND_SOURCES);
+        this.createExpedition(spawn, 4, "remoteMiningSource", FIND_SOURCES);
         this.requestScout(spawn);
     }
 
-    private createExpedition(spawn: StructureSpawn, searchDepth: number, findConstant: FindConstant) {
+    private createExpedition(spawn: StructureSpawn, searchDepth: number, expeditionTypeName: string, findConstant: FindConstant) {
         const searchTreeOrigin: ScreepsSearchTree = {
             nodeName: spawn.room.name,
             children: [],
@@ -40,6 +40,7 @@ export class Expander {
             target: findConstant,
             additionalPersonnelNeeded: 1,
             spawnOrigin: spawn.name,
+            expeditionTypeName: expeditionTypeName,
             progress: expeditionProgress,
             assignedCreeps: [],
         };

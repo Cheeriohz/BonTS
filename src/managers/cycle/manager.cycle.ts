@@ -5,7 +5,7 @@ import { ControllerCacher } from "../caching/manager.controllerCacher"
 import { pruneSourceTree } from "../caching/manager.sourceSelector";
 import { Spawn } from "../manager.spawn";
 import { TerrainScanner } from "../building/manager.terrainScanner";
-import { Expander } from "../building/manager.expander";
+import { Expander } from "../expansion/manager.expander";
 import { LinkManager } from "../structures/manager.links";
 
 export class CycleManager {
