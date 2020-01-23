@@ -1,10 +1,6 @@
 
-import { withdraw } from "../managers/manager.containerSelector"
-import { construct } from "./shared/role.shared.construct";
-import { upgradeController } from "./shared/role.shared.upgradeController";
-
 import { profile } from "Profiler";
-import { RoleCreep } from "./role.creep";
+import { RoleCreep } from "./base/role.creep";
 
 @profile
 export class RoleDrone extends RoleCreep {
@@ -30,21 +26,9 @@ export class RoleDrone extends RoleCreep {
         }
     }
 
-    private withdraw(creep: Creep) {
-        withdraw(creep);
-    }
-
     private performDuty(creep: Creep) {
         if (!this.construct(creep)) {
             this.upgradeController(creep);
         }
-    }
-
-    private construct(creep: Creep) {
-        return construct(creep);
-    }
-
-    private upgradeController(creep: Creep) {
-        upgradeController(creep);
     }
 };

@@ -1,5 +1,5 @@
 import { CreepRole } from "enums/enum.roles";
-import { ExpeditionManager } from "./manager.expedition";
+import { ExpeditionManager } from "../expansion/manager.expedition";
 
 export class Expander {
 

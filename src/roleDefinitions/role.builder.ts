@@ -1,11 +1,5 @@
-
-import { harvestSourceSmart } from "../managers/manager.sourceSelector"
-import { StorageManager } from "../managers/manager.storage"
-
-import { construct } from "./shared/role.shared.construct";
-import { upgradeController } from "./shared/role.shared.upgradeController";
-
-export class RoleBuilder {
+import { RoleCreep } from "./base/role.creep";
+export class RoleBuilder extends RoleCreep {
 
     public run(creep: Creep) {
         const currentEnergy = creep.store[RESOURCE_ENERGY]
@@ -20,15 +14,16 @@ export class RoleBuilder {
         }
 
         if (creep.memory.working) {
-            if (!(construct(creep))) {
+            if (!(this.construct(creep))) {
                 this.repair(creep);
             }
         }
         else {
-            StorageManager.excessEnergyWithdrawal(creep);
+            this.fillUp(creep);
         }
     }
 
+    // TODO: Add repair caching and builder cyclic deploy.
     private repair(creep: Creep) {
         const maxRepairThreshold: number = 1000000
         const targets = creep.room.find(FIND_STRUCTURES, {
@@ -43,7 +38,7 @@ export class RoleBuilder {
             }
         }
         else {
-            upgradeController(creep);
+            this.upgradeController(creep);
         }
     }
 };

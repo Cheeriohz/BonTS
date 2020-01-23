@@ -1,12 +1,12 @@
 
-import { ConstructionSiteCacher } from "./manager.constructionSiteCacher";
-import { pruneContainerTree } from "./manager.containerSelector";
-import { ControllerCacher } from "./manager.controllerCacher"
-import { pruneSourceTree } from "./manager.sourceSelector";
-import { Spawn } from "./manager.spawn";
-import { TerrainScanner } from "./manager.terrainScanner";
-import { Expander } from "./manager.expander";
-import { LinkManager } from "./manager.links";
+import { ConstructionSiteCacher } from "../caching/manager.constructionSiteCacher";
+import { pruneContainerTree } from "../caching/manager.containerSelector";
+import { ControllerCacher } from "../caching/manager.controllerCacher"
+import { pruneSourceTree } from "../caching/manager.sourceSelector";
+import { Spawn } from "../manager.spawn";
+import { TerrainScanner } from "../building/manager.terrainScanner";
+import { Expander } from "../building/manager.expander";
+import { LinkManager } from "../structures/manager.links";
 
 export class CycleManager {
 

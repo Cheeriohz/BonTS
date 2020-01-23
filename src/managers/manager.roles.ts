@@ -9,7 +9,7 @@ import { RoleHarvester } from "roleDefinitions/role.harvester";
 import { RoleHauler } from "roleDefinitions/role.hauler";
 import { RoleUpgrader } from "roleDefinitions/role.upgrader";
 import { RoleScout } from "roleDefinitions/role.scout";
-import { ExpeditionManager } from "./manager.expedition";
+import { ExpeditionManager } from "./expansion/manager.expedition";
 
 export
     class RolesManager {

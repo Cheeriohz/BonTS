@@ -1,4 +1,4 @@
-import { getContainer } from "../managers/manager.containerSelector"
+import { getContainer } from "../managers/caching/manager.containerSelector"
 
 import { profile } from "Profiler";
 @profile

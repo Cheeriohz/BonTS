@@ -1,58 +1,20 @@
-import { harvestSourceSmart } from "../managers/manager.sourceSelector"
+import { harvestSourceSmart } from "../managers/caching/manager.sourceSelector"
+import { RoleCreep } from "./base/role.creep";
 
-import { construct } from "./shared/role.shared.construct";
-import { upgradeController } from "./shared/role.shared.upgradeController";
-
-export class RoleHarvester {
+export class RoleHarvester extends RoleCreep {
 
     public run(creep: Creep) {
         // determine nearest source and harvest energy
         if (creep.store.getFreeCapacity() > 0) {
-            // roleHarvester.harvestSourceDeprecated(creep, sources);
             harvestSourceSmart(creep);
         }
-        // energy full, time to find deposit location. TODO: Refactor for a single targets lookup that is globally stored.
+        // energy full, time to find deposit location.
         else {
-            let targets = this.findEnergyDeposits(creep)
-
-            if (targets.length > 0) {
-                if (creep.transfer(targets[0], RESOURCE_ENERGY) === ERR_NOT_IN_RANGE) {
-                    creep.moveTo(targets[0], { visualizePathStyle: { stroke: '#ffffff' } });
+            if (!this.fillClosest(creep)) {
+                if (!this.construct(creep)) {
+                    this.upgradeController(creep);
                 }
-            }
-            else {
-                targets = this.findSpawnEnergyDeprived(creep);
-                if (targets.length > 0) {
-                    if (creep.transfer(targets[0], RESOURCE_ENERGY) === ERR_NOT_IN_RANGE) {
-                        creep.moveTo(targets[0], { visualizePathStyle: { stroke: '#ffffff' } });
-                    }
-                }
-                else {
-                    if (!construct(creep)) {
-                        upgradeController(creep);
-                    }
-                }
-
             }
         }
-    }
-
-    private findEnergyDeposits(creep: Creep) {
-        return creep.room.find(FIND_STRUCTURES, {
-            filter: (structure) => {
-                return (structure.structureType === STRUCTURE_EXTENSION
-                    || structure.structureType === STRUCTURE_TOWER) &&
-                    structure.store.getFreeCapacity(RESOURCE_ENERGY) > 0;
-            }
-        });
-    }
-
-    private findSpawnEnergyDeprived(creep: Creep) {
-        return creep.room.find(FIND_STRUCTURES, {
-            filter: (structure) => {
-                return (structure.structureType === STRUCTURE_SPAWN) &&
-                    structure.store.getFreeCapacity(RESOURCE_ENERGY) > 0;
-            }
-        });
     }
 };

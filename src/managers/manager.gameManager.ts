@@ -1,8 +1,8 @@
 // Managers
-import { CycleManager } from "managers/manager.cycle";
+import { CycleManager } from "managers/cycle/manager.cycle";
 import { RolesManager } from "managers/manager.roles";
 import { Spawn } from "managers/manager.spawn";
-import { TowerManager } from "managers/manager.towers";
+import { TowerManager } from "managers/structures/manager.towers";
 
 export class GameManager {
 

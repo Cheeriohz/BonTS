@@ -1,7 +1,9 @@
 import _ from "lodash";
-import { getContainer } from "managers/manager.containerSelector";
-import { harvestSourceSmart } from "managers/manager.sourceSelector";
+import { getContainer } from "managers/caching/manager.containerSelector";
+import { harvestSourceSmart } from "managers/caching/manager.sourceSelector";
 import { profile } from "Profiler";
+import { ControllerCacher } from "managers/caching/manager.controllerCacher";
+import { ConstructionSiteCacher } from "managers/caching/manager.constructionSiteCacher";
 
 @profile
 export class RoleCreep {
@@ -23,23 +25,28 @@ export class RoleCreep {
         return harvestSourceSmart(creep);
     }
 
-    protected fillClosest(creep: Creep) {
+    protected fillClosest(creep: Creep): boolean {
         const link = this.checkForLinktoFill(creep);
         if (link) {
-            return this.depositMove(creep, link);
+            this.depositMove(creep, link);
+
         }
         const fillable = this.findClosestFillableRespawnStructure(creep);
         if (fillable) {
-            return this.depositMove(creep, fillable);
+            this.depositMove(creep, fillable);
+            return true;
         }
         const fillableOther = this.findClosestFillableStructure(creep);
         if (fillableOther) {
-            return this.depositMove(creep, fillableOther);
+            this.depositMove(creep, fillableOther);
+            return true;
         }
         const storage = this.checkStorageForDeposit(creep.room)
         if (storage) {
-            return this.depositMove(creep, storage);
+            this.depositMove(creep, storage);
+            return true;
         }
+        return false;
     }
 
     protected fill(creep: Creep) {
@@ -79,7 +86,6 @@ export class RoleCreep {
             return;
         }
     }
-
 
     protected checkStorageForAvailableResource(room: Room, resourceType: ResourceConstant): StructureStorage | undefined {
         if (room.storage) {
@@ -199,5 +205,35 @@ export class RoleCreep {
             }
         }
         return null
+    }
+
+    // This intentionally tries to upgrade first. Upgrading is generally done by upgraders, and they are usually in range.
+    protected upgradeController(creep: Creep): boolean {
+        const target = ControllerCacher.getcontrollerRoom(creep.room);
+        if (target) {
+            if (creep.upgradeController(target) === ERR_NOT_IN_RANGE) {
+                creep.moveTo(target, { visualizePathStyle: { stroke: '#AE02E6', strokeWidth: .15 } });
+                return true;
+            }
+            else {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    construct(creep: Creep): boolean {
+        const target = ConstructionSiteCacher.getConstructionSiteRoom(creep.room);
+        if (target) {
+            if (creep.pos.isNearTo(target)) {
+                creep.build(target);
+                return true;
+            }
+            else {
+                creep.moveTo(target, { reusePath: 1000, ignoreCreeps: false });
+                return true;
+            }
+        }
+        return false;
     }
 }

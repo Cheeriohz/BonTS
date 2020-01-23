@@ -1,4 +1,4 @@
-import { ExpeditionManager } from "managers/manager.expedition";
+import { ExpeditionManager } from "managers/expansion/manager.expedition";
 import _ from "lodash";
 
 export class RoleScout {

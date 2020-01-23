@@ -1,6 +1,6 @@
-import { harvestSourceSmart } from "../managers/manager.sourceSelector";
-import { upgradeController } from "./shared/role.shared.upgradeController";
-export class RoleUpgrader {
+import { harvestSourceSmart } from "../managers/caching/manager.sourceSelector";
+import { RoleCreep } from "./base/role.creep";
+export class RoleUpgrader extends RoleCreep {
 
     public run(creep: Creep) {
         const currentEnergy = creep.store[RESOURCE_ENERGY]
@@ -15,9 +15,10 @@ export class RoleUpgrader {
         }
 
         if (creep.memory.working) {
-            upgradeController(creep);
+            this.upgradeController(creep);
         }
         else {
+            // TODO need to really change my base creeps to resource drop / pickup logic
             harvestSourceSmart(creep);
         }
     }

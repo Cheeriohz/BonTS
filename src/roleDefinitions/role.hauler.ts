@@ -1,7 +1,7 @@
-import { withdraw, getContainer } from "../managers/manager.containerSelector"
+import { getContainer } from "../managers/caching/manager.containerSelector"
 
 import { profile } from "Profiler";
-import { RoleCreep } from "./role.creep";
+import { RoleCreep } from "./base/role.creep";
 
 @profile
 export class RoleHauler extends RoleCreep {
