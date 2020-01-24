@@ -12,3 +12,28 @@ interface IExpeditionResultHandler extends IExpeditionResults {
     storeResults(spawn: StructureSpawn): void;
 }
 
+
+interface Expedition {
+    target: FindConstant;
+    additionalPersonnelNeeded: number;
+    spawnOrigin: string;
+    expeditionTypeName: string;
+    progress: ExpeditionProgress;
+    assignedCreeps: string[];
+}
+
+interface ExpeditionProgress {
+    searchTreeOriginNode: ScreepsSearchTree;
+    plottedRooms: string[];
+    complete: boolean;
+    foundTargets: string[];
+    searchDepth: number;
+    maxDepth: number;
+}
+
+interface ScreepsSearchTree {
+    nodeName: string;
+    children: ScreepsSearchTree[];
+    scanned: boolean;
+    assignedCreep: string;
+}

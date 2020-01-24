@@ -137,17 +137,15 @@ export class ExpeditionManager {
         }
     }
 
-    private endExpedition(expedition: Expedition) {
+    public endExpedition(expedition: Expedition) {
         if (expedition.progress.foundTargets.length === 0) {
             console.log("Expedition was an abject failure chaps");
             console.log(JSON.stringify(expedition));
-            delete Memory.expeditions[_.indexOf(Memory.expeditions, expedition)];
+            Memory.expeditions = _.remove(Memory.expeditions, (e) => e === expedition);
         }
         else {
-            expedition.progress.complete = true;
-            expedition.assignedCreeps = [];
             this.createAndStoreExpeditionResults(expedition.expeditionTypeName, expedition.progress.foundTargets, Game.spawns[expedition.spawnOrigin]);
-            //delete Memory.expeditions[_.indexOf(Memory.expeditions, expedition)];
+            Memory.expeditions = _.remove(Memory.expeditions, (e) => e === expedition);
         }
     }
 

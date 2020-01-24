@@ -8,11 +8,11 @@ export class remoteMineExpeditionHandler extends ExpeditionResultsHandler {
     }
 
     public actionRoutine(spawn: StructureSpawn) {
-
+        throw "Not Implemented";
     }
 
     public storeResults(spawn: StructureSpawn) {
-        const expeditionResults: IExpeditionResults = { targetIds: super.targetIds, name: super.name };
+        const expeditionResults = { targetIds: super.targetIds, name: super.name };
         if (!spawn.memory.expeditionResults) {
             spawn.memory.expeditionResults = [];
         }
