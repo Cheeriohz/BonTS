@@ -4,6 +4,8 @@ import { CreepRole } from "enums/enum.roles";
 import { ServerResponse } from "http";
 import { remoteMineExpeditionHandler } from "./manager.remoteMineExpedition";
 
+// TODO: Fix the issue with creeps ending the expedition early. Most likely has to do with assignment of creeps to nodes and creeps reporting without assignment.
+
 export class ExpeditionManager {
     private branchTraversalDebugging!: boolean;
     private expeditionResultsHandlerMap: Map<string, IExpeditionResultsHandlerConstructor>;
@@ -31,7 +33,7 @@ export class ExpeditionManager {
         if (assignedExpedition) {
             if (Game.spawns[assignedExpedition.spawnOrigin].room.name !== creep.room.name) {
                 if (findings && findings.length > 0) {
-                    assignedExpedition.progress.foundTargets = _.concat(assignedExpedition.progress.foundTargets, findings);
+                    assignedExpedition.progress.foundTargets = _.concat(_.difference(assignedExpedition.progress.foundTargets, findings));
                 }
             }
 
@@ -141,11 +143,31 @@ export class ExpeditionManager {
         if (expedition.progress.foundTargets.length === 0) {
             console.log("Expedition was an abject failure chaps");
             console.log(JSON.stringify(expedition));
-            Memory.expeditions = _.remove(Memory.expeditions, (e) => e === expedition);
+            this.killExpeditionMembers(expedition);
+            _.remove(Memory.expeditions, (e) => e === expedition);
         }
         else {
+            this.orphanCreeps(expedition);
             this.createAndStoreExpeditionResults(expedition.expeditionTypeName, expedition.progress.foundTargets, Game.spawns[expedition.spawnOrigin]);
-            Memory.expeditions = _.remove(Memory.expeditions, (e) => e === expedition);
+            _.remove(Memory.expeditions, (e) => e === expedition);
+        }
+    }
+
+    private orphanCreeps(expedition: Expedition) {
+        for (const name in expedition.assignedCreeps) {
+            const creep = Game.creeps[name];
+            if (creep) {
+                creep.memory.working = false;
+            }
+        }
+    }
+
+    private killExpeditionMembers(expedition: Expedition) {
+        for (const name in expedition.assignedCreeps) {
+            const creep = Game.creeps[name];
+            if (creep) {
+                this.terminateCreep(creep);
+            }
         }
     }
 
@@ -179,24 +201,6 @@ export class ExpeditionManager {
         }
     }
 
-    private determineDirections(creep: Creep, tree: ScreepsSearchTree): string[] {
-        if (creep.memory.orders) {
-            const destination = creep.memory.orders?.target;
-            // Check if we are receiving directions from the origin
-            if (creep.room.name === tree.nodeName) {
-                return this.getOriginTraversal(creep, tree, destination)
-            }
-            else {
-                return this.branchToBranchTraversal(creep, tree, destination);
-            }
-        }
-        else {
-            // Shouldn't get here, let the console know.
-            console.log(`Received no target for creep ${creep.name}`);
-            return [];
-        }
-
-    }
 
     public initialExpansion(tree: ScreepsSearchTree, expedition: Expedition): boolean {
         if (expedition.progress.searchDepth === 0) {
@@ -254,92 +258,6 @@ export class ExpeditionManager {
 
         spawn.memory.remoteCreepRequest.push(creepRequest);
 
-    }
-
-    private branchToBranchTraversal(creep: Creep, tree: ScreepsSearchTree, destination: string): string[] {
-        // Need to traverse back up the tree.
-        let targetBranch = this.getOriginTraversal(creep, tree, destination);
-        let currentBranch = this.getOriginTraversal(creep, tree, creep.room.name);
-        if (this.branchTraversalDebugging) {
-            console.log(`Target Branch is: ${JSON.stringify(targetBranch)}`);
-            console.log(`Current Branch is: ${JSON.stringify(currentBranch)}`);
-        }
-        if (targetBranch.length > 0 && currentBranch.length > 0) {
-            // We have the two paths, find the intersection index.
-            currentBranch = _.reverse(currentBranch);
-            if (this.branchTraversalDebugging) {
-                console.log(`Current Branch reversed is: ${JSON.stringify(currentBranch)}`);
-            }
-
-            for (let i = 0; i < currentBranch.length; i++) {
-                for (let j = 0; j < targetBranch.length; j++) {
-                    if (currentBranch[i] === targetBranch[j]) {
-                        if (this.branchTraversalDebugging) {
-                            console.log(`Intersection found. Concat is below`);
-                            console.log(JSON.stringify(_.concat(_.slice(currentBranch, 0, i), _.slice(targetBranch, j + 1, targetBranch.length))));
-                            console.log(JSON.stringify(_.slice(currentBranch, 0, i)));
-                            console.log(JSON.stringify(_.slice(targetBranch, j + 1, targetBranch.length)));
-                        }
-                        // We have found our intersection, return the branch traversal.
-                        return _.concat(_.slice(currentBranch, 0, i), _.slice(targetBranch, j + 1, targetBranch.length));
-                    }
-                }
-            }
-        }
-        // Traversal failed, log it.
-        if (this.branchTraversalDebugging) {
-            console.log(`Could not determine branch to branch traversal for ${creep.name}. Full tree is:`);
-            console.log(JSON.stringify(tree));
-        }
-
-        return [];
-    }
-
-    private getOriginTraversal(creep: Creep, tree: ScreepsSearchTree, destination: string): string[] {
-        let branchPath: string[] = [];
-        const originName = this.scanForLeafFromOrigin(tree, destination, branchPath);
-        if (this.branchTraversalDebugging) {
-            console.log(`originName is ${originName}`)
-        }
-        if (originName !== "") {
-            return _.concat([originName], branchPath);
-        }
-        else {
-            // Should not get here, log
-            if (this.branchTraversalDebugging) {
-                console.log(`Could not determine origin traversal for ${creep.name}. Full tree is:`);
-                console.log(JSON.stringify(tree));
-            }
-            return [];
-        }
-    }
-
-    private scanForLeafFromOrigin(tree: ScreepsSearchTree, targetLeaf: string, branchPath: string[]): string {
-        if (this.branchTraversalDebugging) {
-            console.log(`leaf is ${targetLeaf}. tree is ${tree.nodeName}`);
-        }
-        if (tree.nodeName === targetLeaf) {
-            return tree.nodeName;
-        }
-        else {
-            if (tree.children) {
-                for (const child of tree.children) {
-                    const childScan: string = this.scanForLeafFromOrigin(child, targetLeaf, branchPath);
-                    if (childScan !== "") {
-                        if (this.branchTraversalDebugging) {
-                            console.log(`Pushing childNode of ${childScan} onto the branch`);
-                            console.log(`Before push, branch is ${JSON.stringify(branchPath)}`);
-                        }
-                        branchPath.push(childScan);
-                        return tree.nodeName;
-                    }
-                }
-            }
-            else {
-                return "";
-            }
-        }
-        return "";
     }
 
     private searchForAssignee(assigneeName: string, tree: ScreepsSearchTree): boolean {

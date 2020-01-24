@@ -2,9 +2,12 @@ import { ExpeditionResultsHandler } from "./manager.expeditionResultsHandler.abs
 
 
 export class remoteMineExpeditionHandler extends ExpeditionResultsHandler {
-
+    targetIds: string[];
+    name: string;
     constructor(targetIds: string[], name: string) {
         super(targetIds, name);
+        this.targetIds = targetIds;
+        this.name = name;
     }
 
     public actionRoutine(spawn: StructureSpawn) {
@@ -12,7 +15,10 @@ export class remoteMineExpeditionHandler extends ExpeditionResultsHandler {
     }
 
     public storeResults(spawn: StructureSpawn) {
-        const expeditionResults = { targetIds: super.targetIds, name: super.name };
+        // console.log("Storing Remote Mining Expedition Results");
+        // console.log(`targetIds: ${this.targetIds} | name: ${this.name}`);
+        const expeditionResults = { targetIds: this.targetIds, name: this.name };
+        // console.log(`expeditionResults: ${JSON.stringify(expeditionResults)}`);
         if (!spawn.memory.expeditionResults) {
             spawn.memory.expeditionResults = [];
         }
