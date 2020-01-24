@@ -3,9 +3,18 @@ import _ from "lodash";
 export class ManagerHelperSpawner {
 
     public static spawnACreep(spawn: StructureSpawn, body: any[], name: string, assignedRole: number) {
-        return spawn.spawnCreep(body,
+        if (spawn.spawnCreep(body,
             `${name}${Game.time.toString()}`,
-            { memory: { role: assignedRole, working: false, orders: null } });
+            { memory: { role: assignedRole, working: false, orders: null } }) === 0) {
+            this.updateRoomRoleMap(spawn, assignedRole);
+        }
+    }
+
+    public static updateRoomRoleMap(spawn: StructureSpawn, roleToUpdate: number) {
+        let roleRoomMap = Memory.roleRoomMap[spawn.room.name];
+        if (roleRoomMap) {
+            roleRoomMap[roleToUpdate] += 1;
+        }
     }
 
     public static getCreepsByType(room: Room, roleNumber: number) {

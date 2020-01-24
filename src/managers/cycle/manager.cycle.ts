@@ -9,6 +9,7 @@ import { Expander } from "../expansion/manager.expander";
 import { LinkManager } from "../structures/manager.links";
 import { SpawnReassment } from "./manager.spawnReassessment";
 import { ExpeditionManager } from "managers/expansion/manager.expedition";
+import { CreepRequester } from "./manager.creepRequester";
 
 export class CycleManager {
 
@@ -35,6 +36,7 @@ export class CycleManager {
     }
 
     private static manageMediumTermTasks() {
+        this.spawnLevelTasksMediumTerm();
         this.manageShortTermTasks();
     }
 
@@ -72,6 +74,20 @@ export class CycleManager {
             if (spawn.memory?.reassess) {
                 const reassessment: SpawnReassment = new SpawnReassment(spawn);
                 reassessment.reassess();
+            }
+        }
+    }
+
+    private static spawnLevelTasksMediumTerm() {
+        for (const spawnName in Game.spawns) {
+            const spawn: StructureSpawn = Game.spawns[spawnName];
+            if (spawn) {
+                if (spawn.memory.rcl) {
+                    if (spawn.memory.rcl >= 4) {
+                        const creepRequester: CreepRequester = new CreepRequester(spawn);
+                        creepRequester.CheckForRepairNeed();
+                    }
+                }
             }
         }
     }
