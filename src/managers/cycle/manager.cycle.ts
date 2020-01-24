@@ -7,6 +7,8 @@ import { Spawn } from "../manager.spawn";
 import { TerrainScanner } from "../building/manager.terrainScanner";
 import { Expander } from "../expansion/manager.expander";
 import { LinkManager } from "../structures/manager.links";
+import { SpawnReassment } from "./manager.spawnReassessment";
+import { ExpeditionManager } from "managers/expansion/manager.expedition";
 
 export class CycleManager {
 
@@ -64,13 +66,12 @@ export class CycleManager {
 
     private static spawnLevelTasksLongTerm() {
         const expander: Expander = new Expander();
-        const linkManager: LinkManager = new LinkManager();
         for (const spawnName in Game.spawns) {
             const spawn = Game.spawns[spawnName];
             expander.mineExpansion(spawn);
             if (spawn.memory?.reassess) {
-                linkManager.populateLinkMemory(spawn);
-                spawn.memory.reassess = false;
+                const reassessment: SpawnReassment = new SpawnReassment(spawn);
+                reassessment.reassess();
             }
         }
     }

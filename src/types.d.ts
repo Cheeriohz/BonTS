@@ -24,11 +24,13 @@ interface RoomMemory {
 }
 
 interface SpawnMemory {
-  reassess: boolean;
-  remoteCreepRequest: CreepRequest[];
-  remoteMineCount: number;
-  remoteMineExpansionInProgress: boolean;
+  reassess: boolean | null;
+  remoteCreepRequest: CreepRequest[] | null;
+  remoteMineCount: number | null;
+  remoteMineExpansionInProgress: boolean | null;
   expeditionResults: IExpeditionResults[] | null;
+  rcl: number | null;
+  rclUpgrades: RCLUpgradeEvent[] | null
 }
 
 interface CreepRequest {
@@ -44,35 +46,6 @@ interface Memory {
   expeditions: Expedition[];
 }
 
-interface Expedition {
-  target: FindConstant;
-  additionalPersonnelNeeded: number;
-  spawnOrigin: string;
-  expeditionTypeName: string;
-  progress: ExpeditionProgress;
-  assignedCreeps: string[];
-}
-
-interface ExpeditionProgress {
-  searchTreeOriginNode: ScreepsSearchTree;
-  plottedRooms: string[];
-  complete: boolean;
-  foundTargets: string[];
-  searchDepth: number;
-  maxDepth: number;
-}
-
-interface ScreepsSearchTree {
-  nodeName: string;
-  children: ScreepsSearchTree[];
-  scanned: boolean;
-  assignedCreep: string;
-}
-
-interface TraversalCounter {
-  leafTraversalCount: number;
-  nodeCount: number;
-}
 
 interface Dictionary<T> {
   [index: string]: T;

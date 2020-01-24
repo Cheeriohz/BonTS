@@ -3,6 +3,7 @@ import _ from "lodash";
 export class ControllerCacher {
     private static roomControllerMap: Dictionary<StructureController> = {};
 
+    // TODO PROBABLY BAD IMPLEMENTATION. THE ROOM OBJECT ALREADY HAS A CONTROLLER OBJECT. NEED TO CHECK WHICH IS MORE EFFICIENT, THIS CLASS OR THAT.
 
     public static getcontrollerRoom(room: Room) {
         if (!(room.memory.controller == null)) {

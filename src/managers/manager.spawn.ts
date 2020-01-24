@@ -96,12 +96,15 @@ export class Spawn {
     }
 
     private static checkForSpawnRequest(spawn: StructureSpawn) {
-        if (spawn.memory.remoteCreepRequest?.length > 0) {
-            const request: CreepRequest = spawn.memory.remoteCreepRequest[0];
-            if (ManagerHelperSpawner.spawnACreep(spawn, request.body, CreepRole[request.role], request.role) == OK) {
-                spawn.memory.remoteCreepRequest = _.takeRight(spawn.memory.remoteCreepRequest, spawn.memory.remoteCreepRequest.length - 1);
+        if (spawn.memory.remoteCreepRequest) {
+            if (spawn.memory.remoteCreepRequest.length > 0) {
+                const request: CreepRequest = spawn.memory.remoteCreepRequest[0];
+                if (ManagerHelperSpawner.spawnACreep(spawn, request.body, CreepRole[request.role], request.role) == OK) {
+                    spawn.memory.remoteCreepRequest = _.takeRight(spawn.memory.remoteCreepRequest, spawn.memory.remoteCreepRequest.length - 1);
+                }
             }
         }
+
 
     }
 

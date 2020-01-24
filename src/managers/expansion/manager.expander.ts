@@ -5,6 +5,9 @@ export class Expander {
 
     public mineExpansion(spawn: StructureSpawn) {
         if (spawn) {
+            if (!spawn.memory.remoteMineCount) {
+                spawn.memory.remoteMineCount = 0;
+            }
             const containerUsage: number = spawn.memory.remoteMineCount + spawn.room.memory.containerMap.length
             // If we have an untapped local container, first expand to it.
 
