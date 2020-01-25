@@ -7,11 +7,9 @@ import { remoteMineExpeditionHandler } from "./manager.remoteMineExpedition";
 // TODO: Fix the issue with creeps ending the expedition early. Most likely has to do with assignment of creeps to nodes and creeps reporting without assignment.
 
 export class ExpeditionManager {
-    private branchTraversalDebugging!: boolean;
     private expeditionResultsHandlerMap: Map<string, IExpeditionResultsHandlerConstructor>;
 
-    constructor(branchTraversalDebugging: boolean) {
-        this.branchTraversalDebugging = branchTraversalDebugging;
+    constructor() {
         this.expeditionResultsHandlerMap = new Map<string, IExpeditionResultsHandlerConstructor>()
         this.expeditionResultsHandlerMap.set('remoteMiningSource', remoteMineExpeditionHandler)
     }
@@ -33,16 +31,13 @@ export class ExpeditionManager {
         if (assignedExpedition) {
             if (Game.spawns[assignedExpedition.spawnOrigin].room.name !== creep.room.name) {
                 if (findings && findings.length > 0) {
-                    assignedExpedition.progress.foundTargets = _.concat(_.difference(assignedExpedition.progress.foundTargets, findings));
+                    assignedExpedition.progress.foundTargets = _.concat(_.difference(findings, assignedExpedition.progress.foundTargets), assignedExpedition.progress.foundTargets);
                 }
             }
-
-            if (creep.memory.orders?.independentOperator === false) {
-                if (!this.searchForAssignee(creep.name, assignedExpedition.progress.searchTreeOriginNode)) {
-                    // Shouldn't be possible, but again, log it.
-                    console.log(`Could not update scanned flag for creep: ${creep.name}. Tree is below.`);
-                    console.log(JSON.stringify(assignedExpedition.progress.searchTreeOriginNode));
-                }
+            if (!this.searchForAssignee(creep.name, assignedExpedition.progress.searchTreeOriginNode)) {
+                // Shouldn't be possible, but again, log it.
+                console.log(`Could not update scanned flag for creep: ${creep.name}. Tree is below.`);
+                console.log(JSON.stringify(assignedExpedition.progress.searchTreeOriginNode));
             }
             this.checkForAdditionalAssignments(creep, assignedExpedition, true);
 
@@ -81,6 +76,7 @@ export class ExpeditionManager {
         creep.memory.orders = null;
         if (this.determineTargetLeaf(expedition.progress.searchTreeOriginNode, creep)) {
             // Check if we can get directions
+            console.log(JSON.stringify(expedition.progress.searchTreeOriginNode));
             this.createOrders(creep, expedition);
             expedition.additionalPersonnelNeeded -= 1;
             expedition.assignedCreeps.push(creep.name);
@@ -92,22 +88,13 @@ export class ExpeditionManager {
 
     private createOrders(creep: Creep, expedition: Expedition) {
         if (creep.memory.orders) {
-            //const roomPath = this.determineDirections(creep, expedition.progress.searchTreeOriginNode);
-            //if (roomPath && roomPath.length > 0) {
-            // Update creep memory
             const CreepOrders: ScoutOrder = {
                 target: creep.memory.orders.target,
                 searchTarget: expedition.target,
-                independentOperator: creep.memory.orders.independentOperator,
-                //roomPath: roomPath
+                independentOperator: creep.memory.orders.independentOperator
             };
             creep.memory.orders = CreepOrders;
             creep.memory.working = true;
-            //}
-            //else {
-            // Failure should already be logged, just kill the creep as this shouldn't happen.
-            //  this.terminateCreep(creep);
-            //}
         }
         else {
             // Code should not be called this way.
@@ -131,6 +118,7 @@ export class ExpeditionManager {
                 else {
                     // Need to expand our search window.
                     this.expandExpedition(expedition);
+                    this.checkForAdditionalAssignments(creep, expedition, false);
                 }
             }
             else {
@@ -147,7 +135,8 @@ export class ExpeditionManager {
             _.remove(Memory.expeditions, (e) => e === expedition);
         }
         else {
-            this.orphanCreeps(expedition);
+            // this.orphanCreeps(expedition);
+            this.killExpeditionMembers(expedition);
             this.createAndStoreExpeditionResults(expedition.expeditionTypeName, expedition.progress.foundTargets, Game.spawns[expedition.spawnOrigin]);
             _.remove(Memory.expeditions, (e) => e === expedition);
         }
@@ -321,7 +310,7 @@ export class ExpeditionManager {
             }
         }
         else {
-            if (tree.assignedCreep == "") {
+            if (tree.assignedCreep === "") {
                 tree.assignedCreep = creep.name;
                 this.setOrdersTarget(creep, tree, false);
                 return true;

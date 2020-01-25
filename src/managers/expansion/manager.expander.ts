@@ -57,7 +57,7 @@ export class Expander {
 
     public remoteMineExpansion() {
         // Create the expedition object to find a source.
-        this.createExpedition(4, "remoteMiningSource", FIND_SOURCES);
+        this.createExpedition(2, "remoteMiningSource", FIND_SOURCES);
         this.requestScout();
     }
 
@@ -88,7 +88,7 @@ export class Expander {
             Memory.expeditions = [];
         }
         Memory.expeditions.push(expedition);
-        const em: ExpeditionManager = new ExpeditionManager(false);
+        const em: ExpeditionManager = new ExpeditionManager();
         em.initialExpansion(searchTreeOrigin, expedition);
         this.spawn.memory.remoteMineExpansionInProgress = true;
     }

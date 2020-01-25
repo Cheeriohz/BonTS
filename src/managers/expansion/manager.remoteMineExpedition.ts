@@ -15,13 +15,18 @@ export class remoteMineExpeditionHandler extends ExpeditionResultsHandler {
     }
 
     public storeResults(spawn: StructureSpawn) {
-        // console.log("Storing Remote Mining Expedition Results");
-        // console.log(`targetIds: ${this.targetIds} | name: ${this.name}`);
+        console.log("Storing Remote Mining Expedition Results");
+        console.log(`targetIds: ${this.targetIds} | name: ${this.name}`);
         const expeditionResults = { targetIds: this.targetIds, name: this.name };
-        // console.log(`expeditionResults: ${JSON.stringify(expeditionResults)}`);
+        console.log(`expeditionResults: ${JSON.stringify(expeditionResults)}`);
         if (!spawn.memory.expeditionResults) {
             spawn.memory.expeditionResults = [];
         }
-        spawn.memory.expeditionResults.push(expeditionResults);
+        if (spawn.memory.expeditionResults.length = 0) {
+            spawn.memory.expeditionResults = [expeditionResults];
+        }
+        else {
+            spawn.memory.expeditionResults.push(expeditionResults);
+        }
     }
 }

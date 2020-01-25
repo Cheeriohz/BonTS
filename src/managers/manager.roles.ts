@@ -135,7 +135,7 @@ export
 
     private manageScout(creep: Creep) {
         if (!this.mExpeditionManager) {
-            this.mExpeditionManager = new ExpeditionManager(false);
+            this.mExpeditionManager = new ExpeditionManager();
         }
         this.mScout.run(creep, this.mExpeditionManager);
     }

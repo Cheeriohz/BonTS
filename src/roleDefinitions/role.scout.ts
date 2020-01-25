@@ -38,44 +38,6 @@ export class RoleScout {
             this.logOrders(creep);
         }
     }
-    /*
-    private _embark(creep: Creep, expeditionManager: ExpeditionManager) {
-        let orders = <ScoutOrder>creep.memory.orders;
-        if (orders.roomPath.length > 0) {
-            if (creep.room.name === orders.roomPath[0]) {
-                // console.log(` ${creep.name}: Room Identified`);
-                // We have entered the next room.
-                if (orders.roomPath.length === 1) {
-                    // console.log(`${creep.name}: Have traveled to room`);
-                    // We have arrived at our destination.
-                    orders.roomPath.pop();
-                    if (!orders.independentOperator) {
-                        this.report(creep, expeditionManager);
-                    }
-                    else {
-                        expeditionManager.reassignmentRequest(creep);
-                    }
-
-                }
-                else {
-                    // console.log(` ${creep.name}: Need to travel`);
-                    // Need to continue travelling.
-                    orders.roomPath = _.takeRight(orders.roomPath, orders.roomPath.length - 1);
-                    (<ScoutOrder>creep.memory.orders).roomPath = orders.roomPath;
-                    this.travelToRoom(creep, orders.roomPath[0]);
-                }
-            }
-            else {
-                // We need to travel to the room.
-                this.travelToRoom(creep, orders.roomPath[0]);
-            }
-        }
-        else {
-            expeditionManager.reassignmentRequest(creep);
-        }
-        //console.log(` ${creep.name}: I have embarked`);
-
-    }*/
 
     private report(creep: Creep, expeditionManager: ExpeditionManager) {
         // First scan the surroundings.

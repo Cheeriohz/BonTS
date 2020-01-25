@@ -36,11 +36,9 @@ export class RoleDedicatedHauler extends RoleHauler {
         const container: Structure | null = Game.getObjectById(dedication);
         if (container) {
             const resourceType: MineralConstant | DepositConstant | undefined = creep.room.memory.mine?.type;
-            console.log(resourceType);
             if (resourceType) {
                 this.withdrawMoveSpecified(creep, container, resourceType);
             }
-
         }
     }
 
