@@ -8,8 +8,8 @@ export class Expander {
             if (!spawn.memory.remoteMineCount) {
                 spawn.memory.remoteMineCount = 0;
             }
-            const containerUsage: number = spawn.memory.remoteMineCount + spawn.room.memory.containerMap.length
-            // If we have an untapped local container, first expand to it.
+            const containerUsage: number = spawn.memory.remoteMineCount + spawn.room.memory.containerMap?.length
+            // If we have an untapped local container location, first expand to it.
 
             // start a remote mine expansion request.
             if (!spawn.memory.remoteMineExpansionInProgress) {

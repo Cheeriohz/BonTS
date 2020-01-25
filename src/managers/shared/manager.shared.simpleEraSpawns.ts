@@ -3,6 +3,7 @@ import { ManagerHelperSpawner } from "./manager.shared.spawner"
 
 // Enums
 import { CreepRole } from "../../enums/enum.roles"
+import _ from "lodash";
 
 export class SimpleEraSpawnHelper {
 
@@ -38,7 +39,9 @@ export class SimpleEraSpawnHelper {
 
     public static spawnGeneric(room: Room, body: any[], cap: number, role: CreepRole): boolean {
 
-        if (Memory.roleRoomMap[room.name][role] < cap) {
+        const roomRoleTracker = _.get(Memory.roleRoomMap, `[${room.name}][${role}]`, 0);
+
+        if (roomRoleTracker < cap) {
             const spawns = room.find(FIND_MY_SPAWNS);
 
             if (spawns.length > 0) {

@@ -10,7 +10,7 @@ export class RoleHarvester extends RoleCreep {
         }
         // energy full, time to find deposit location.
         else {
-            if (!this.fillClosest(creep)) {
+            if (!this.fillClosest(creep, true)) {
                 if (!this.construct(creep)) {
                     this.upgradeController(creep);
                 }

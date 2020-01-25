@@ -8,9 +8,14 @@ export class RoleHauler extends RoleCreep {
 
     public run(creep: Creep) {
         const currentEnergy = creep.store[RESOURCE_ENERGY]
+        if (!creep.memory.ignoreLinks) {
+            creep.memory.ignoreLinks = false;
+        }
 
         if (creep.memory.working && currentEnergy === 0) {
             creep.memory.working = false;
+            // Check to see if we need to toggle link dumping
+            this.checkRoomEnergy(creep);
             creep.say('🏗️ pickup');
         }
         if (!creep.memory.working && creep.store.getFreeCapacity() === 0) {
@@ -20,10 +25,19 @@ export class RoleHauler extends RoleCreep {
 
         // energy full, time to find deposit location.
         if (creep.memory.working) {
-            this.fillClosest(creep);
+            this.fillClosest(creep, false);
         }
         else {
             this.fillUpHauler(creep);
+        }
+    }
+
+    private checkRoomEnergy(creep: Creep) {
+        if ((creep.room.energyAvailable / creep.room.energyCapacityAvailable) < .4) {
+            creep.memory.ignoreLinks = true;
+        }
+        else {
+            creep.memory.ignoreLinks = false;
         }
     }
 

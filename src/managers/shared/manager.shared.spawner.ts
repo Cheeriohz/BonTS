@@ -3,12 +3,15 @@ import _ from "lodash";
 export class ManagerHelperSpawner {
 
     public static spawnACreep(spawn: StructureSpawn, body: any[], name: string, assignedRole: number) {
-        if (spawn.spawnCreep(body,
+        const returnCode = spawn.spawnCreep(body,
             `${name}${Game.time.toString()}`,
-            { memory: { role: assignedRole, working: false, orders: null } }) === 0) {
+            { memory: { role: assignedRole, working: false, orders: null, ignoreLinks: null } });
+        if (returnCode === 0) {
             this.updateRoomRoleMap(spawn, assignedRole);
         }
+        return returnCode;
     }
+
 
     public static updateRoomRoleMap(spawn: StructureSpawn, roleToUpdate: number) {
         let roleRoomMap = Memory.roleRoomMap[spawn.room.name];

@@ -2,6 +2,7 @@ interface CreepMemory {
   role: number;
   working: boolean;
   orders: CreepOrder | null;
+  ignoreLinks: boolean | null;
 }
 
 interface CreepOrder {
@@ -15,12 +16,17 @@ interface ScoutOrder extends CreepOrder {
 
 interface RoomMemory {
   era: number;
-  sourceMap: string[][];
-  containerMap: string[][];
+  sourceMap: Assignment[];
+  containerMap: Assignment[];
   constructionSites: Id<ConstructionSite<BuildableStructureConstant>>[];
   controller: Id<StructureController> | null;
   sourceLinks: Id<StructureLink>[] | null
   dumpLinks: Id<StructureLink>[] | null
+}
+
+interface Assignment {
+  id: string;
+  assigned: string[];
 }
 
 interface SpawnMemory {

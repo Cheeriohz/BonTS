@@ -84,7 +84,7 @@ export class Spawn {
 
     private static bronzeSpawning(spawn: StructureSpawn) {
         const room: Room = spawn.room;
-        if (ManagerHelperSpawner.canSpawn(room)) {
+        if (!spawn.spawning) {
             if (CivilizedEraSpawnHelper.spawnDroppers(room, dropMinerBody)) {
                 if (SimpleEraSpawnHelper.spawnGeneric(room, haulerBody, this.spawnConfig.bronzeEraConfig.haulers, CreepRole.hauler)) {
                     if (SimpleEraSpawnHelper.spawnGeneric(room, droneBody, this.spawnConfig.bronzeEraConfig.drones, CreepRole.drone)) {

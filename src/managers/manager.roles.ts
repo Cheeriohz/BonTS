@@ -39,8 +39,8 @@ export
                 delete Memory.creeps[name];
             }
             else {
-                this.manageRoles(name);
-                // this.manageRolesLogged(name);
+                // this.manageRoles(name);
+                this.manageRolesLogged(name);
             }
         }
     }
@@ -49,7 +49,7 @@ export
     public manageRolesLogged(name: string) {
         const startTime = Game.cpu.getUsed();
         this.manageRoles(name);
-        console.log(`Execution time for ${name}: ${Game.cpu.getUsed() - startTime}`);
+        console.log(`   Execution time for ${name}: ${Game.cpu.getUsed() - startTime}`);
 
     }
 

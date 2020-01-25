@@ -25,11 +25,13 @@ export class RoleCreep {
         return harvestSourceSmart(creep);
     }
 
-    protected fillClosest(creep: Creep): boolean {
-        const link = this.checkForLinktoFill(creep);
-        if (link) {
-            this.depositMove(creep, link);
-
+    protected fillClosest(creep: Creep, ignoreLinks: boolean): boolean {
+        if (!ignoreLinks) {
+            const link = this.checkForLinktoFill(creep);
+            if (link) {
+                this.depositMove(creep, link);
+                return true;
+            }
         }
         const fillable = this.findClosestFillableRespawnStructure(creep);
         if (fillable) {

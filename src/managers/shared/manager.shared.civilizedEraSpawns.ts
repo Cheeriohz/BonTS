@@ -3,6 +3,7 @@ import { ManagerHelperSpawner } from "./manager.shared.spawner"
 
 // Enums
 import { CreepRole } from "../../enums/enum.roles"
+import _ from "lodash";
 
 export class CivilizedEraSpawnHelper {
 
@@ -13,8 +14,9 @@ export class CivilizedEraSpawnHelper {
                 return (structure.structureType === STRUCTURE_CONTAINER)
             }
         }).length;
+        const roomRoleTracker = _.get(Memory.roleRoomMap, `[${room.name}][${CreepRole.dropper}]`, 0);
 
-        if (Memory.roleRoomMap[room.name][CreepRole.dropper] < containers) {
+        if (roomRoleTracker < containers) {
             const spawns = room.find(FIND_MY_SPAWNS);
 
             if (spawns.length > 0) {

@@ -1,62 +1,72 @@
 import _ from "lodash";
 
-export function withdraw(creep: Creep) {
-    const container = Game.getObjectById<StructureContainer>(getContainer(creep));
-    if (container) {
-        if (creep.withdraw(container, RESOURCE_ENERGY) === ERR_NOT_IN_RANGE) {
-            creep.moveTo(container, { reusePath: 20, visualizePathStyle: { stroke: '#ffaa00' } });
-        }
-    }
-}
-
 export function getContainer(creep: Creep): string {
     let containerMap = creep.room.memory.containerMap
     // Check to see if our containerMap has been initialized
-    if (containerMap === null) {
+    if (!containerMap) {
         containerMap = [];
-        for (const container in findContainers(creep.room)) {
-            containerMap[container] = [];
+        for (const container of findContainers(creep.room)) {
+            containerMap.push({ id: container.id, assigned: [] });
         }
     }
     if (containerMap.length === 1) {
         creep.room.memory.containerMap = containerMap;
-        return findContainers(creep.room)[0].id;
+        return containerMap[0].id;
     }
-    let assignment: number = checkIfAssigned(containerMap, creep.name);
-    if (assignment === -1) {
+    const assignment: string | null = checkIfAssigned(containerMap, creep.name);
+    if (!assignment) {
         cleanTree(containerMap);
-        assignment = getAssignment(containerMap, creep.room, creep.memory.role);
-        const currentAssignments: string[] = containerMap[assignment];
-        currentAssignments.push(creep.name);
+        const mapIndex: number = getAssignment(containerMap, creep.memory.role);
+        containerMap[mapIndex].assigned.push(creep.name);
         creep.room.memory.containerMap = containerMap;
+        return containerMap[mapIndex].id;
     }
-    return findContainers(creep.room)[assignment].id;
+    else {
+        return assignment;
+    }
+
 }
 
 function findContainers(room: Room): StructureContainer[] {
-    return room.find<StructureContainer>(FIND_STRUCTURES, {
+    const allContainers: StructureContainer[] | null = room.find<StructureContainer>(FIND_STRUCTURES, {
         filter: (structure) => {
             return (structure.structureType === STRUCTURE_CONTAINER)
         }
     });
+    if (allContainers) {
+        // Need to figure out which containers are source containers.
+        return _.filter(allContainers, (c) => checkForSource(c));
+    }
+    else {
+        return [];
+    }
 }
 
-function checkIfAssigned(containerMap: string[][], assignee: string) {
+function checkForSource(container: StructureContainer): boolean {
+    if (container.pos.findInRange(FIND_SOURCES, 5)?.length > 0) {
+        return true;
+    }
+    else {
+        return false;
+    }
+
+}
+
+function checkIfAssigned(containerMap: Assignment[], assignee: string): string | null {
     for (let i = 0; i < containerMap.length; i++) {
-        if (containerMap[i].includes(assignee)) {
-            return i;
+        if (containerMap[i].assigned.includes(assignee)) {
+            return containerMap[i].id;
         }
     }
-    return -1;
+    return null;
 }
 
-function getAssignment(containerMap: string[][], room: Room, role: number) {
+function getAssignment(containerMap: Assignment[], role: number) {
     const containerRatings: ContainerRating[] = [];
     for (let i = 0; i < containerMap.length; i++) {
         containerRatings.push(
             getRate(i,
-                _.filter(containerMap[i], (creepName) => Game.creeps[creepName].memory.role === role).length,
-                room));
+                _.filter(containerMap[i].assigned, (creepName) => Game.creeps[creepName].memory.role === role).length));
     }
     containerRatings.sort((a, b) => a.rate - b.rate);
     return containerRatings[0].index;
@@ -64,26 +74,26 @@ function getAssignment(containerMap: string[][], room: Room, role: number) {
 
 export function pruneContainerTree(room: Room) {
     if (room.memory.containerMap) {
-        room.memory.containerMap = cleanTree(room.memory.containerMap);
+        if (_.keys(room.memory.containerMap).length > 0) {
+            room.memory.containerMap = cleanTree(room.memory.containerMap);
+        }
     }
 }
 
-function cleanTree(containerMap: string[][]): string[][] {
+function cleanTree(containerMap: Assignment[]): Assignment[] {
     for (let i = 0; i < containerMap.length; i++) {
-        for (let index = 0; index < containerMap[i].length; index++) {
-            while (index < containerMap[i].length && !(containerMap[i][index] in Game.creeps)) {
-                containerMap[i].splice(index, 1);
+        for (let index = 0; index < containerMap[i].assigned?.length; index++) {
+            while (index < containerMap[i].assigned?.length && !(containerMap[i].assigned[index] in Game.creeps)) {
+                containerMap[i].assigned.splice(index, 1);
             }
         }
     }
     return containerMap;
 }
 
-function getRate(index: number, assigneeCount: number, room: Room) {
+function getRate(index: number, assigneeCount: number) {
     return new ContainerRating(index, assigneeCount);
 }
-
-
 
 class ContainerRating {
     public constructor(index: number, rate: number) {
