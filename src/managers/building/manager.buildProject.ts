@@ -61,11 +61,16 @@ export class BuildProjectManager {
                 filter: (s) => { return s.structureType === STRUCTURE_CONTAINER; }
             });
             if (container) {
-                this.spawn.room.memory.mine = {
-                    extractorId: extractors[0].id,
-                    containerId: container.id,
-                    miner: "",
-                    hauler: ""
+                const minerals: Mineral[] = extractors[0].pos.lookFor(LOOK_MINERALS);
+                if (minerals.length > 0) {
+                    this.spawn.room.memory.mine = {
+                        extractorId: extractors[0].id,
+                        containerId: container.id,
+                        miner: "",
+                        hauler: "",
+                        type: minerals[0].mineralType,
+                        vein: minerals[0].id
+                    }
                 }
                 this.spawn.room.createConstructionSite(container.pos.x, container.pos.y, STRUCTURE_ROAD);
                 if (this.spawn.memory.buildProjects) {

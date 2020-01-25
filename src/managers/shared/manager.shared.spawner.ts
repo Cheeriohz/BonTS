@@ -5,13 +5,18 @@ export class ManagerHelperSpawner {
     public static spawnACreep(spawn: StructureSpawn, body: any[], name: string, assignedRole: number) {
         const returnCode = spawn.spawnCreep(body,
             `${name}${Game.time.toString()}`,
-            { memory: { role: assignedRole, working: false, orders: null, ignoreLinks: null } });
+            { memory: { role: assignedRole, working: false, orders: null, ignoreLinks: null, dedication: null, precious: null } });
         if (returnCode === 0) {
             this.updateRoomRoleMap(spawn, assignedRole);
         }
         return returnCode;
     }
 
+    public static spawnADedicatedCreep(spawn: StructureSpawn, body: any[], name: string, assignedRole: number, dedication: string) {
+        const returnCode = spawn.spawnCreep(body, name,
+            { memory: { role: assignedRole, working: false, orders: null, ignoreLinks: null, dedication: dedication, precious: null } });
+        return returnCode;
+    }
 
     public static updateRoomRoleMap(spawn: StructureSpawn, roleToUpdate: number) {
         let roleRoomMap = Memory.roleRoomMap[spawn.room.name];

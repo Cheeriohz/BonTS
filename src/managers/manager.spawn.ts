@@ -36,16 +36,16 @@ export class Spawn {
     public static populateCreepCounts() {
         const roomCreepMap: Dictionary<number[]> = {};
         const roleArray: number[] = this.createCreepRoleArray();
-        for (const creepName in Game.creeps) {
-            const creep: Creep = Game.creeps[creepName];
-            if (roomCreepMap[creep.room.name]) {
-                _.update(roomCreepMap, `${creep.room.name}[${creep.memory.role}]`, (n) => n + 1);
+        for (const creep of _.values(Game.creeps)) {
+            if (!creep.memory.dedication) {
+                if (roomCreepMap[creep.room.name]) {
+                    _.update(roomCreepMap, `${creep.room.name}[${creep.memory.role}]`, (n) => n + 1);
+                }
+                else {
+                    // If we see multi room miscounts, check here
+                    _.assign(roomCreepMap, this.createCreepRoleMap(creep, roleArray));
+                }
             }
-            else {
-                // If we see multi room miscounts, check here
-                _.assign(roomCreepMap, this.createCreepRoleMap(creep, roleArray));
-            }
-
         }
         Memory.roleRoomMap = roomCreepMap;
     }
@@ -102,6 +102,16 @@ export class Spawn {
                 if (ManagerHelperSpawner.spawnACreep(spawn, request.body, CreepRole[request.role], request.role) == OK) {
                     spawn.memory.remoteCreepRequest = _.takeRight(spawn.memory.remoteCreepRequest, spawn.memory.remoteCreepRequest.length - 1);
                 }
+                return;
+            }
+        }
+        if (spawn.memory.dedicatedCreepRequest) {
+            if (spawn.memory.dedicatedCreepRequest.length > 0) {
+                const request: DedicatedCreepRequest = spawn.memory.dedicatedCreepRequest[0];
+                if (ManagerHelperSpawner.spawnADedicatedCreep(spawn, request.body, request.specifiedName, request.role, request.dedication) == OK) {
+                    spawn.memory.dedicatedCreepRequest = _.takeRight(spawn.memory.dedicatedCreepRequest, spawn.memory.dedicatedCreepRequest.length - 1);
+                }
+                return;
             }
         }
 

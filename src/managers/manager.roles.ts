@@ -10,6 +10,8 @@ import { RoleHauler } from "roleDefinitions/role.hauler";
 import { RoleUpgrader } from "roleDefinitions/role.upgrader";
 import { RoleScout } from "roleDefinitions/role.scout";
 import { ExpeditionManager } from "./expansion/manager.expedition";
+import { RoleDedicatedDropper } from "roleDefinitions/dedicated/role.dedicated.dropper";
+import { RoleDedicatedHauler } from "roleDefinitions/dedicated/role.dedicated.hauler";
 
 export
     class RolesManager {
@@ -21,6 +23,8 @@ export
     private mDrone!: RoleDrone;
     private mScout!: RoleScout;
     private mExpeditionManager: ExpeditionManager | undefined;
+    private mDDropper!: RoleDedicatedDropper;
+    private mDHauler!: RoleDedicatedHauler;
 
 
     constructor() {
@@ -31,6 +35,8 @@ export
         this.mHauler = new RoleHauler();
         this.mDrone = new RoleDrone();
         this.mScout = new RoleScout();
+        this.mDDropper = new RoleDedicatedDropper();
+        this.mDHauler = new RoleDedicatedHauler();
     }
 
     public run() {
@@ -39,49 +45,71 @@ export
                 delete Memory.creeps[name];
             }
             else {
-                this.manageRoles(name);
+                this.manageRoles(Game.creeps[name]);
                 // this.manageRolesLogged(name);
             }
         }
     }
 
 
-    public manageRolesLogged(name: string) {
+    public manageRolesLogged(creep: Creep) {
         const startTime = Game.cpu.getUsed();
-        this.manageRoles(name);
-        console.log(`   Execution time for ${name}: ${Game.cpu.getUsed() - startTime}`);
+        this.manageRoles(creep);
+        console.log(`   Execution time for ${creep.name}: ${Game.cpu.getUsed() - startTime}`);
 
     }
 
 
-    private manageRoles(name: string) {
-        switch (Memory.creeps[name].role) {
-            case CreepRole.harvester: {
-                this.manageHarvester(Game.creeps[name]);
-                break;
+    private manageRoles(creep: Creep) {
+        if (creep.memory.dedication) {
+            this.manageDedicatedCreepRole(creep, creep.memory.dedication)
+        }
+        else {
+            switch (creep.memory.role) {
+                case CreepRole.harvester: {
+                    this.manageHarvester(creep);
+                    break;
+                }
+                case CreepRole.upgrader: {
+                    this.manageUpgrader(creep);
+                    break;
+                }
+                case CreepRole.builder: {
+                    this.manageBuilder(creep);
+                    break;
+                }
+                case CreepRole.dropper: {
+                    this.manageDropper(creep);
+                    break;
+                }
+                case CreepRole.hauler: {
+                    this.manageHauler(creep);
+                    break;
+                }
+                case CreepRole.drone: {
+                    this.manageDrone(creep);
+                    break;
+                }
+                case CreepRole.scout: {
+                    this.manageScout(creep);
+                }
             }
-            case CreepRole.upgrader: {
-                this.manageUpgrader(Game.creeps[name]);
-                break;
-            }
-            case CreepRole.builder: {
-                this.manageBuilder(Game.creeps[name]);
-                break;
-            }
+        }
+    }
+
+    private manageDedicatedCreepRole(creep: Creep, dedication: string) {
+        switch (creep.memory.role) {
             case CreepRole.dropper: {
-                this.manageDropper(Game.creeps[name]);
+                this.mDDropper.runDedicated(creep, dedication);
                 break;
             }
             case CreepRole.hauler: {
-                this.manageHauler(Game.creeps[name]);
+                this.mDHauler.runDedicated(creep, dedication);
                 break;
             }
-            case CreepRole.drone: {
-                this.manageDrone(Game.creeps[name]);
+            default: {
+                console.log(`No dedicated role exists for ${creep.name}`);
                 break;
-            }
-            case CreepRole.scout: {
-                this.manageScout(Game.creeps[name]);
             }
         }
     }

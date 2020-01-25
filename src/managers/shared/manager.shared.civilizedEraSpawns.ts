@@ -9,11 +9,7 @@ export class CivilizedEraSpawnHelper {
 
     public static spawnDroppers(room: Room, body: any[]): boolean {
 
-        const containers: number = room.find<StructureContainer>(FIND_STRUCTURES, {
-            filter: (structure) => {
-                return (structure.structureType === STRUCTURE_CONTAINER)
-            }
-        }).length;
+        const containers: number = room.memory.containerMap.length;
         const roomRoleTracker = _.get(Memory.roleRoomMap, `[${room.name}][${CreepRole.dropper}]`, 0);
 
         if (roomRoleTracker < containers) {

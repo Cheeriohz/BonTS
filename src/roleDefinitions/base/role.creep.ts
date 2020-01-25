@@ -66,9 +66,32 @@ export class RoleCreep {
         }
     }
 
+    protected withdrawMoveSpecified(creep: Creep, structure: Structure, resourceType: ResourceConstant) {
+        if (creep.pos.isNearTo(structure)) {
+            creep.withdraw(structure, resourceType);
+            return;
+        }
+        else {
+            creep.moveTo(structure, { reusePath: 1000, ignoreCreeps: false });
+            return;
+        }
+    }
+
     protected withdrawMove(creep: Creep, structure: Structure) {
         if (creep.pos.isNearTo(structure)) {
             creep.withdraw(structure, RESOURCE_ENERGY);
+            return;
+        }
+        else {
+            creep.moveTo(structure, { reusePath: 1000, ignoreCreeps: false });
+            return;
+        }
+    }
+
+    protected depositMoveSpecified(creep: Creep, structure: Structure, resourceType: ResourceConstant) {
+        // console.log(JSON.stringify(structure));
+        if (creep.pos.isNearTo(structure)) {
+            creep.transfer(structure, resourceType);
             return;
         }
         else {

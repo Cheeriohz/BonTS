@@ -15,10 +15,11 @@ export class RoleDropper {
     }
 
     private relocate(creep: Creep) {
-        const container = Game.getObjectById<StructureContainer>(this.getContainer(creep));
+        const container = Game.getObjectById<StructureContainer>(getContainer(creep));
         // use the working bit to determine which of two max sources can be harvested from. TODO this might have issues if my assumption is wrong.
         if (container) {
             if (creep.pos.x === container.pos.x && creep.pos.y === container.pos.y) {
+                this.updatePrecious(creep);
                 creep.memory.working = true;
             }
             else {
@@ -28,23 +29,26 @@ export class RoleDropper {
         }
     }
 
-    private getContainer(creep: Creep): string {
-        return getContainer(creep);
-    }
-
-    // Checks to see if in range to havest from a source
-    private harvest(creep: Creep) {
+    private updatePrecious(creep: Creep) {
         const source = this.locateSource(creep);
         if (source) {
-            this.harvestSource(creep, source);
+            creep.memory.precious = source.id;
         }
     }
 
-    private harvestSource(creep: Creep, source: Source) {
-        creep.harvest(source);
+
+    // Checks to see if in range to havest from a source
+    protected harvest(creep: Creep) {
+        if (creep.memory.precious) {
+            const harvestTarget: Source | Mineral | Deposit | null = Game.getObjectById(creep.memory.precious);
+            if (harvestTarget) {
+                creep.harvest(harvestTarget);
+            }
+        }
     }
 
-    private locateSource(creep: Creep) {
+
+    private locateSource(creep: Creep): Source | null {
         return creep.pos.findClosestByRange(FIND_SOURCES);
     }
 };

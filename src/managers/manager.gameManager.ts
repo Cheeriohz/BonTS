@@ -3,6 +3,8 @@ import { CycleManager } from "managers/cycle/manager.cycle";
 import { RolesManager } from "managers/manager.roles";
 import { Spawn } from "managers/manager.spawn";
 import { TowerManager } from "managers/structures/manager.towers";
+import { MineManager } from "./manager.mine";
+import _ from "lodash";
 
 export class GameManager {
 
@@ -19,6 +21,16 @@ export class GameManager {
         // Manage roles
         const rm: RolesManager = new RolesManager();
         rm.run();
+
+        // Manage mines
+        if (Memory.cycle % 50 === 0) {
+            for (const spawn of _.values(Game.spawns)) {
+                if (spawn.room.memory.mine) {
+                    const mm: MineManager = new MineManager(spawn.room, spawn);
+                    mm.manageMine(true);
+                }
+            }
+        }
 
         // Manage structures
         TowerManager.run();

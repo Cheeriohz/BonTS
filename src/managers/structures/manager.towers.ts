@@ -1,5 +1,5 @@
 export class TowerManager {
-    private static priorityStructures: StructureConstant[] = [STRUCTURE_CONTAINER, STRUCTURE_ROAD, STRUCTURE_SPAWN, STRUCTURE_EXTENSION, STRUCTURE_LINK];
+    private static priorityStructures: StructureConstant[] = [STRUCTURE_CONTAINER, STRUCTURE_ROAD, STRUCTURE_SPAWN, STRUCTURE_EXTENSION, STRUCTURE_LINK, STRUCTURE_EXTRACTOR];
     public static run() {
         for (const room in Game.rooms) {
             for (const tower of Game.rooms[room].find<StructureTower>(FIND_STRUCTURES, {

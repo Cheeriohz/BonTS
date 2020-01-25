@@ -23,17 +23,21 @@ export class RoleHauler extends RoleCreep {
             creep.say('💦');
         }
 
-        // energy full, time to find deposit location.
+        this.carryOutGeneralWork(creep, creep.memory.ignoreLinks);
+    }
+
+    protected carryOutGeneralWork(creep: Creep, ignoreLinks: boolean) {
         if (creep.memory.working) {
-            this.fillClosest(creep, creep.memory.ignoreLinks);
+            this.fillClosest(creep, ignoreLinks);
         }
         else {
+            // energy full, time to find deposit location.
             this.fillUpHauler(creep);
         }
     }
 
-    private checkRoomEnergy(creep: Creep) {
-        if ((creep.room.energyAvailable / creep.room.energyCapacityAvailable) < .4) {
+    protected checkRoomEnergy(creep: Creep) {
+        if ((creep.room.energyAvailable / creep.room.energyCapacityAvailable) < .6) {
             creep.memory.ignoreLinks = true;
         }
         else {
@@ -42,12 +46,18 @@ export class RoleHauler extends RoleCreep {
     }
 
     protected fillUpHauler(creep: Creep) {
-        const container = Game.getObjectById<StructureContainer>(getContainer(creep));
-        if (container) {
-            return this.withdrawMove(creep, container);
+        if (!creep.memory.precious) {
+            const container = Game.getObjectById<StructureContainer>(getContainer(creep));
+            if (container) {
+                creep.memory.precious = container.id;
+                return this.withdrawMove(creep, container);
+            }
+        }
+        else {
+            const container = Game.getObjectById<StructureContainer>(creep.memory.precious);
+            if (container) {
+                return this.withdrawMove(creep, container);
+            }
         }
     }
-
-
-
 };

@@ -3,6 +3,8 @@ interface CreepMemory {
   working: boolean;
   orders: CreepOrder | null;
   ignoreLinks: boolean | null;
+  dedication: string | null;
+  precious: string | null;
 }
 
 interface RoomMemory {
@@ -21,6 +23,8 @@ interface Mine {
   containerId: Id<StructureContainer>;
   miner: string;
   hauler: string;
+  type: MineralConstant | DepositConstant;
+  vein: Id<Mineral> | Id<Deposit>;
 }
 
 interface Assignment {
@@ -31,6 +35,7 @@ interface Assignment {
 interface SpawnMemory {
   reassess: boolean | null;
   remoteCreepRequest: CreepRequest[] | null;
+  dedicatedCreepRequest: DedicatedCreepRequest[] | null;
   remoteMineCount: number | null;
   remoteMineExpansionInProgress: boolean | null;
   expeditionResults: IExpeditionResults[] | null;
@@ -43,6 +48,11 @@ interface SpawnMemory {
 interface CreepRequest {
   role: number;
   body: any[];
+}
+
+interface DedicatedCreepRequest extends CreepRequest {
+  dedication: string;
+  specifiedName: string;
 }
 
 interface Memory {
