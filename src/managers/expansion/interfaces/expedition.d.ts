@@ -37,3 +37,13 @@ interface ScreepsSearchTree {
     scanned: boolean;
     assignedCreep: string;
 }
+
+
+interface CreepOrder {
+    target: string;
+    independentOperator: boolean;
+}
+
+interface ScoutOrder extends CreepOrder {
+    searchTarget: FindConstant;
+}

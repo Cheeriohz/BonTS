@@ -10,14 +10,25 @@ export class CreepRequester {
         this.spawn = spawn;
     }
 
+    public MaintainBuilder(): void {
+        if (!this.RepairCreepRequested() && !this.HaveRepairWorker()) {
+            this.RequestRepairBot();
+        }
+    }
+
+
     public CheckForRepairNeed(): void {
         if (!this.RepairCreepRequested() && !this.HaveRepairWorker() && this.HaveDamagedRamparts()) {
-            const builderRequest: CreepRequest = { role: CreepRole.builder, body: [WORK, WORK, WORK, WORK, CARRY, CARRY, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE] };
-            if (!this.spawn.memory.remoteCreepRequest) {
-                this.spawn.memory.remoteCreepRequest = [];
-            }
-            this.spawn.memory.remoteCreepRequest.push(builderRequest);
+            this.RequestRepairBot();
         }
+    }
+
+    private RequestRepairBot() {
+        const builderRequest: CreepRequest = { role: CreepRole.builder, body: [WORK, WORK, WORK, WORK, CARRY, CARRY, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE] };
+        if (!this.spawn.memory.remoteCreepRequest) {
+            this.spawn.memory.remoteCreepRequest = [];
+        }
+        this.spawn.memory.remoteCreepRequest.push(builderRequest);
     }
 
     private RepairCreepRequested(): boolean {

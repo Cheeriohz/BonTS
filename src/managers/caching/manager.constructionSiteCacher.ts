@@ -3,7 +3,7 @@ import _ from "lodash";
 export class ConstructionSiteCacher {
     private static roomSiteMap: Dictionary<ConstructionSite<BuildableStructureConstant>> = {};
 
-    public static getConstructionSiteRoom(room: Room) {
+    public static getConstructionSiteRoom(room: Room): ConstructionSite<BuildableStructureConstant> | null {
         if (!(room.memory.constructionSites == null)) {
             if (room.memory.constructionSites.length > 0) {
                 // Check if site already pulled and still valid.

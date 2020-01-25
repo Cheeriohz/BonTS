@@ -11,6 +11,8 @@ import { SpawnReassment } from "./manager.spawnReassessment";
 import { ExpeditionManager } from "managers/expansion/manager.expedition";
 import { CreepRequester } from "./manager.creepRequester";
 import { ContainerExpansion } from "managers/building/manager.containerExpansion";
+import { BuildProjectManager } from "managers/building/manager.buildProject";
+import _ from "lodash";
 
 export class CycleManager {
 
@@ -87,8 +89,9 @@ export class CycleManager {
             if (rclUpgradeEvent) {
                 switch (rclUpgradeEvent.newRclLevel) {
                     case 6: {
-                        const containerExpansion: ContainerExpansion = new ContainerExpansion(spawn.room, spawn.pos, true);
+                        const containerExpansion: ContainerExpansion = new ContainerExpansion(spawn, spawn.room, spawn.pos, false);
                         containerExpansion.checkForMineralExpansion();
+                        _.remove(spawn.memory.rclUpgrades, rclUpgradeEvent);
                         break;
                     }
                     default: {
@@ -115,8 +118,15 @@ export class CycleManager {
 
     private static spawnLevelTasksShortTerm() {
         const linkManager: LinkManager = new LinkManager();
-        for (const spawn in Game.spawns) {
-            linkManager.balanceEnergyForSpawn(Game.spawns[spawn]);
+        for (const spawnName in Game.spawns) {
+            const spawn = Game.spawns[spawnName];
+            linkManager.balanceEnergyForSpawn(spawn);
+            if (spawn.memory.buildProjects) {
+                if (spawn.memory.buildProjects.length > 0) {
+                    const projectManager: BuildProjectManager = new BuildProjectManager(spawn, spawn.memory.buildProjects[0]);
+                    projectManager.manageProject();
+                }
+            }
         }
     }
 

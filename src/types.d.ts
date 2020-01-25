@@ -5,15 +5,6 @@ interface CreepMemory {
   ignoreLinks: boolean | null;
 }
 
-interface CreepOrder {
-  target: string;
-  independentOperator: boolean;
-}
-
-interface ScoutOrder extends CreepOrder {
-  searchTarget: FindConstant;
-}
-
 interface RoomMemory {
   era: number;
   sourceMap: Assignment[];
@@ -22,6 +13,14 @@ interface RoomMemory {
   controller: Id<StructureController> | null;
   sourceLinks: Id<StructureLink>[] | null;
   dumpLinks: Id<StructureLink>[] | null;
+  mine: Mine | null;
+}
+
+interface Mine {
+  extractorId: Id<StructureExtractor>;
+  containerId: Id<StructureContainer>;
+  miner: string;
+  hauler: string;
 }
 
 interface Assignment {
@@ -38,6 +37,7 @@ interface SpawnMemory {
   rcl: number | null;
   rclUpgrades: RCLUpgradeEvent[] | null;
   sourcesUtilized: boolean;
+  buildProjects: BuildProject[] | null;
 }
 
 interface CreepRequest {

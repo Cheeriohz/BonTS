@@ -31,7 +31,7 @@ export class Expander {
         const sources: Source[] | null = this.getSources()
         if (sources) {
             if (containerUsage < sources.length) {
-                const containerExpansion: ContainerExpansion = new ContainerExpansion(this.spawn.room, this.spawn.pos, true);
+                const containerExpansion: ContainerExpansion = new ContainerExpansion(this.spawn, this.spawn.room, this.spawn.pos, true);
                 containerExpansion.checkForSourceExpansion(sources);
                 return true;
             }
