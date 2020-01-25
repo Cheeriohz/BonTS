@@ -20,8 +20,8 @@ interface RoomMemory {
   containerMap: Assignment[];
   constructionSites: Id<ConstructionSite<BuildableStructureConstant>>[];
   controller: Id<StructureController> | null;
-  sourceLinks: Id<StructureLink>[] | null
-  dumpLinks: Id<StructureLink>[] | null
+  sourceLinks: Id<StructureLink>[] | null;
+  dumpLinks: Id<StructureLink>[] | null;
 }
 
 interface Assignment {
@@ -36,7 +36,8 @@ interface SpawnMemory {
   remoteMineExpansionInProgress: boolean | null;
   expeditionResults: IExpeditionResults[] | null;
   rcl: number | null;
-  rclUpgrades: RCLUpgradeEvent[] | null
+  rclUpgrades: RCLUpgradeEvent[] | null;
+  sourcesUtilized: boolean;
 }
 
 interface CreepRequest {

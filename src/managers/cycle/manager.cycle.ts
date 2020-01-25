@@ -67,10 +67,10 @@ export class CycleManager {
     }
 
     private static spawnLevelTasksLongTerm() {
-        const expander: Expander = new Expander();
         for (const spawnName in Game.spawns) {
             const spawn = Game.spawns[spawnName];
-            expander.mineExpansion(spawn);
+            const expander: Expander = new Expander(spawn);
+            expander.mineExpansion();
             if (spawn.memory?.reassess) {
                 const reassessment: SpawnReassment = new SpawnReassment(spawn);
                 reassessment.reassess();

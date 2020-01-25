@@ -1,32 +1,69 @@
 import { CreepRole } from "enums/enum.roles";
 import { ExpeditionManager } from "./manager.expedition";
+import _ from "lodash";
+import { ContainerExpansion } from "managers/building/manager.containerExpansion";
 
 export class Expander {
+    private spawn!: StructureSpawn;
 
-    public mineExpansion(spawn: StructureSpawn) {
-        if (spawn) {
-            if (!spawn.memory.remoteMineCount) {
-                spawn.memory.remoteMineCount = 0;
-            }
-            const containerUsage: number = spawn.memory.remoteMineCount + spawn.room.memory.containerMap?.length
-            // If we have an untapped local container location, first expand to it.
+    constructor(spawn: StructureSpawn) {
+        this.spawn = spawn;
+    }
 
+    public mineExpansion() {
+        // If we have an untapped local container location, first expand to it.
+        if (this.spawn.memory.sourcesUtilized || !this.localSourceExpansion()) {
             // start a remote mine expansion request.
-            if (!spawn.memory.remoteMineExpansionInProgress) {
-                this.remoteMineExpansion(spawn);
+            if (!this.spawn.memory.remoteMineExpansionInProgress) {
+                this.remoteMineExpansion();
             }
         }
     }
 
-    public remoteMineExpansion(spawn: StructureSpawn) {
-        // Create the expedition object to find a source.
-        this.createExpedition(spawn, 4, "remoteMiningSource", FIND_SOURCES);
-        this.requestScout(spawn);
+    private localSourceExpansion(): boolean {
+        if (!this.spawn.memory.remoteMineCount) {
+            this.spawn.memory.remoteMineCount = 0;
+        }
+        const containerUsage: number = this.spawn.memory.remoteMineCount + this.spawn.room.memory.containerMap?.length
+        if (containerUsage === 3) {
+            return false;
+        }
+        const sources: Source[] | null = this.getSources()
+        if (sources) {
+            if (containerUsage < sources.length) {
+                const containerExpansion: ContainerExpansion = new ContainerExpansion(this.spawn.room, this.spawn.pos, true);
+                containerExpansion.checkForSourceExpansion(sources);
+                return true;
+            }
+        }
+        this.spawn.memory.sourcesUtilized = true;
+        return false;
     }
 
-    private createExpedition(spawn: StructureSpawn, searchDepth: number, expeditionTypeName: string, findConstant: FindConstant) {
+    private getSources(): Source[] | null {
+        if (this.spawn.room.memory.sourceMap) {
+            if (this.spawn.room.memory.sourceMap.length > 0) {
+                const sourceIds = _.map(this.spawn.room.memory.sourceMap, (s) => s.id);
+                if (sourceIds) {
+                    if (sourceIds.length > 0) {
+                        return _.compact(_.map(sourceIds, (id) => { return Game.getObjectById(id); }));
+                    }
+                }
+            }
+        }
+        const sources: Source[] | null = this.spawn.room.find(FIND_SOURCES);
+        return sources;
+    }
+
+    public remoteMineExpansion() {
+        // Create the expedition object to find a source.
+        this.createExpedition(4, "remoteMiningSource", FIND_SOURCES);
+        this.requestScout();
+    }
+
+    private createExpedition(searchDepth: number, expeditionTypeName: string, findConstant: FindConstant) {
         const searchTreeOrigin: ScreepsSearchTree = {
-            nodeName: spawn.room.name,
+            nodeName: this.spawn.room.name,
             children: [],
             scanned: true,
             assignedCreep: "",
@@ -37,12 +74,12 @@ export class Expander {
             foundTargets: [],
             searchDepth: 0,
             maxDepth: searchDepth,
-            plottedRooms: [spawn.room.name]
+            plottedRooms: [this.spawn.room.name]
         };
         const expedition: Expedition = {
             target: findConstant,
             additionalPersonnelNeeded: 1,
-            spawnOrigin: spawn.name,
+            spawnOrigin: this.spawn.name,
             expeditionTypeName: expeditionTypeName,
             progress: expeditionProgress,
             assignedCreeps: [],
@@ -53,19 +90,19 @@ export class Expander {
         Memory.expeditions.push(expedition);
         const em: ExpeditionManager = new ExpeditionManager(false);
         em.initialExpansion(searchTreeOrigin, expedition);
-        spawn.memory.remoteMineExpansionInProgress = true;
+        this.spawn.memory.remoteMineExpansionInProgress = true;
     }
 
-    private requestScout(spawn: StructureSpawn) {
+    private requestScout() {
         const creepRequest: CreepRequest = {
             role: CreepRole.scout,
             body: [MOVE]
         };
-        if (!spawn.memory.remoteCreepRequest) {
-            spawn.memory.remoteCreepRequest = [];
+        if (!this.spawn.memory.remoteCreepRequest) {
+            this.spawn.memory.remoteCreepRequest = [];
         }
 
-        spawn.memory.remoteCreepRequest.push(creepRequest);
+        this.spawn.memory.remoteCreepRequest.push(creepRequest);
 
     }
 

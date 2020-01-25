@@ -39,8 +39,8 @@ export
                 delete Memory.creeps[name];
             }
             else {
-                // this.manageRoles(name);
-                this.manageRolesLogged(name);
+                this.manageRoles(name);
+                // this.manageRolesLogged(name);
             }
         }
     }

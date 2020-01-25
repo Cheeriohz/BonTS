@@ -25,7 +25,7 @@ export class RoleHauler extends RoleCreep {
 
         // energy full, time to find deposit location.
         if (creep.memory.working) {
-            this.fillClosest(creep, false);
+            this.fillClosest(creep, creep.memory.ignoreLinks);
         }
         else {
             this.fillUpHauler(creep);

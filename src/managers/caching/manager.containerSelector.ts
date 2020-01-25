@@ -43,7 +43,7 @@ function findContainers(room: Room): StructureContainer[] {
 }
 
 function checkForSource(container: StructureContainer): boolean {
-    if (container.pos.findInRange(FIND_SOURCES, 5)?.length > 0) {
+    if (container.pos.findInRange(FIND_SOURCES, 3)?.length > 0) {
         return true;
     }
     else {

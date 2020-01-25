@@ -131,7 +131,7 @@ export class RoleCreep {
             {
                 filter: (structure) => {
                     return (structure.structureType === STRUCTURE_EXTENSION ||
-                        structure.structureType === STRUCTURE_SPAWN) && structure.store.getFreeCapacity(RESOURCE_ENERGY) > 0;
+                        structure.structureType === STRUCTURE_SPAWN) && structure.store.getFreeCapacity(RESOURCE_ENERGY) > 49;
                 }
             });
         return queryItem
