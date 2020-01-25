@@ -10,6 +10,7 @@ import { LinkManager } from "../structures/manager.links";
 import { SpawnReassment } from "./manager.spawnReassessment";
 import { ExpeditionManager } from "managers/expansion/manager.expedition";
 import { CreepRequester } from "./manager.creepRequester";
+import { ContainerExpansion } from "managers/building/manager.containerExpansion";
 
 export class CycleManager {
 
@@ -50,6 +51,7 @@ export class CycleManager {
     private static everyCycle() {
         ConstructionSiteCacher.dispose();
         ControllerCacher.dispose();
+        this.handleRCLUpgrades(Game.spawns['Sp1']);
         Memory.cycle++;
     }
 
@@ -74,6 +76,25 @@ export class CycleManager {
             if (spawn.memory?.reassess) {
                 const reassessment: SpawnReassment = new SpawnReassment(spawn);
                 reassessment.reassess();
+            }
+            this.handleRCLUpgrades(spawn);
+        }
+    }
+
+    private static handleRCLUpgrades(spawn: StructureSpawn) {
+        if (spawn.memory?.rclUpgrades) {
+            const rclUpgradeEvent: RCLUpgradeEvent = spawn.memory.rclUpgrades[0];
+            if (rclUpgradeEvent) {
+                switch (rclUpgradeEvent.newRclLevel) {
+                    case 6: {
+                        const containerExpansion: ContainerExpansion = new ContainerExpansion(spawn.room, spawn.pos, true);
+                        containerExpansion.checkForMineralExpansion();
+                        break;
+                    }
+                    default: {
+                        console.log(`No handling implemented for RCL Level ${rclUpgradeEvent.newRclLevel}`);
+                    }
+                }
             }
         }
     }

@@ -63,7 +63,7 @@ export class ContainerExpansion {
                 const nearbyContainer: Structure[] | null = mineral.pos.findInRange(FIND_STRUCTURES, 3, {
                     filter: (s) => { return (s.structureType == STRUCTURE_CONTAINER); }
                 });
-                if (!nearbyContainer) {
+                if (nearbyContainer.length === 0) {
                     unTappedMinerals.push(mineral);
                 }
             }
@@ -77,15 +77,20 @@ export class ContainerExpansion {
     private identifyExpansionTarget(positions: RoomPosition[]) {
         const closest: RoomPosition | null = this.originPos.findClosestByRange(positions);
         if (closest) {
-            //const path: PathStep[] = this.originPos.findPathTo(closest);
+            const path: PathStep[] = this.originPos.findPathTo(closest, { ignoreCreeps: true });
             if (this.visualizeOnly) {
-                this.visualizeContainerExpansion(closest);
+                this.visualizeContainerExpansion(path);
             }
         }
     }
 
-    private visualizeContainerExpansion(destination: RoomPosition) {
+    private visualizeContainerExpansion(path: PathStep[]) {
         const visualizer: Visualizer = new Visualizer();
-        visualizer.visualizeRoadInRoom(this.room.name, this.originPos, destination);
+        visualizer.visualizeRoadInRoom(this.room.name, path);
+    }
+
+    private highlightContainerLocation(destination: RoomPosition) {
+        const visualizer: Visualizer = new Visualizer();
+        visualizer.visualizeTargetCallout(this.room.name, this.originPos, destination);
     }
 }

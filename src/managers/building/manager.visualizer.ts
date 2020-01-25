@@ -1,11 +1,19 @@
 export class Visualizer {
 
-    private roadStyle: LineStyle = {
+    private lineStyle: LineStyle = {
         width: .5,
         color: "#FAAC58",
         opacity: 0.5,
         lineStyle: "dashed"
     };
+
+    private circleStyle: CircleStyle = {
+        radius: .2,
+        stroke: "#FAAC58",
+        strokeWidth: .05,
+        fill: "#767A80"
+    };
+
 
 
 
@@ -14,10 +22,23 @@ export class Visualizer {
         throw "Not Implemented";
     }
 
-    public visualizeRoadInRoom(roomName: string, startPoint: RoomPosition, endPoint: RoomPosition) {
+    public visualizeRoadInRoom(roomName: string, path: PathStep[]) {
         const visualizer: RoomVisual = new RoomVisual(roomName);
         if (visualizer) {
-            visualizer.line(startPoint, endPoint, this.roadStyle)
+            if (path) {
+                if (path.length > 0) {
+                    for (const pathStep of path) {
+                        visualizer.circle(pathStep.x, pathStep.y, this.circleStyle);
+                    }
+                }
+            }
+        }
+    }
+
+    public visualizeTargetCallout(roomName: string, startPoint: RoomPosition, endPoint: RoomPosition) {
+        const visualizer: RoomVisual = new RoomVisual(roomName);
+        if (visualizer) {
+            visualizer.line(startPoint, endPoint, this.lineStyle)
         }
     }
 }
