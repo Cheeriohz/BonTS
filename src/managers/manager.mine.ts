@@ -40,7 +40,9 @@ export class MineManager {
                 const hauler = Game.creeps[this.room.memory.mine.hauler];
                 if (!hauler) {
                     if (!this.creepNotInQueue(this.room.memory.mine.hauler)) {
-                        this.requestHauler(this.room.memory.mine);
+                        if (this.haulerNeeded()) {
+                            this.requestHauler(this.room.memory.mine);
+                        }
                     }
 
                 }
@@ -51,6 +53,16 @@ export class MineManager {
         }
 
 
+    }
+
+    private haulerNeeded(): boolean {
+        const container: StructureContainer | null = Game.getObjectById(this.room.memory.mine!.containerId);
+        if (container!.store.getFreeCapacity() < 400) {
+            return true;
+        }
+        else {
+            return false;
+        }
     }
 
     private creepNotInQueue(creepName: string) {
