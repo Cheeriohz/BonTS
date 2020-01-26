@@ -55,7 +55,8 @@ export class CreepRequester {
     }
 
     private HaveDamagedContainers(): boolean {
-        return this.HaveDamagedStructure(STRUCTURE_CONTAINER, StructureContainer.prototype.hitsMax, (StructureContainer.prototype.hitsMax / 5), (2 * (StructureContainer.prototype.hitsMax / 5)));
+        return this.HaveDamagedStructure(STRUCTURE_CONTAINER, 250000, (250000 / 5), (2 * (250000 / 5)));
+
     }
 
     private HaveDamagedRamparts(): boolean {
@@ -63,12 +64,13 @@ export class CreepRequester {
     }
 
     private HaveDamagedStructure(structureType: StructureConstant, individualThreshold: number, individualDifference: number, totalThreshold: number): boolean {
+        // console.log(`structureType: ${structureType} | individualThreshold: ${individualThreshold} | individualDifference: ${individualDifference} | totalThreshold : ${totalThreshold} `);
         const structures = this.spawn.room.find(FIND_STRUCTURES, {
             filter: (structure) => {
                 return (structure.structureType === structureType && individualThreshold - structure.hits > individualDifference);
             }
         });
-
+        console.log(JSON.stringify(structures));
         if (structures) {
             if (structures.length > 0) {
                 let totalDamage: number = 0;
