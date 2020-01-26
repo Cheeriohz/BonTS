@@ -63,7 +63,7 @@ export class CycleManager {
 
     private static roomLevelTasksLongTerm() {
         for (const room in Game.rooms) {
-            this.cleanUpTrees(Game.rooms[room]);
+
             this.storeControllerIds(Game.rooms[room]);
         }
     }
@@ -72,6 +72,7 @@ export class CycleManager {
         for (const spawnName in Game.spawns) {
             const spawn = Game.spawns[spawnName];
             const expander: Expander = new Expander(spawn);
+            this.cleanUpTrees(spawn.room);
             expander.mineExpansion();
             if (spawn.memory?.reassess) {
                 const reassessment: SpawnReassment = new SpawnReassment(spawn);
