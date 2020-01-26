@@ -18,7 +18,7 @@ export class CreepRequester {
 
 
     public CheckForRepairNeed(): void {
-        if (!this.RepairCreepRequested() && !this.HaveRepairWorker() && this.HaveDamagedRamparts()) {
+        if (!this.RepairCreepRequested() && !this.HaveRepairWorker() && (this.HaveDamagedRamparts() || this.HaveDamagedContainers())) {
             this.RequestRepairBot();
         }
     }
@@ -54,26 +54,30 @@ export class CreepRequester {
         return false;
     }
 
+    private HaveDamagedContainers(): boolean {
+        return this.HaveDamagedStructure(STRUCTURE_CONTAINER, StructureContainer.prototype.hitsMax, (StructureContainer.prototype.hitsMax / 5), (2 * (StructureContainer.prototype.hitsMax / 5)));
+    }
+
     private HaveDamagedRamparts(): boolean {
-        const ramparts = this.spawn.room.find(FIND_STRUCTURES, {
+        return this.HaveDamagedStructure(STRUCTURE_RAMPART, this.rampartMaxRepairThreshold, 100000, this.builderSpawnThreshold)
+    }
+
+    private HaveDamagedStructure(structureType: StructureConstant, individualThreshold: number, individualDifference: number, totalThreshold: number): boolean {
+        const structures = this.spawn.room.find(FIND_STRUCTURES, {
             filter: (structure) => {
-                return (structure.structureType === STRUCTURE_RAMPART && this.rampartMaxRepairThreshold - structure.hits > 100000);
+                return (structure.structureType === structureType && individualThreshold - structure.hits > individualDifference);
             }
         });
 
-        if (ramparts) {
-            if (ramparts.length > 0) {
+        if (structures) {
+            if (structures.length > 0) {
                 let totalDamage: number = 0;
-                _.forEach(ramparts, (r) => totalDamage += this.rampartMaxRepairThreshold - r.hits);
-                if (totalDamage > this.builderSpawnThreshold) {
+                _.forEach(structures, (s) => totalDamage += individualThreshold - s.hits);
+                if (totalDamage > totalThreshold) {
                     return true;
                 }
             }
         }
         return false;
     }
-
-
-
-
 }
