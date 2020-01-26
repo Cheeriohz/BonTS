@@ -30,7 +30,17 @@ export class MineManager {
                 const miner = Game.creeps[this.room.memory.mine.miner];
                 if (!miner) {
                     if (!this.creepNotInQueue(this.room.memory.mine.miner)) {
-                        this.requestMiner(this.room.memory.mine);
+                        const container: StructureContainer | null = Game.getObjectById(this.room.memory.mine!.containerId);
+                        if (container) {
+                            this.requestMiner(this.room.memory.mine);
+                        }
+                        else {
+                            if (!this.reassignContainer()) {
+                                this.rebuildContainer();
+                            }
+                            return;
+                        }
+
                     }
                 }
             }
@@ -45,15 +55,12 @@ export class MineManager {
                             this.requestHauler(this.room.memory.mine);
                         }
                     }
-
                 }
             }
             else {
                 this.requestHauler(this.room.memory.mine);
             }
         }
-
-
     }
 
     private haulerNeeded(): boolean {
