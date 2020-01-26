@@ -1,4 +1,4 @@
-import { getContainer } from "../managers/caching/manager.containerSelector"
+import { getContainer, refreshTree } from "../managers/caching/manager.containerSelector"
 
 import { profile } from "Profiler";
 @profile
@@ -15,7 +15,8 @@ export class RoleDropper {
     }
 
     private relocate(creep: Creep) {
-        const container = Game.getObjectById<StructureContainer>(getContainer(creep));
+        const containerId = getContainer(creep);
+        const container = Game.getObjectById<StructureContainer>(containerId);
         // use the working bit to determine which of two max sources can be harvested from. TODO this might have issues if my assumption is wrong.
         if (container) {
             if (creep.pos.x === container.pos.x && creep.pos.y === container.pos.y) {
@@ -25,7 +26,9 @@ export class RoleDropper {
             else {
                 creep.moveTo(container);
             }
-
+        }
+        else {
+            refreshTree(creep.room, containerId);
         }
     }
 

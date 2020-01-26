@@ -1,7 +1,7 @@
 import { CreepRole } from "enums/enum.roles";
 import { ExpeditionManager } from "./manager.expedition";
 import _ from "lodash";
-import { ContainerExpansion } from "managers/building/manager.containerExpansion";
+import { ContainerExpansion } from "building/building.containerExpansion";
 
 export class Expander {
     private spawn!: StructureSpawn;
@@ -12,7 +12,7 @@ export class Expander {
 
     public mineExpansion() {
         // If we have an untapped local container location, first expand to it.
-        if (this.spawn.memory.sourcesUtilized || !this.localSourceExpansion()) {
+        if (!this.buildInProgress() && (this.spawn.memory.sourcesUtilized || !this.localSourceExpansion())) {
             // start a remote mine expansion request.
             if (!this.spawn.memory.remoteMineExpansionInProgress) {
                 this.remoteMineExpansion();
@@ -20,18 +20,31 @@ export class Expander {
         }
     }
 
+    private buildInProgress(): boolean {
+        if (this.spawn.memory.buildProjects) {
+            if (this.spawn.memory.buildProjects.length > 0) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     private localSourceExpansion(): boolean {
         if (!this.spawn.memory.remoteMineCount) {
             this.spawn.memory.remoteMineCount = 0;
         }
-        const containerUsage: number = this.spawn.memory.remoteMineCount + this.spawn.room.memory.containerMap?.length
-        if (containerUsage === 3) {
+        let containerUsage: number = 0;
+        if (this.spawn.room.memory.containerMap) {
+            containerUsage += this.spawn.room.memory.containerMap.length;
+        }
+        if (containerUsage === 2) {
+            this.spawn.memory.sourcesUtilized = true;
             return false;
         }
         const sources: Source[] | null = this.getSources()
         if (sources) {
             if (containerUsage < sources.length) {
-                const containerExpansion: ContainerExpansion = new ContainerExpansion(this.spawn, this.spawn.room, this.spawn.pos, true);
+                const containerExpansion: ContainerExpansion = new ContainerExpansion(this.spawn, this.spawn.room, this.spawn.pos, false);
                 containerExpansion.checkForSourceExpansion(sources);
                 return true;
             }

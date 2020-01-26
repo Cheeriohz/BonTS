@@ -1,4 +1,4 @@
-import { getContainer } from "../managers/caching/manager.containerSelector"
+import { getContainer, refreshTree } from "../managers/caching/manager.containerSelector"
 
 import { profile } from "Profiler";
 import { RoleCreep } from "./base/role.creep";
@@ -47,16 +47,23 @@ export class RoleHauler extends RoleCreep {
 
     protected fillUpHauler(creep: Creep) {
         if (!creep.memory.precious) {
-            const container = Game.getObjectById<StructureContainer>(getContainer(creep));
+            const containerId = getContainer(creep);
+            const container = Game.getObjectById<StructureContainer>(containerId);
             if (container) {
                 creep.memory.precious = container.id;
                 return this.withdrawMove(creep, container);
+            }
+            else {
+                refreshTree(creep.room, containerId);
             }
         }
         else {
             const container = Game.getObjectById<StructureContainer>(creep.memory.precious);
             if (container) {
                 return this.withdrawMove(creep, container);
+            }
+            else {
+                creep.memory.precious = null;
             }
         }
     }

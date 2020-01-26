@@ -1,5 +1,5 @@
 import _ from "lodash";
-import { getContainer } from "managers/caching/manager.containerSelector";
+import { getContainer, refreshTree } from "managers/caching/manager.containerSelector";
 import { harvestSourceSmart } from "managers/caching/manager.sourceSelector";
 import { profile } from "Profiler";
 import { ControllerCacher } from "managers/caching/manager.controllerCacher";
@@ -18,9 +18,13 @@ export class RoleCreep {
         if (storage) {
             return this.withdrawMove(creep, storage);
         }
-        const container = Game.getObjectById<StructureContainer>(getContainer(creep));
+        const containerId = getContainer(creep);
+        const container = Game.getObjectById<StructureContainer>(containerId);
         if (container) {
             return this.withdrawMove(creep, container);
+        }
+        else {
+            refreshTree(creep.room, containerId);
         }
         return harvestSourceSmart(creep);
     }
@@ -85,6 +89,22 @@ export class RoleCreep {
         else {
             creep.moveTo(structure, { reusePath: 1000, ignoreCreeps: false });
             return;
+        }
+    }
+
+    protected grabAdjacentDroppedEnergy(creep: Creep, adjacentPos: RoomPosition): void {
+        const droppedResources = adjacentPos.findInRange(FIND_DROPPED_RESOURCES, 0);
+        if (droppedResources && droppedResources.length > 0) {
+            creep.pickup(droppedResources[0]);
+        }
+    }
+
+
+    // Quite inefficient, but might be able to find an application where it is valueable.
+    protected checkForDroppedEnergyWhileTraveling(creep: Creep): void {
+        const droppedResources = creep.pos.findInRange(FIND_DROPPED_RESOURCES, 1);
+        if (droppedResources && droppedResources.length > 0) {
+            creep.pickup(droppedResources[0]);
         }
     }
 

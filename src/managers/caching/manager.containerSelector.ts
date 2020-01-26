@@ -3,11 +3,8 @@ import _ from "lodash";
 export function getContainer(creep: Creep): string {
     let containerMap = creep.room.memory.containerMap
     // Check to see if our containerMap has been initialized
-    if (!containerMap) {
-        containerMap = [];
-        for (const container of findContainers(creep.room)) {
-            containerMap.push({ id: container.id, assigned: [] });
-        }
+    if (!containerMap || containerMap.length == 0) {
+        containerMap = buildEmptyContainerMap(containerMap, creep.room);
     }
     if (containerMap.length === 1) {
         creep.room.memory.containerMap = containerMap;
@@ -25,6 +22,15 @@ export function getContainer(creep: Creep): string {
         return assignment;
     }
 
+}
+
+export function buildEmptyContainerMap(containerMap: Assignment[] | null, room: Room) {
+    containerMap = [];
+    for (const container of findContainers(room)) {
+        containerMap.push({ id: container.id, assigned: [] });
+    }
+    room.memory.containerMap = containerMap;
+    return containerMap;
 }
 
 function findContainers(room: Room): StructureContainer[] {
@@ -89,6 +95,17 @@ function cleanTree(containerMap: Assignment[]): Assignment[] {
         }
     }
     return containerMap;
+}
+
+export function refreshTree(room: Room, missingContainer: string) {
+    if (room.memory.containerMap) {
+        _.remove(room.memory.containerMap, (cm) => { return cm.id === missingContainer; });
+
+        const spawn = _.find(_.values(Game.spawns), (s) => { return s.room.name == room.name; });
+        if (spawn) {
+            spawn.memory.sourcesUtilized = false;
+        }
+    }
 }
 
 function getRate(index: number, assigneeCount: number) {
