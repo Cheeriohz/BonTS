@@ -76,7 +76,7 @@ export class RoleCreep {
             return;
         }
         else {
-            creep.moveTo(structure, { reusePath: 1000, ignoreCreeps: false });
+            creep.moveTo(structure, { reusePath: 10, ignoreCreeps: false });
             return;
         }
     }
@@ -126,7 +126,7 @@ export class RoleCreep {
             return;
         }
         else {
-            creep.moveTo(structure, { reusePath: 1000, ignoreCreeps: false });
+            creep.moveTo(structure, { reusePath: 10, ignoreCreeps: false });
             return;
         }
     }
