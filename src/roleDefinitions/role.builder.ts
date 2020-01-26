@@ -46,7 +46,7 @@ export class RoleBuilder extends RoleCreep {
     private getRepairTarget(creep: Creep) {
         const targets = creep.room.find(FIND_STRUCTURES, {
             filter: (structure) => {
-                return (structure.hits < structure.hitsMax && structure.hits < this.maxRepairThreshold)
+                return (structure.structureType !== STRUCTURE_ROAD && structure.hits < structure.hitsMax && structure.hits < this.maxRepairThreshold)
             }
         });
         if (targets.length > 0) {
