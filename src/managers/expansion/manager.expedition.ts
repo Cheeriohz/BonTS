@@ -1,8 +1,7 @@
 import _ from "lodash";
 import { ErrorMapper } from "utils/ErrorMapper";
 import { CreepRole } from "enums/enum.roles";
-import { ServerResponse } from "http";
-import { remoteMineExpeditionHandler } from "./manager.remoteMineExpedition";
+import { ExpeditionResultsHandlerMapper } from "./expansion.expeditionResultsHandlerMap";
 
 // TODO: Fix the issue with creeps ending the expedition early. Most likely has to do with assignment of creeps to nodes and creeps reporting without assignment.
 
@@ -10,8 +9,7 @@ export class ExpeditionManager {
     private expeditionResultsHandlerMap: Map<string, IExpeditionResultsHandlerConstructor>;
 
     constructor() {
-        this.expeditionResultsHandlerMap = new Map<string, IExpeditionResultsHandlerConstructor>()
-        this.expeditionResultsHandlerMap.set('remoteMiningSource', remoteMineExpeditionHandler)
+        this.expeditionResultsHandlerMap = ExpeditionResultsHandlerMapper.getMap();
     }
 
     public reportForInitialAssignment(creep: Creep) {
