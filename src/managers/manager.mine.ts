@@ -1,7 +1,7 @@
 import { CreepRole } from "enums/enum.roles";
-import { DedicatedCreepRequester } from "./cycle/manager.dedicatedCreepRequester";
+import { DedicatedCreepRequester } from "../cycle/manager.dedicatedCreepRequester";
 import _ from "lodash";
-import { CreepRequester } from "./cycle/manager.creepRequester";
+import { CreepRequester } from "../cycle/manager.creepRequester";
 
 export class MineManager {
     room!: Room;

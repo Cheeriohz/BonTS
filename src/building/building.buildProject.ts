@@ -1,5 +1,5 @@
 import { ConstructionSiteCacher } from "caching/manager.constructionSiteCacher";
-import { CreepRequester } from "managers/cycle/manager.creepRequester";
+import { CreepRequester } from "cycle/manager.creepRequester";
 import { BuildProjectEnum } from "./interfaces/building.enum";
 import _ from "lodash";
 import { buildEmptyContainerMap } from "caching/manager.containerSelector";

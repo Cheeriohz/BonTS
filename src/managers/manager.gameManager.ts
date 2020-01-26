@@ -1,5 +1,5 @@
 // Managers
-import { CycleManager } from "managers/cycle/manager.cycle";
+import { CycleManager } from "cycle/manager.cycle";
 import { RolesManager } from "managers/manager.roles";
 import { Spawn } from "managers/manager.spawn";
 import { TowerManager } from "managers/structures/manager.towers";

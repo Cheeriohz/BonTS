@@ -1,11 +1,11 @@
 
-import { ConstructionSiteCacher } from "../../caching/manager.constructionSiteCacher";
-import { pruneContainerTree } from "../../caching/manager.containerSelector";
-import { ControllerCacher } from "../../caching/manager.controllerCacher"
-import { pruneSourceTree } from "../../caching/manager.sourceSelector";
-import { Spawn } from "../manager.spawn";
-import { Expander } from "../expansion/manager.expander";
-import { LinkManager } from "../structures/manager.links";
+import { ConstructionSiteCacher } from "../caching/manager.constructionSiteCacher";
+import { pruneContainerTree } from "../caching/manager.containerSelector";
+import { ControllerCacher } from "../caching/manager.controllerCacher"
+import { pruneSourceTree } from "../caching/manager.sourceSelector";
+import { Spawn } from "../managers/manager.spawn";
+import { Expander } from "../managers/expansion/manager.expander";
+import { LinkManager } from "../managers/structures/manager.links";
 import { SpawnReassment } from "./manager.spawnReassessment";
 import { CreepRequester } from "./manager.creepRequester";
 import { ContainerExpansion } from "building/building.containerExpansion";
