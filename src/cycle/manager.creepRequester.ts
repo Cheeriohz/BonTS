@@ -70,7 +70,7 @@ export class CreepRequester {
                 return (structure.structureType === structureType && individualThreshold - structure.hits > individualDifference);
             }
         });
-        console.log(JSON.stringify(structures));
+        // console.log(JSON.stringify(structures));
         if (structures) {
             if (structures.length > 0) {
                 let totalDamage: number = 0;
