@@ -1,5 +1,6 @@
 import { RoleCreep } from "./base/role.creep";
 export class RoleBuilder extends RoleCreep {
+    private maxRepairThreshold: number = 1000000
 
     public run(creep: Creep) {
         const currentEnergy = creep.store[RESOURCE_ENERGY]
@@ -11,6 +12,7 @@ export class RoleBuilder extends RoleCreep {
         if (!creep.memory.working && creep.store.getFreeCapacity() === 0) {
             creep.memory.working = true;
             creep.say('🚧 build');
+            creep.say("🔧 Repair");
         }
 
         if (creep.memory.working) {
@@ -23,19 +25,34 @@ export class RoleBuilder extends RoleCreep {
         }
     }
 
-    // TODO: Add repair caching and builder cyclic deploy.
     private repair(creep: Creep) {
-        const maxRepairThreshold: number = 1000000
+        if (creep.memory.precious) {
+            const repairTarget: Structure | null = Game.getObjectById(creep.memory.precious);
+            if (repairTarget && repairTarget.hits !== this.maxRepairThreshold && repairTarget.hits !== repairTarget.hitsMax) {
+                this.repairMove(creep, repairTarget);
+            }
+            else {
+                creep.memory.precious = null;
+                this.repair(creep);
+                return;
+            }
+        }
+        else {
+            this.getRepairTarget(creep);
+        }
+
+    }
+
+    private getRepairTarget(creep: Creep) {
         const targets = creep.room.find(FIND_STRUCTURES, {
             filter: (structure) => {
-                return (structure.hits < structure.hitsMax && structure.hits < maxRepairThreshold)
+                return (structure.hits < structure.hitsMax && structure.hits < this.maxRepairThreshold)
             }
         });
         if (targets.length > 0) {
-            if (creep.repair(targets[0]) === ERR_NOT_IN_RANGE) {
-                creep.say("🔧 Repair");
-                creep.moveTo(targets[0], { visualizePathStyle: { stroke: '#3ADF00' } });
-            }
+            creep.memory.precious = targets[0].id;
+            this.repair(creep);
+            return;
         }
         else {
             this.upgradeController(creep);

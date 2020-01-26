@@ -91,6 +91,17 @@ export class RoleCreep {
             return;
         }
     }
+    protected repairMove(creep: Creep, structure: Structure) {
+        if (creep.pos.isNearTo(structure)) {
+            creep.repair(structure);
+            return;
+        }
+        else {
+            creep.moveTo(structure, { reusePath: 15, ignoreCreeps: false });
+            return;
+        }
+    }
+
 
     protected grabAdjacentDroppedEnergy(creep: Creep, adjacentPos: RoomPosition): void {
         const droppedResources = adjacentPos.findInRange(FIND_DROPPED_RESOURCES, 0);
