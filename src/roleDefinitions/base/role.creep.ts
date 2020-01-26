@@ -1,9 +1,9 @@
 import _ from "lodash";
-import { getContainer, refreshTree } from "managers/caching/manager.containerSelector";
-import { harvestSourceSmart } from "managers/caching/manager.sourceSelector";
+import { getContainer, refreshTree } from "caching/manager.containerSelector";
+import { harvestSourceSmart } from "caching/manager.sourceSelector";
 import { profile } from "Profiler";
-import { ControllerCacher } from "managers/caching/manager.controllerCacher";
-import { ConstructionSiteCacher } from "managers/caching/manager.constructionSiteCacher";
+import { ControllerCacher } from "caching/manager.controllerCacher";
+import { ConstructionSiteCacher } from "caching/manager.constructionSiteCacher";
 
 @profile
 export class RoleCreep {

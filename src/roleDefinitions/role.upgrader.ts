@@ -1,4 +1,4 @@
-import { harvestSourceSmart } from "../managers/caching/manager.sourceSelector";
+import { harvestSourceSmart } from "../caching/manager.sourceSelector";
 import { RoleCreep } from "./base/role.creep";
 export class RoleUpgrader extends RoleCreep {
 

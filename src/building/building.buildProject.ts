@@ -1,8 +1,8 @@
-import { ConstructionSiteCacher } from "managers/caching/manager.constructionSiteCacher";
+import { ConstructionSiteCacher } from "caching/manager.constructionSiteCacher";
 import { CreepRequester } from "managers/cycle/manager.creepRequester";
 import { BuildProjectEnum } from "./interfaces/building.enum";
 import _ from "lodash";
-import { buildEmptyContainerMap } from "managers/caching/manager.containerSelector";
+import { buildEmptyContainerMap } from "caching/manager.containerSelector";
 import { CreepRole } from "enums/enum.roles";
 
 export class BuildProjectManager {

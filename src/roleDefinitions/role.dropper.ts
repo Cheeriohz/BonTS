@@ -1,4 +1,4 @@
-import { getContainer, refreshTree } from "../managers/caching/manager.containerSelector"
+import { getContainer, refreshTree } from "../caching/manager.containerSelector"
 
 import { profile } from "Profiler";
 @profile
