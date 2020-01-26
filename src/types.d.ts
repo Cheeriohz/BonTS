@@ -18,26 +18,13 @@ interface RoomMemory {
   mine: Mine | null;
 }
 
-interface Mine {
-  extractorId: Id<StructureExtractor>;
-  containerId: Id<StructureContainer>;
-  miner: string;
-  hauler: string;
-  type: MineralConstant | DepositConstant;
-  vein: Id<Mineral> | Id<Deposit>;
-}
-
-interface Assignment {
-  id: string;
-  assigned: string[];
-}
-
 interface SpawnMemory {
   reassess: boolean | null;
   remoteCreepRequest: CreepRequest[] | null;
   dedicatedCreepRequest: DedicatedCreepRequest[] | null;
   remoteMineCount: number | null;
   remoteMineExpansionInProgress: boolean | null;
+  remoteMines: RemoteMine[] | null;
   expeditionResults: IExpeditionResults[] | null;
   rcl: number | null;
   rclUpgrades: RCLUpgradeEvent[] | null;
