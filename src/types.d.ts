@@ -10,7 +10,7 @@ interface CreepMemory {
 interface RoomMemory {
   era: number;
   sourceMap: Assignment[];
-  containerMap: Assignment[];
+  containerMap: Assignment[] | null;
   constructionSites: Id<ConstructionSite<BuildableStructureConstant>>[];
   controller: Id<StructureController> | null;
   sourceLinks: Id<StructureLink>[] | null;
@@ -43,16 +43,6 @@ interface SpawnMemory {
   rclUpgrades: RCLUpgradeEvent[] | null;
   sourcesUtilized: boolean;
   buildProjects: BuildProject[] | null;
-}
-
-interface CreepRequest {
-  role: number;
-  body: any[];
-}
-
-interface DedicatedCreepRequest extends CreepRequest {
-  dedication: string;
-  specifiedName: string;
 }
 
 interface Memory {

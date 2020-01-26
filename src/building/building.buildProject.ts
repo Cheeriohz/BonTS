@@ -2,6 +2,8 @@ import { ConstructionSiteCacher } from "managers/caching/manager.constructionSit
 import { CreepRequester } from "managers/cycle/manager.creepRequester";
 import { BuildProjectEnum } from "./interfaces/building.enum";
 import _ from "lodash";
+import { buildEmptyContainerMap } from "managers/caching/manager.containerSelector";
+import { CreepRole } from "enums/enum.roles";
 
 export class BuildProjectManager {
     private spawn!: StructureSpawn;
@@ -47,8 +49,28 @@ export class BuildProjectManager {
 
     private handOffProject() {
         switch (this.project.projectType) {
-            case BuildProjectEnum.LocalMineralExpansion:
+            case BuildProjectEnum.LocalMineralExpansion: {
                 this.handOffLocalMineralExpansion();
+            }
+            case BuildProjectEnum.LocalContainerExpansion: {
+                this.handOffLocalContainerExpansion();
+            }
+        }
+    }
+
+    private handOffLocalContainerExpansion() {
+        if (this.spawn.room.memory.containerMap) {
+            // empty the map, so it will reassess.
+            this.spawn.room.memory.containerMap = null;
+        }
+        buildEmptyContainerMap([], this.spawn.room)
+        this.clearHaulerContainerSelection(this.spawn.room);
+        _.remove(this.spawn.memory.buildProjects!, this.project);
+    }
+
+    private clearHaulerContainerSelection(room: Room) {
+        for (const creep of _.filter(_.values(Game.creeps), (c) => { return c.room.name === room.name && c.memory.role === CreepRole.hauler && !c.memory.dedication; })) {
+            creep.memory.precious = null;
         }
     }
 
@@ -73,9 +95,7 @@ export class BuildProjectManager {
                     }
                 }
                 this.spawn.room.createConstructionSite(container.pos.x, container.pos.y, STRUCTURE_ROAD);
-                if (this.spawn.memory.buildProjects) {
-                    _.remove(this.spawn.memory.buildProjects, this.project);
-                }
+                _.remove(this.spawn.memory.buildProjects!, this.project);
             }
         }
     }
