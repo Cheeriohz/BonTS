@@ -1,6 +1,7 @@
 import { CreepRole } from "enums/enum.roles";
 import { DedicatedCreepRequester } from "./cycle/manager.dedicatedCreepRequester";
 import _ from "lodash";
+import { CreepRequester } from "./cycle/manager.creepRequester";
 
 export class MineManager {
     room!: Room;
@@ -57,11 +58,45 @@ export class MineManager {
 
     private haulerNeeded(): boolean {
         const container: StructureContainer | null = Game.getObjectById(this.room.memory.mine!.containerId);
-        if (container!.store.getFreeCapacity() < 400) {
-            return true;
+        if (container) {
+            if (container.store.getFreeCapacity() < 400) {
+                return true;
+            }
         }
         else {
-            return false;
+            // Container has been destroyed, need to rebuild
+            if (!this.reassignContainer()) {
+                this.rebuildContainer();
+            }
+        }
+        return false;
+    }
+
+    private reassignContainer(): boolean {
+        const vein: Mineral | Deposit | null = Game.getObjectById(this.room.memory.mine!.vein);
+        if (vein) {
+            const newContainers: StructureContainer[] | null = vein.pos.findInRange<StructureContainer>(FIND_STRUCTURES, 1, {
+                filter: (s) => { return s.structureType === STRUCTURE_CONTAINER; }
+            });
+            if (newContainers.length > 0) {
+                this.room.memory.mine!.containerId = newContainers[0].id;
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private rebuildContainer() {
+        const vein: Mineral | Deposit | null = Game.getObjectById(this.room.memory.mine!.vein);
+        if (vein) {
+            const nearestRoad: Structure | null = vein.pos.findClosestByRange(FIND_STRUCTURES, {
+                filter: (s) => { return s.structureType === STRUCTURE_ROAD; }
+            });
+            if (nearestRoad) {
+                this.room.createConstructionSite(nearestRoad.pos.x, nearestRoad.pos.y, STRUCTURE_CONTAINER);
+                const cr: CreepRequester = new CreepRequester(this.spawn);
+                cr.MaintainBuilder();
+            }
         }
     }
 
