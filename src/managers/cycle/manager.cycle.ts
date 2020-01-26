@@ -4,14 +4,12 @@ import { pruneContainerTree } from "../caching/manager.containerSelector";
 import { ControllerCacher } from "../caching/manager.controllerCacher"
 import { pruneSourceTree } from "../caching/manager.sourceSelector";
 import { Spawn } from "../manager.spawn";
-import { TerrainScanner } from "../building/manager.terrainScanner";
 import { Expander } from "../expansion/manager.expander";
 import { LinkManager } from "../structures/manager.links";
 import { SpawnReassment } from "./manager.spawnReassessment";
-import { ExpeditionManager } from "managers/expansion/manager.expedition";
 import { CreepRequester } from "./manager.creepRequester";
-import { ContainerExpansion } from "managers/building/manager.containerExpansion";
-import { BuildProjectManager } from "managers/building/manager.buildProject";
+import { ContainerExpansion } from "building/building.containerExpansion";
+import { BuildProjectManager } from "building/building.buildProject";
 import _ from "lodash";
 
 export class CycleManager {
