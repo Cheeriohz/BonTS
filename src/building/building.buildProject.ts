@@ -4,6 +4,7 @@ import { BuildProjectEnum } from "./interfaces/building.enum";
 import _ from "lodash";
 import { buildEmptyContainerMap } from "caching/manager.containerSelector";
 import { CreepRole } from "enums/enum.roles";
+import { DedicatedCreepRequester } from "cycle/manager.dedicatedCreepRequester";
 
 export class BuildProjectManager {
     private spawn!: StructureSpawn;
@@ -15,39 +16,99 @@ export class BuildProjectManager {
     }
 
     public manageProject() {
-        this.checkConstructionSites();
-        this.addConstructionSites();
-        this.maintainActiveBuilder();
+        if (this.project.roomName === this.spawn.room.name) {
+            this.manageProject();
+        }
+        else {
+            this.manageRemoteProject();
+        }
+
+    }
+
+    private manageLocalProject() {
+        this.checkConstructionSites(this.spawn.room);
+        this.addConstructionSites(this.spawn.room);
+        this.maintainActiveLocalBuilder();
         if (this.project.activeSites === 0 && this.project.buildOrders.length === 0) {
-            this.handOffProject();
+            this.handOffProject(false);
         }
     }
 
-    private checkConstructionSites() {
-        ConstructionSiteCacher.updateConstructionSites(this.spawn.room);
-        if (this.spawn.room.memory.constructionSites) {
-            if (this.spawn.room.memory.constructionSites.length < this.project.activeSites) {
-                this.project.activeSites = this.spawn.room.memory.constructionSites.length;
+    private manageRemoteProject() {
+        // NOT IMPLEMENTED YET
+        return;
+    }
+
+    private _manageRemoteProject() {
+        const room = this.roomCheck(this.project.roomName);
+        if (room) {
+            this.checkConstructionSites(room);
+            this.addConstructionSites(room);
+        }
+        this.maintainActiveRemoteBuilder();
+        if (this.project.activeSites === 0 && this.project.buildOrders.length === 0) {
+            this.handOffProject(true);
+        }
+    }
+
+    private roomCheck(roomName: string): Room | null {
+        const room = Game.rooms[roomName];
+        if (room) {
+            return room;
+        }
+        else {
+            const cr: CreepRequester = new CreepRequester(this.spawn);
+            cr.RequestScoutToRoom(roomName);
+            return null;
+        }
+    }
+
+    private checkConstructionSites(room: Room) {
+        ConstructionSiteCacher.updateConstructionSites(room);
+        if (room.memory.constructionSites) {
+            if (room.memory.constructionSites.length < this.project.activeSites) {
+                this.project.activeSites = room.memory.constructionSites.length;
             }
         }
     }
 
-    private addConstructionSites() {
+    private addConstructionSites(room: Room) {
         while (this.project.buildOrders.length > 0 && this.project.activeSites < 3) {
             const buildSite: BuildOrder | undefined = this.project.buildOrders.pop();
             if (buildSite) {
-                this.spawn.room.createConstructionSite(buildSite.x, buildSite.y, buildSite.type);
+                room.createConstructionSite(buildSite.x, buildSite.y, buildSite.type);
                 this.project.activeSites++;
             }
         }
     }
 
-    private maintainActiveBuilder() {
+    private maintainActiveLocalBuilder() {
         const creepRequester: CreepRequester = new CreepRequester(this.spawn);
         creepRequester.MaintainBuilder();
     }
 
-    private handOffProject() {
+    private maintainActiveRemoteBuilder() {
+        if (!this.getActiveRemoteBuilder(this.project.roomName)) {
+            const dcr: DedicatedCreepRequester = new DedicatedCreepRequester(this.spawn);
+            dcr.createdDedicatedCreepRequest(this.project.roomName, CreepRole.builder, `${this.spawn.name}_BPR_${this.project.roomName}`);
+        }
+    }
+
+    private getActiveRemoteBuilder(roomName: string): Creep | null {
+        for (const creep of _.values(Game.creeps)) {
+            if (creep.memory.role === CreepRole.builder) {
+                if (creep.memory.dedication) {
+                    if (creep.memory.dedication === roomName) {
+                        return creep;
+                    }
+                }
+            }
+        }
+        return null;
+    }
+
+
+    private handOffProject(remote: boolean) {
         switch (this.project.projectType) {
             case BuildProjectEnum.LocalMineralExpansion: {
                 this.handOffLocalMineralExpansion();
@@ -55,7 +116,34 @@ export class BuildProjectManager {
             case BuildProjectEnum.LocalContainerExpansion: {
                 this.handOffLocalContainerExpansion();
             }
+            case BuildProjectEnum.RemoteContainerExpansion: {
+                this.attemptRemoteContainerExpansionHandOff(remote);
+            }
         }
+    }
+
+    private attemptRemoteContainerExpansionHandOff(remote: boolean) {
+        if (this.spawn.memory.buildProjects!.length > 1) {
+            // There are more build Projects for this remote expansion, remove the current project and allow it to continue.
+            _.remove(this.spawn.memory.buildProjects!, this.project);
+            if (remote) {
+                // If we are already in the remote phase, reassign the remote builder.
+                const remoteBot = this.getActiveRemoteBuilder(this.project.roomName);
+                if (remoteBot) {
+                    remoteBot.memory.dedication = this.spawn.memory.buildProjects![0].roomName;
+                }
+            }
+            // kickoff the next build project immediately.
+            this.kickOffNextProject();
+        }
+        else {
+            // TODO Implement final build project hand off for remote expansion.
+        }
+    }
+
+    private kickOffNextProject() {
+        const projectManager: BuildProjectManager = new BuildProjectManager(this.spawn, this.spawn.memory.buildProjects![0]);
+        projectManager.manageProject();
     }
 
     private handOffLocalContainerExpansion() {
