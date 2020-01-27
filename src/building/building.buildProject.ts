@@ -17,7 +17,7 @@ export class BuildProjectManager {
 
     public manageProject() {
         if (this.project.roomName === this.spawn.room.name) {
-            this.manageProject();
+            this.manageLocalProject();
         }
         else {
             this.manageRemoteProject();
