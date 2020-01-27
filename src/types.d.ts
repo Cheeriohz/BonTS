@@ -1,10 +1,11 @@
 interface CreepMemory {
   role: number;
   working: boolean;
-  orders: CreepOrder | null;
-  ignoreLinks: boolean | null;
-  dedication: string | null;
-  precious: string | null;
+  orders?: CreepOrder | null;
+  ignoreLinks?: boolean | null;
+  dedication?: string | null;
+  precious?: string | null;
+  home?: string | null
 }
 
 interface RoomMemory {
