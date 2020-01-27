@@ -24,10 +24,7 @@ export class CreepRequester {
             {
                 target: roomName,
                 independentOperator: true
-            },
-            dedication: null,
-            precious: null,
-            ignoreLinks: null
+            }
         };
         const scoutRequest: CreepRequest = { role: CreepRole.scout, body: [MOVE], memory: memory };
         if (!this.spawn.memory.remoteCreepRequest) {
@@ -59,7 +56,7 @@ export class CreepRequester {
     }
 
     private RequestRepairBot() {
-        const builderRequest: CreepRequest = { role: CreepRole.builder, body: [WORK, WORK, WORK, WORK, CARRY, CARRY, MOVE, MOVE, MOVE], memory: null };
+        const builderRequest: CreepRequest = { role: CreepRole.builder, body: [WORK, WORK, WORK, WORK, CARRY, CARRY, MOVE, MOVE, MOVE] };
         if (!this.spawn.memory.remoteCreepRequest) {
             this.spawn.memory.remoteCreepRequest = [];
         }
