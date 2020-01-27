@@ -1,13 +1,14 @@
 import { getContainer, refreshTree } from "../caching/manager.containerSelector"
 
 import { profile } from "Profiler";
+import { RoleCreep } from "./base/role.creep";
 @profile
-export class RoleDropper {
+export class RoleDropper extends RoleCreep {
 
     public run(creep: Creep) {
         // Check if in range to harvest
         if (creep.memory.working) {
-            this.harvest(creep)
+            super.harvestPrecious(creep)
         }
         else {
             this.relocate(creep);
@@ -38,18 +39,6 @@ export class RoleDropper {
             creep.memory.precious = source.id;
         }
     }
-
-
-    // Checks to see if in range to havest from a source
-    protected harvest(creep: Creep) {
-        if (creep.memory.precious) {
-            const harvestTarget: Source | Mineral | Deposit | null = Game.getObjectById(creep.memory.precious);
-            if (harvestTarget) {
-                creep.harvest(harvestTarget);
-            }
-        }
-    }
-
 
     private locateSource(creep: Creep): Source | null {
         return creep.pos.findClosestByRange(FIND_SOURCES);

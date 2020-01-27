@@ -9,10 +9,10 @@ import { RoleHarvester } from "roleDefinitions/role.harvester";
 import { RoleHauler } from "roleDefinitions/role.hauler";
 import { RoleUpgrader } from "roleDefinitions/role.upgrader";
 import { RoleScout } from "roleDefinitions/role.scout";
-import { ExpeditionManager } from "./expansion/manager.expedition";
+import { ExpeditionManager } from "../expansion/manager.expedition";
 import { RoleDedicatedDropper } from "roleDefinitions/dedicated/role.dedicated.dropper";
 import { RoleDedicatedHauler } from "roleDefinitions/dedicated/role.dedicated.hauler";
-import { RoleRemoteBuilder } from "roleDefinitions/remote/role.dedicated.builder";
+import { RoleRemoteBuilder } from "roleDefinitions/remote/role.remote.builder";
 
 export
     class RolesManager {
@@ -110,6 +110,7 @@ export
         switch (creep.memory.role) {
             case CreepRole.builder: {
                 this.mRBuilder.run(creep);
+                break;
             }
             default: {
                 console.log(`No remote role exists for creep: ${creep.name}`);

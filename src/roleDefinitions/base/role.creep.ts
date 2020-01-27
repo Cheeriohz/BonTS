@@ -292,4 +292,14 @@ export class RoleCreep {
         }
         return false;
     }
+
+    // Checks to see if in range to havest from a source
+    protected harvestPrecious(creep: Creep) {
+        if (creep.memory.precious) {
+            const harvestTarget: Source | Mineral | Deposit | null = Game.getObjectById(creep.memory.precious);
+            if (harvestTarget) {
+                creep.harvest(harvestTarget);
+            }
+        }
+    }
 }

@@ -1,4 +1,4 @@
-import { ExpeditionManager } from "managers/expansion/manager.expedition";
+import { ExpeditionManager } from "expansion/manager.expedition";
 import _ from "lodash";
 import { RoleRemote } from "./base/role.remote";
 
