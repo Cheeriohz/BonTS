@@ -88,7 +88,13 @@ export class buildProjectCreator {
             const presentObjects: Structure[] | null = this.room.lookForAt(LOOK_STRUCTURES, pathStep.x, pathStep.y);
             if (presentObjects) {
                 for (const structure of presentObjects) {
-                    if (structure.structureType === STRUCTURE_ROAD) {
+                    if (structure.structureType === STRUCTURE_ROAD
+                        || structure.structureType === STRUCTURE_CONTAINER
+                        || structure.structureType === STRUCTURE_LINK
+                        || structure.structureType === STRUCTURE_STORAGE
+                        || structure.structureType === STRUCTURE_TERMINAL
+                        || structure.structureType === STRUCTURE_TOWER
+                        || structure.structureType === STRUCTURE_WALL) {
                         return false;
                     }
                 }

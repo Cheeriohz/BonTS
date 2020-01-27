@@ -35,11 +35,6 @@ export class BuildProjectManager {
     }
 
     private manageRemoteProject() {
-        // NOT IMPLEMENTED YET
-        return;
-    }
-
-    private _manageRemoteProject() {
         const room = this.roomCheck(this.project.roomName);
         if (room) {
             this.checkConstructionSites(room);
@@ -137,8 +132,47 @@ export class BuildProjectManager {
             this.kickOffNextProject();
         }
         else {
-            // TODO Implement final build project hand off for remote expansion.
+            this.handOffRemoteContainerExpansion();
         }
+    }
+
+    private handOffRemoteContainerExpansion() {
+        const remoteMine: RemoteMine | undefined = _.first(_.filter(this.spawn.memory.remoteMines, (rm) => { return rm.vein === null }));
+        if (remoteMine) {
+            const endPath = _.last(remoteMine!.pathingLookup[this.project.roomName][0]);
+            if (endPath) {
+                const containerPos = new RoomPosition(endPath.x, endPath.y, this.project.roomName);
+                if (containerPos) {
+                    const containers = containerPos.lookFor(LOOK_STRUCTURES);
+                    if (containers.length === 1) {
+                        const source = containers[0].pos.findClosestByRange(FIND_SOURCES);
+                        if (source) {
+                            this.updateRemoteMineInMemoryForHandoff(source, <StructureContainer>containers[0], remoteMine);
+                            this.spawn.room.createConstructionSite(containers[0].pos.x, containers[0].pos.y, STRUCTURE_ROAD);
+                            _.remove(this.spawn.memory.buildProjects!, this.project);
+                        }
+                    }
+                    else {
+                        console.log("Identified multiple structures at end of path");
+                    }
+                }
+                else {
+                    console.log("Could not map container position for end of path");
+                }
+            }
+            else {
+                console.log("Could not identify ending path");
+            }
+        }
+        else {
+            console.log("Could not identify remote mine");
+        }
+    }
+
+
+    private updateRemoteMineInMemoryForHandoff(source: Source, container: StructureContainer, remoteMine: RemoteMine) {
+        remoteMine.vein = source.id;
+        remoteMine.containerId = container.id;
     }
 
     private kickOffNextProject() {
