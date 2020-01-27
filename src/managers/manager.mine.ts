@@ -32,7 +32,9 @@ export class MineManager {
                     if (!this.creepNotInQueue(this.room.memory.mine.miner)) {
                         const container: StructureContainer | null = Game.getObjectById(this.room.memory.mine!.containerId);
                         if (container) {
-                            this.requestMiner(this.room.memory.mine);
+                            if (this.minerNeeded()) {
+                                this.requestMiner(this.room.memory.mine);
+                            }
                         }
                         else {
                             if (!this.reassignContainer()) {
@@ -61,6 +63,20 @@ export class MineManager {
                 this.requestHauler(this.room.memory.mine);
             }
         }
+    }
+
+    private minerNeeded(): boolean {
+        if (this.room.memory.mine) {
+            const vein: Mineral | Deposit | null = Game.getObjectById<Mineral | Deposit>(this.room.memory.mine.vein);
+            const mineralAmount = _.get(vein, 'mineralAmount', null);
+            if (mineralAmount) {
+                // TODO Make this more robust
+                if (mineralAmount > 4000) {
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 
     private haulerNeeded(): boolean {
