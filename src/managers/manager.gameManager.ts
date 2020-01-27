@@ -9,6 +9,12 @@ import _ from "lodash";
 export class GameManager {
 
     public static run() {
+        if (Memory.cycle > 99) {
+            Memory.cycle = 0;
+        } else {
+            Memory.cycle++;
+        }
+
         this.runClean();
         // this.runLogging();
     }

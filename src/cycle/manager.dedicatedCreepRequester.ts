@@ -27,11 +27,11 @@ export class DedicatedCreepRequester {
     }
 
     private createDedicatedDropper(dedication: string, specifiedName: string): DedicatedCreepRequest {
-        return { role: CreepRole.dropper, body: [WORK, WORK, WORK, WORK, WORK, WORK, MOVE], dedication: dedication, specifiedName: specifiedName };
+        return { role: CreepRole.dropper, body: [WORK, WORK, WORK, WORK, WORK, WORK, MOVE], dedication: dedication, specifiedName: specifiedName, memory: null };
     }
 
     private createDedicatedHauler(dedication: string, specifiedName: string): DedicatedCreepRequest {
-        return { role: CreepRole.hauler, body: [CARRY, CARRY, CARRY, MOVE, MOVE, MOVE], dedication: dedication, specifiedName: specifiedName };
+        return { role: CreepRole.hauler, body: [CARRY, CARRY, CARRY, MOVE, MOVE, MOVE], dedication: dedication, specifiedName: specifiedName, memory: null };
     }
 
 

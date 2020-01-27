@@ -10,6 +10,30 @@ export class CreepRequester {
         this.spawn = spawn;
     }
 
+    public RequestScoutToRoom(roomName: string) {
+        if (this.scoutAlreadyRequested(roomName)) {
+            return;
+        }
+        const memory: CreepMemory =
+        {
+            role: CreepRole.scout,
+            working: true,
+            orders:
+            {
+                target: roomName,
+                independentOperator: true
+            },
+            dedication: null,
+            precious: null,
+            ignoreLinks: null
+        };
+        const scoutRequest: CreepRequest = { role: CreepRole.scout, body: [MOVE], memory: memory };
+        if (!this.spawn.memory.remoteCreepRequest) {
+            this.spawn.memory.remoteCreepRequest = [];
+        }
+        this.spawn.memory.remoteCreepRequest.push(scoutRequest);
+    }
+
     public MaintainBuilder(): void {
         if (!this.RepairCreepRequested() && !this.HaveRepairWorker()) {
             this.RequestRepairBot();
@@ -23,8 +47,18 @@ export class CreepRequester {
         }
     }
 
+    private scoutAlreadyRequested(roomName: string): boolean {
+        // TODO add queue check.
+        for (const creep of _.values(Game.creeps)) {
+            if (creep.memory.role === CreepRole.scout && creep.memory.orders && creep.memory.orders.target === roomName) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     private RequestRepairBot() {
-        const builderRequest: CreepRequest = { role: CreepRole.builder, body: [WORK, WORK, WORK, WORK, CARRY, CARRY, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE] };
+        const builderRequest: CreepRequest = { role: CreepRole.builder, body: [WORK, WORK, WORK, WORK, CARRY, CARRY, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE], memory: null };
         if (!this.spawn.memory.remoteCreepRequest) {
             this.spawn.memory.remoteCreepRequest = [];
         }

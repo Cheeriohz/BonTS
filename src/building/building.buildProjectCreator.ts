@@ -9,6 +9,7 @@ export class buildProjectCreator {
         this.spawn = spawn;
     }
 
+    // Last Pathstep will become an extractor. Next to last pathstep will become a container. Remaining will become roads'
     public createBuildProjectLocalMineExpansion(path: PathStep[], projectType: BuildProjectEnum) {
         const extractorLocation: PathStep | undefined = path.pop();
         if (extractorLocation) {
@@ -22,13 +23,21 @@ export class buildProjectCreator {
         }
     }
 
-    public createBuildProjectLocalContainerExpansion(path: PathStep[], projectType: BuildProjectEnum) {
+    // Last pathstep will become a container. Remaining pathsteps will become roads.
+    public createBuildProjectContainerExpansion(path: PathStep[], projectType: BuildProjectEnum) {
         const containerLocation: PathStep | undefined = path.pop();
         if (containerLocation) {
             let buildOrders: BuildOrder[] = [this.createContainerBuildOrder(containerLocation)];
             this.fillPathWithRoads(path, buildOrders);
             this.pushBuildProjectToSpawn(buildOrders, projectType);
         }
+    }
+
+    // All pathsteps will become roads;
+    public createBuildProjectHighway(path: PathStep[], projectType: BuildProjectEnum) {
+        let buildOrders: BuildOrder[] = [];
+        this.fillPathWithRoads(path, buildOrders);
+        this.pushBuildProjectToSpawn(buildOrders, projectType);
     }
 
     private pushBuildProjectToSpawn(buildOrders: BuildOrder[], projectType: BuildProjectEnum) {

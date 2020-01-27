@@ -99,9 +99,17 @@ export class Spawn {
         if (spawn.memory.remoteCreepRequest) {
             if (spawn.memory.remoteCreepRequest.length > 0) {
                 const request: CreepRequest = spawn.memory.remoteCreepRequest[0];
-                if (ManagerHelperSpawner.spawnACreep(spawn, request.body, CreepRole[request.role], request.role) == OK) {
-                    spawn.memory.remoteCreepRequest = _.takeRight(spawn.memory.remoteCreepRequest, spawn.memory.remoteCreepRequest.length - 1);
+                if (request.memory) {
+                    if (ManagerHelperSpawner.spawnACreepWithMemory(spawn, request.body, CreepRole[request.role], request.role, request.memory) == OK) {
+                        spawn.memory.remoteCreepRequest = _.takeRight(spawn.memory.remoteCreepRequest, spawn.memory.remoteCreepRequest.length - 1);
+                    }
                 }
+                else {
+                    if (ManagerHelperSpawner.spawnACreep(spawn, request.body, CreepRole[request.role], request.role) == OK) {
+                        spawn.memory.remoteCreepRequest = _.takeRight(spawn.memory.remoteCreepRequest, spawn.memory.remoteCreepRequest.length - 1);
+                    }
+                }
+
                 return;
             }
         }

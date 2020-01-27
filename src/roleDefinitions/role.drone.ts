@@ -27,8 +27,8 @@ export class RoleDrone extends RoleCreep {
     }
 
     private performDuty(creep: Creep) {
-        if (!this.construct(creep)) {
-            this.upgradeController(creep);
-        }
+        //if (!this.construct(creep)) {
+        this.upgradeController(creep);
+        //}
     }
 };

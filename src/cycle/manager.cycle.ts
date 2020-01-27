@@ -11,13 +11,13 @@ import { CreepRequester } from "./manager.creepRequester";
 import { ContainerExpansion } from "building/building.containerExpansion";
 import { BuildProjectManager } from "building/building.buildProject";
 import _ from "lodash";
+import { ExpeditionResultsHandlerMapper } from "managers/expansion/expansion.expeditionResultsHandlerMap";
 
 export class CycleManager {
 
     public static check() {
-        if (Memory.cycle > 99) {
+        if (Memory.cycle === 0) {
             this.manageLongTermTasks();
-            Memory.cycle = 0;
         }
         else if (Memory.cycle % 20 === 0) {
             this.manageMediumTermTasks();
@@ -52,7 +52,6 @@ export class CycleManager {
         ConstructionSiteCacher.dispose();
         ControllerCacher.dispose();
         this.handleRCLUpgrades(Game.spawns['Sp1']);
-        Memory.cycle++;
     }
 
     private static updateSpawnConstructionSiteMaps() {
@@ -71,16 +70,51 @@ export class CycleManager {
     private static spawnLevelTasksLongTerm() {
         for (const spawnName in Game.spawns) {
             const spawn = Game.spawns[spawnName];
+
             const expander: Expander = new Expander(spawn);
-            this.cleanUpTrees(spawn.room);
             expander.mineExpansion();
-            if (spawn.memory?.reassess) {
-                const reassessment: SpawnReassment = new SpawnReassment(spawn);
-                reassessment.reassess();
-            }
+
+            this.cleanUpTrees(spawn.room);
+
+            this.handleSpawnReassess(spawn);
+
             this.handleRCLUpgrades(spawn);
+
+            this.handleExpeditionResultsAction(spawn);
         }
     }
+
+    private static handleExpeditionResultsAction(spawn: StructureSpawn) {
+        if (spawn.memory.expeditionResults) {
+            if (spawn.memory.expeditionResults.length > 0) {
+                // If we are already building, don't create another expedition build project.
+                if (spawn.memory.buildProjects && spawn.memory.buildProjects.length > 0) {
+                    return;
+                }
+                // Only ever going to process one expedition result at a time. They are very costly operations
+                const expeditionResult = _.first(spawn.memory.expeditionResults);
+                if (expeditionResult) {
+                    const expeditionResultsHandlerMap: Map<string, IExpeditionResultsHandlerConstructor> = ExpeditionResultsHandlerMapper.getMap();
+                    const ExpeditionResultsHandler = expeditionResultsHandlerMap.get(expeditionResult.name);
+                    if (typeof ExpeditionResultsHandler !== 'undefined') {
+                        const expeditionResultsHandler = new ExpeditionResultsHandler(expeditionResult.targetIds, expeditionResult.name);
+                        expeditionResultsHandler.actionRoutine(spawn);
+                    }
+                    else {
+                        console.log(`Could not map expeditionResultsHandler for expeditionResult: ${JSON.stringify(expeditionResult)}`);
+                    }
+                }
+            }
+        }
+    }
+
+    private static handleSpawnReassess(spawn: StructureSpawn) {
+        if (spawn.memory?.reassess) {
+            const reassessment: SpawnReassment = new SpawnReassment(spawn);
+            reassessment.reassess();
+        }
+    }
+
 
     private static handleRCLUpgrades(spawn: StructureSpawn) {
         if (spawn.memory?.rclUpgrades) {

@@ -20,8 +20,8 @@ export class ExpeditionManager {
                 }
             }
         }
-        // If we haven't found orders to distribute, terminate
-        this.terminateCreep(creep);
+        // If we haven't found orders to distribute, sleep
+        creep.memory.working = false;
     }
 
     public reportFindings(creep: Creep, findings: string[]) {
@@ -237,7 +237,8 @@ export class ExpeditionManager {
     private requestScout(spawn: StructureSpawn) {
         const creepRequest: CreepRequest = {
             role: CreepRole.scout,
-            body: [MOVE]
+            body: [MOVE],
+            memory: null
         };
         if (!spawn.memory.remoteCreepRequest) {
             spawn.memory.remoteCreepRequest = [];

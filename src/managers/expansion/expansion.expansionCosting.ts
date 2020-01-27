@@ -35,6 +35,7 @@ export class ExpansionCosting {
         if (rpPath) {
             this.translateOneWay(rpPath, this.translatedPaths);
         }
+        console.log(JSON.stringify(this.translatedPaths));
     }
 
     private translatedPathsReverse() {
@@ -42,12 +43,12 @@ export class ExpansionCosting {
         if (rpPath) {
             this.translateOneWay(rpPath, this.translatedPathsReversed);
         }
+        console.log(JSON.stringify(this.translatedPathsReversed));
     }
 
 
     private translateOneWay(rpPath: RoomPosition[], translatedStorage: RoomPathCostingRetainer[]) {
         const groupedPaths = _.groupBy(rpPath, 'roomName');
-        console.log(JSON.stringify(groupedPaths));
         for (const roomName in groupedPaths) {
             translatedStorage.push(this.mapRoomPath(roomName, groupedPaths[roomName]));
         }
@@ -56,7 +57,7 @@ export class ExpansionCosting {
 
     private connectRoomPathsForTranslatedPath(translatedPaths: RoomPathCostingRetainer[]) {
         if (translatedPaths.length > 1) {
-            for (let index = 0; index < translatedPaths.length - 2; index++) {
+            for (let index = 0; index < translatedPaths.length - 1; index++) {
                 const peekAheadIndex = index + 1;
                 this.linkCrossRoom(translatedPaths[index], translatedPaths[peekAheadIndex]);
             }
@@ -72,7 +73,7 @@ export class ExpansionCosting {
         */
         let lastOriginPath = (_.last(originRoom.path));
         const firstDestinationPath = (_.first(destinationRoom.path));
-        if (lastOriginPath!.x === 50) {
+        if (lastOriginPath!.x === 49) {
             lastOriginPath!.dx = 1;
         }
         else if (lastOriginPath!.x === 0) {
@@ -81,7 +82,7 @@ export class ExpansionCosting {
         else {
             lastOriginPath!.dx = (firstDestinationPath!.x - lastOriginPath!.x);
         }
-        if (lastOriginPath!.y === 50) {
+        if (lastOriginPath!.y === 49) {
             lastOriginPath!.dy = 1;
         }
         else if (lastOriginPath!.y === 0) {
@@ -96,10 +97,9 @@ export class ExpansionCosting {
 
 
     private mapRoomPath(roomName: string, positions: RoomPosition[]): RoomPathCostingRetainer {
-        console.log(`roomName: ${roomName}. positions: ${JSON.stringify(positions)}`);
         let lastPosition: RoomPosition = positions[0];
         let pathSteps: PathStep[] = new Array<PathStep>();
-        for (const pos of positions) {
+        for (const pos of _.slice(positions, 1)) {
             const dx: number = pos.x - lastPosition.x;
             const dy: number = pos.y - lastPosition.y;
             const ps: PathStep = {
@@ -131,10 +131,10 @@ export class ExpansionCosting {
             case 0: {
                 switch (dy) {
                     case 1: {
-                        return TOP;
+                        return BOTTOM;
                     }
                     case -1: {
-                        return BOTTOM;
+                        return TOP;
                     }
                     default: {
                         console.log("Error invalid dy for a pathstep");
@@ -148,10 +148,10 @@ export class ExpansionCosting {
                         return RIGHT;
                     }
                     case 1: {
-                        return TOP_RIGHT;
+                        return BOTTOM_RIGHT;
                     }
                     case -1: {
-                        return BOTTOM_RIGHT;
+                        return TOP_RIGHT;
                     }
                     default: {
                         console.log("Error invalid dy for a pathstep");
@@ -165,10 +165,10 @@ export class ExpansionCosting {
                         return LEFT;
                     }
                     case 1: {
-                        return TOP_LEFT;
+                        return BOTTOM_LEFT;
                     }
                     case -1: {
-                        return BOTTOM_LEFT
+                        return TOP_LEFT
                     }
                     default: {
                         console.log("Error invalid dy for a pathstep");

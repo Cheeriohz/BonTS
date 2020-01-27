@@ -90,7 +90,7 @@ export class ContainerExpansion {
                     bpc.createBuildProjectLocalMineExpansion(path, projectType);
                 }
                 else if (projectType === BuildProjectEnum.LocalContainerExpansion) {
-                    bpc.createBuildProjectLocalContainerExpansion(path, projectType);
+                    bpc.createBuildProjectContainerExpansion(path, projectType);
                 }
 
             }

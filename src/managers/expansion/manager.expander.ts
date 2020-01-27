@@ -109,7 +109,8 @@ export class Expander {
     private requestScout() {
         const creepRequest: CreepRequest = {
             role: CreepRole.scout,
-            body: [MOVE]
+            body: [MOVE],
+            memory: null
         };
         if (!this.spawn.memory.remoteCreepRequest) {
             this.spawn.memory.remoteCreepRequest = [];

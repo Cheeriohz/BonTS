@@ -1,6 +1,10 @@
 import { ExpeditionResultsHandler } from "./manager.expeditionResultsHandler.abstract";
 import _ from "lodash";
 import { ExpansionCosting } from "./expansion.expansionCosting";
+import { buildProjectCreator } from "building/building.buildProjectCreator";
+import { BuildProjectEnum } from "building/interfaces/building.enum";
+import { ErrorMapper } from "utils/ErrorMapper";
+import { CreepRequester } from "cycle/manager.creepRequester";
 
 
 export class remoteMineExpeditionHandler extends ExpeditionResultsHandler {
@@ -16,6 +20,7 @@ export class remoteMineExpeditionHandler extends ExpeditionResultsHandler {
         if (this.targetIds.length === 0) {
             this.removeExpeditionResults(spawn);
             spawn.memory.remoteMineExpansionInProgress = false;
+            return;
         }
         if (!this.checkIfExpansionPossible(spawn)) {
             this.removeExpeditionResults(spawn);
@@ -30,29 +35,95 @@ export class remoteMineExpeditionHandler extends ExpeditionResultsHandler {
             // choose the closest expansion first.
             let costings: ExpansionCosting[] = new Array<ExpansionCosting>();
             for (const id of this.targetIds) {
-                const destination: Structure | null = Game.getObjectById(id);
+                const destination: Source | null = Game.getObjectById(id);
                 if (destination) {
                     let expansionCosting: ExpansionCosting = new ExpansionCosting(spawn.pos, destination.pos, destination.id, 1);
+                    console.log(JSON.stringify(expansionCosting));
                     costings.push(expansionCosting);
                 }
             }
-            let selection: ExpansionCosting;
+            let selection: ExpansionCosting | null = null;
             let lowestCost: number = Number.MAX_VALUE;
             _.forEach(costings, (c) => { if (c.cost < lowestCost) { lowestCost = c.cost; selection = c; } });
 
-            selection!.translateFullPathToRetainableRoomPaths();
-            this.createBuildProjects(spawn, selection!);
+            if (selection) {
+                selection!.translateFullPathToRetainableRoomPaths();
+                if (this.createBuildProjects(spawn, selection)) {
+                    this.persistPathingToMemory(spawn, selection);
+                    _.remove(spawn.memory!.expeditionResults![0].targetIds, (t) => { return t === selection!.destinationId; });
+                }
+                else {
+                    // Clear the spawn memory as we don't just need a single build snapshot that will then sit in memory.
+                    spawn.memory.buildProjects = new Array<BuildProject>();
+                }
+            }
+            else {
+                // TODO need to ensure we route scouts
+            }
         }
     }
 
-    private createBuildProjects(spawn: StructureSpawn, costing: ExpansionCosting) {
-        /*for(const rpcr of costing.translatedPath ) {
+    private persistPathingToMemory(spawn: StructureSpawn, costing: ExpansionCosting) {
+        if (!spawn.memory.remoteMines) {
+            spawn.memory.remoteMines = new Array<RemoteMine>();
+        }
 
-        }*/
+        let pathingLookup: Dictionary<PathStep[][]> = {};
+        for (const rpr of costing.translatedPaths) {
+            const rprReverse = _.find(costing.translatedPathsReversed, (rprR) => { return rprR.roomName === rpr.roomName; });
+            if (rprReverse) {
+                pathingLookup[rpr.roomName] = [rpr.path, rprReverse.path]
+            }
+            else {
+                console.log(ErrorMapper.sourceMappedStackTrace("Could not find a reversed room path"));
+            }
+        }
+
+        const remoteMine: RemoteMine = {
+            containerId: null,
+            extractorId: null,
+            miner: null,
+            haulers: null,
+            type: RESOURCE_ENERGY,
+            vein: <Id<Source>>costing.destinationId,
+            pathingLookup: pathingLookup
+        };
+
+        spawn.memory.remoteMines = [remoteMine];
+
     }
 
-    private createBuildProject() {
-
+    private createBuildProjects(spawn: StructureSpawn, costing: ExpansionCosting): boolean {
+        let success: boolean = true;
+        for (let index = 0; index < costing.translatedPaths.length - 1; index++) {
+            const translatedPath = costing.translatedPaths[index];
+            let clonedPath = _.cloneDeep(translatedPath.path);
+            const room: Room | undefined = Game.rooms[translatedPath.roomName];
+            if (!room) {
+                // Need room visibility.
+                const cr: CreepRequester = new CreepRequester(spawn);
+                cr.RequestScoutToRoom(translatedPath.roomName);
+                success = false;
+            }
+            else {
+                const bpc: buildProjectCreator = new buildProjectCreator(room, spawn);
+                bpc.createBuildProjectHighway(clonedPath, BuildProjectEnum.RemoteContainerExpansion);
+            }
+        }
+        const translatedPath = _.last(costing.translatedPaths);
+        let clonedPath = _.cloneDeep(translatedPath!.path);
+        const room: Room | undefined = Game.rooms[translatedPath!.roomName];
+        if (!room) {
+            // Need room visibility.
+            const cr: CreepRequester = new CreepRequester(spawn);
+            cr.RequestScoutToRoom(translatedPath!.roomName);
+            success = false;
+        }
+        else {
+            const bpc: buildProjectCreator = new buildProjectCreator(room, spawn);
+            bpc.createBuildProjectContainerExpansion(clonedPath, BuildProjectEnum.RemoteContainerExpansion);
+        }
+        return success;
     }
 
     private removeExpeditionResults(spawn: StructureSpawn) {
