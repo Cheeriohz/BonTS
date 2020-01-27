@@ -1,6 +1,8 @@
 import { CreepRole } from "enums/enum.roles";
 import _ from "lodash";
 
+// This requester is for common creep requests for relatively generic purposes.
+// Requests here should ensure we don't create infinite requests without external request management.
 export class CreepRequester {
     private spawn!: StructureSpawn;
     private rampartMaxRepairThreshold: number = 1000000;
@@ -40,7 +42,6 @@ export class CreepRequester {
         }
     }
 
-
     public CheckForRepairNeed(): void {
         if (!this.RepairCreepRequested() && !this.HaveRepairWorker() && (this.HaveDamagedRamparts() || this.HaveDamagedContainers())) {
             this.RequestRepairBot();
@@ -58,7 +59,7 @@ export class CreepRequester {
     }
 
     private RequestRepairBot() {
-        const builderRequest: CreepRequest = { role: CreepRole.builder, body: [WORK, WORK, WORK, WORK, CARRY, CARRY, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE], memory: null };
+        const builderRequest: CreepRequest = { role: CreepRole.builder, body: [WORK, WORK, WORK, WORK, CARRY, CARRY, MOVE, MOVE, MOVE], memory: null };
         if (!this.spawn.memory.remoteCreepRequest) {
             this.spawn.memory.remoteCreepRequest = [];
         }
@@ -77,10 +78,9 @@ export class CreepRequester {
     }
 
     private HaveRepairWorker(): boolean {
-        // first see if we already have a dedicated repairer.
+        // first see if we already have a local repairer.
         const roomData = Memory.roleRoomMap[this.spawn.room.name];
         if (roomData) {
-            // TODO: Encorporate dedicated repairer
             if (roomData[CreepRole.builder] > 0) {
                 return true;
             }
