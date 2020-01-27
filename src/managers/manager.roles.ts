@@ -137,7 +137,7 @@ export
         if (!this.mExpeditionManager) {
             this.mExpeditionManager = new ExpeditionManager();
         }
-        this.mScout.run(creep, this.mExpeditionManager);
+        this.mScout.runExpeditionScout(creep, this.mExpeditionManager);
     }
 }
 

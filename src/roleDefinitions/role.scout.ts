@@ -1,12 +1,13 @@
 import { ExpeditionManager } from "managers/expansion/manager.expedition";
 import _ from "lodash";
+import { RoleRemote } from "./base/role.remote";
 
-export class RoleScout {
+export class RoleScout extends RoleRemote {
 
-    public run(creep: Creep, expeditionManager: ExpeditionManager) {
+    public runExpeditionScout(creep: Creep, expeditionManager: ExpeditionManager) {
         if (!creep.memory.orders) {
             expeditionManager.reportForInitialAssignment(creep);
-            this.logOrders(creep);
+            // this.logOrders(creep);
         }
         if (creep.memory.working) {
             this.embark(creep, expeditionManager);
@@ -35,7 +36,7 @@ export class RoleScout {
         }
         else {
             expeditionManager.reassignmentRequest(creep);
-            this.logOrders(creep);
+            // this.logOrders(creep);
         }
     }
 
@@ -61,17 +62,7 @@ export class RoleScout {
         console.log(`Orders for ${creep.name} are: ${JSON.stringify(creep.memory.orders)}`);
     }
 
-    private travelToRoom(creep: Creep, roomName: string) {
-        let target = Game.map.findExit(creep.room.name, roomName);
-        if (target > 0) {
-            const destination = creep.pos.findClosestByPath(<ExitConstant>target);
-            if (destination) {
-                creep.moveTo(destination, {
-                    reusePath: 1500, ignoreCreeps: true
-                });
-            }
-        }
-    }
+
 
 
 
