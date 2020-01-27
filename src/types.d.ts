@@ -21,7 +21,7 @@ interface RoomMemory {
 
 interface SpawnMemory {
   reassess: boolean | null;
-  remoteCreepRequest: CreepRequest[] | null;
+  creepRequest: CreepRequest[] | null;
   dedicatedCreepRequest: DedicatedCreepRequest[] | null;
   remoteMineCount: number | null;
   remoteMineExpansionInProgress: boolean | null;

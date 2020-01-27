@@ -27,10 +27,10 @@ export class CreepRequester {
             }
         };
         const scoutRequest: CreepRequest = { role: CreepRole.scout, body: [MOVE], memory: memory };
-        if (!this.spawn.memory.remoteCreepRequest) {
-            this.spawn.memory.remoteCreepRequest = [];
+        if (!this.spawn.memory.creepRequest) {
+            this.spawn.memory.creepRequest = [];
         }
-        this.spawn.memory.remoteCreepRequest.push(scoutRequest);
+        this.spawn.memory.creepRequest.push(scoutRequest);
     }
 
     public MaintainBuilder(): void {
@@ -57,15 +57,15 @@ export class CreepRequester {
 
     private RequestRepairBot() {
         const builderRequest: CreepRequest = { role: CreepRole.builder, body: [WORK, WORK, WORK, WORK, CARRY, CARRY, MOVE, MOVE, MOVE] };
-        if (!this.spawn.memory.remoteCreepRequest) {
-            this.spawn.memory.remoteCreepRequest = [];
+        if (!this.spawn.memory.creepRequest) {
+            this.spawn.memory.creepRequest = [];
         }
-        this.spawn.memory.remoteCreepRequest.push(builderRequest);
+        this.spawn.memory.creepRequest.push(builderRequest);
     }
 
     private RepairCreepRequested(): boolean {
         // TODO: Switch to different types or queues.
-        const creepRequest = _.filter(this.spawn.memory.remoteCreepRequest, (cr) => { return (cr.role === CreepRole.builder); });
+        const creepRequest = _.filter(this.spawn.memory.creepRequest, (cr) => { return (cr.role === CreepRole.builder); });
         if (creepRequest) {
             if (creepRequest.length > 0) {
                 return true;

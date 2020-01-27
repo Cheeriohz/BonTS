@@ -6,6 +6,7 @@ interface CreepRequest {
     role: number;
     body: any[];
     memory?: CreepMemory | null;
+    home?: string | null;
 }
 
 interface DedicatedCreepRequest extends CreepRequest {

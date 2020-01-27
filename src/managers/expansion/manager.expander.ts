@@ -112,11 +112,11 @@ export class Expander {
             body: [MOVE],
             memory: null
         };
-        if (!this.spawn.memory.remoteCreepRequest) {
-            this.spawn.memory.remoteCreepRequest = [];
+        if (!this.spawn.memory.creepRequest) {
+            this.spawn.memory.creepRequest = [];
         }
 
-        this.spawn.memory.remoteCreepRequest.push(creepRequest);
+        this.spawn.memory.creepRequest.push(creepRequest);
 
     }
 

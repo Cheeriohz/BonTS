@@ -22,9 +22,14 @@ export class ManagerHelperSpawner {
         return returnCode;
     }
 
-    public static spawnADedicatedCreep(spawn: StructureSpawn, body: any[], name: string, assignedRole: number, dedication: string) {
+    public static spawnADedicatedCreep(spawn: StructureSpawn,
+        body: any[],
+        name: string,
+        assignedRole: number,
+        dedication: string,
+        home?: string | null) {
         const returnCode = spawn.spawnCreep(body, name,
-            { memory: { role: assignedRole, working: false, orders: null, ignoreLinks: null, dedication: dedication, precious: null } });
+            { memory: { role: assignedRole, working: false, orders: null, ignoreLinks: null, dedication: dedication, precious: null, home: home } });
         return returnCode;
     }
 

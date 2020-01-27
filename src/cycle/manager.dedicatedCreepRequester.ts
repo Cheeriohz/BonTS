@@ -8,13 +8,17 @@ export class DedicatedCreepRequester {
         this.spawn = spawn;
     }
 
-    public createdDedicatedCreepRequest(dedication: string, role: CreepRole, specifiedName: string) {
+
+
+    public createdDedicatedCreepRequest(dedication: string, role: CreepRole, specifiedName: string, isRemote?: boolean) {
         if (!this.spawn.memory.dedicatedCreepRequest) {
             this.spawn.memory.dedicatedCreepRequest = [];
         }
         switch (role) {
             case CreepRole.builder: {
-                this.spawn.memory.dedicatedCreepRequest.push(this.createDedicatedBuilder(dedication, specifiedName));
+                if (isRemote) {
+                    this.spawn.memory.dedicatedCreepRequest.push(this.createDedicatedRemoteBuilder(dedication, specifiedName));
+                }
                 break;
             }
             case CreepRole.dropper: {
@@ -31,8 +35,14 @@ export class DedicatedCreepRequester {
         }
     }
 
-    private createDedicatedBuilder(dedication: string, specifiedName: string): DedicatedCreepRequest {
-        return { role: CreepRole.builder, body: [WORK, WORK, WORK, CARRY, CARRY, CARRY, CARRY, CARRY, MOVE, MOVE, MOVE, MOVE], dedication: dedication, specifiedName: specifiedName, memory: null };
+    private createDedicatedRemoteBuilder(dedication: string, specifiedName: string): DedicatedCreepRequest {
+        return {
+            role: CreepRole.builder,
+            body: [WORK, WORK, WORK, CARRY, CARRY, CARRY, CARRY, CARRY, MOVE, MOVE, MOVE, MOVE],
+            dedication: dedication,
+            specifiedName: specifiedName,
+            home: this.spawn.room.name
+        };
     }
 
     private createDedicatedDropper(dedication: string, specifiedName: string): DedicatedCreepRequest {
@@ -40,7 +50,7 @@ export class DedicatedCreepRequester {
     }
 
     private createDedicatedHauler(dedication: string, specifiedName: string): DedicatedCreepRequest {
-        return { role: CreepRole.hauler, body: [CARRY, CARRY, CARRY, MOVE, MOVE, MOVE], dedication: dedication, specifiedName: specifiedName, memory: null };
+        return { role: CreepRole.hauler, body: [CARRY, CARRY, MOVE], dedication: dedication, specifiedName: specifiedName, memory: null };
     }
 
 

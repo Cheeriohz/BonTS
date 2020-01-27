@@ -240,11 +240,11 @@ export class ExpeditionManager {
             body: [MOVE],
             memory: null
         };
-        if (!spawn.memory.remoteCreepRequest) {
-            spawn.memory.remoteCreepRequest = [];
+        if (!spawn.memory.creepRequest) {
+            spawn.memory.creepRequest = [];
         }
 
-        spawn.memory.remoteCreepRequest.push(creepRequest);
+        spawn.memory.creepRequest.push(creepRequest);
 
     }
 

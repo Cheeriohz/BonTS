@@ -12,6 +12,7 @@ import { RoleScout } from "roleDefinitions/role.scout";
 import { ExpeditionManager } from "./expansion/manager.expedition";
 import { RoleDedicatedDropper } from "roleDefinitions/dedicated/role.dedicated.dropper";
 import { RoleDedicatedHauler } from "roleDefinitions/dedicated/role.dedicated.hauler";
+import { RoleRemoteBuilder } from "roleDefinitions/remote/role.dedicated.builder";
 
 export
     class RolesManager {
@@ -23,9 +24,11 @@ export
     private mDrone!: RoleDrone;
     private mScout!: RoleScout;
     private mExpeditionManager: ExpeditionManager | undefined;
+
     private mDDropper!: RoleDedicatedDropper;
     private mDHauler!: RoleDedicatedHauler;
 
+    private mRBuilder!: RoleRemoteBuilder;
 
     constructor() {
         this.mHarvester = new RoleHarvester();
@@ -35,8 +38,11 @@ export
         this.mHauler = new RoleHauler();
         this.mDrone = new RoleDrone();
         this.mScout = new RoleScout();
+
         this.mDDropper = new RoleDedicatedDropper();
         this.mDHauler = new RoleDedicatedHauler();
+
+        this.mRBuilder = new RoleRemoteBuilder();
     }
 
     public run() {
@@ -61,7 +67,10 @@ export
 
 
     private manageRoles(creep: Creep) {
-        if (creep.memory.dedication) {
+        if (creep.memory.home) {
+            this.manageRemoteCreepRole(creep);
+        }
+        else if (creep.memory.dedication) {
             this.manageDedicatedCreepRole(creep, creep.memory.dedication)
         }
         else {
@@ -93,6 +102,17 @@ export
                 case CreepRole.scout: {
                     this.manageScout(creep);
                 }
+            }
+        }
+    }
+
+    private manageRemoteCreepRole(creep: Creep) {
+        switch (creep.memory.role) {
+            case CreepRole.builder: {
+                this.mRBuilder.run(creep);
+            }
+            default: {
+                console.log(`No remote role exists for creep: ${creep.name}`);
             }
         }
     }

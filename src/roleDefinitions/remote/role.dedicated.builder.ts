@@ -3,7 +3,7 @@ import { RoleRemote } from "roleDefinitions/base/role.remote";
 
 
 // I am debating whether or not to use this moment to branch out into a remote subclass, but for not I am not sure if it's necessary.
-export class RoleDedicatedBuilder extends RoleRemote {
+export class RoleRemoteBuilder extends RoleRemote {
 
     public run(creep: Creep) {
         super.run(creep);
