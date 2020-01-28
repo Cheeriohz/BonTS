@@ -10,7 +10,7 @@ export class DedicatedCreepRequester {
 
 
 
-    public createdDedicatedCreepRequest(dedication: string, role: CreepRole, specifiedName: string, isRemote?: boolean) {
+    public createdDedicatedCreepRequest(dedication: string, role: CreepRole, specifiedName: string, precious?: string, isRemote?: boolean, orders?: CreepOrder) {
         if (!this.spawn.memory.dedicatedCreepRequest) {
             this.spawn.memory.dedicatedCreepRequest = [];
         }
@@ -22,10 +22,18 @@ export class DedicatedCreepRequester {
                 break;
             }
             case CreepRole.dropper: {
-                this.spawn.memory.dedicatedCreepRequest.push(this.createDedicatedDropper(dedication, specifiedName));
+                if (isRemote) {
+                    this.spawn.memory.dedicatedCreepRequest.push(this.createDedicatedRemoteDropper(dedication, specifiedName, precious, orders));
+                }
+                else {
+                    this.spawn.memory.dedicatedCreepRequest.push(this.createDedicatedDropper(dedication, specifiedName, precious));
+                }
                 break;
             }
             case CreepRole.hauler: {
+                if (isRemote) {
+                    this.spawn.memory.dedicatedCreepRequest.push(this.createDedicatedRemoteHauler(dedication, specifiedName, precious, orders));
+                }
                 this.spawn.memory.dedicatedCreepRequest.push(this.createDedicatedHauler(dedication, specifiedName));
                 break;
             }
@@ -45,12 +53,47 @@ export class DedicatedCreepRequester {
         };
     }
 
-    private createDedicatedDropper(dedication: string, specifiedName: string): DedicatedCreepRequest {
-        return { role: CreepRole.dropper, body: [WORK, WORK, WORK, WORK, WORK, WORK, MOVE], dedication: dedication, specifiedName: specifiedName, memory: null };
+    private createDedicatedRemoteDropper(dedication: string, specifiedName: string, precious?: string, orders?: CreepOrder): DedicatedCreepRequest {
+        return {
+            role: CreepRole.dropper,
+            body: [WORK, WORK, WORK, WORK, WORK, WORK, MOVE],
+            dedication: dedication,
+            specifiedName: specifiedName,
+            precious: precious,
+            home: this.spawn.room.name,
+            orders: orders
+        };
+    }
+
+    private createDedicatedRemoteHauler(dedication: string, specifiedName: string, precious?: string, orders?: CreepOrder): DedicatedCreepRequest {
+        return {
+            role: CreepRole.dropper,
+            body: [WORK, WORK, WORK, WORK, WORK, WORK, MOVE],
+            dedication: dedication,
+            specifiedName: specifiedName,
+            precious: precious,
+            home: this.spawn.room.name,
+            orders: orders
+        };
+    }
+
+    private createDedicatedDropper(dedication: string, specifiedName: string, precious?: string): DedicatedCreepRequest {
+        return {
+            role: CreepRole.dropper,
+            body: [WORK, WORK, WORK, WORK, WORK, WORK, MOVE],
+            dedication: dedication,
+            specifiedName: specifiedName,
+            precious: precious
+        };
     }
 
     private createDedicatedHauler(dedication: string, specifiedName: string): DedicatedCreepRequest {
-        return { role: CreepRole.hauler, body: [CARRY, CARRY, MOVE], dedication: dedication, specifiedName: specifiedName, memory: null };
+        return {
+            role: CreepRole.hauler,
+            body: [CARRY, CARRY, MOVE],
+            dedication: dedication,
+            specifiedName: specifiedName
+        };
     }
 
 

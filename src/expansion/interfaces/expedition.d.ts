@@ -47,3 +47,7 @@ interface CreepOrder {
 interface ScoutOrder extends CreepOrder {
     searchTarget: FindConstant;
 }
+
+interface MineOrder extends CreepOrder {
+    resourceType: ResourceConstant;
+}
