@@ -5,7 +5,7 @@ interface CreepMemory {
   ignoreLinks?: boolean | null;
   dedication?: string | null;
   precious?: string | null;
-  home?: string | null
+  home?: string | null;
 }
 
 interface RoomMemory {
@@ -31,6 +31,7 @@ interface SpawnMemory {
   rclUpgrades: RCLUpgradeEvent[] | null;
   sourcesUtilized: boolean;
   buildProjects: BuildProject[] | null;
+  remoteHarvests: RemoteHarvest[] | null;
 }
 
 interface Memory {
@@ -41,7 +42,6 @@ interface Memory {
   expeditions: Expedition[];
   killswitch: boolean;
 }
-
 
 interface Dictionary<T> {
   [index: string]: T;
@@ -54,6 +54,3 @@ declare namespace NodeJS {
     log: any;
   }
 }
-
-
-

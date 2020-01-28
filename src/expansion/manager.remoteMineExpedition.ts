@@ -74,6 +74,9 @@ export class remoteMineExpeditionHandler extends ExpeditionResultsHandler {
     if (!spawn.memory.remoteMines) {
       spawn.memory.remoteMines = new Array<RemoteMine>();
     }
+    if (!spawn.memory.remoteHarvests) {
+      spawn.memory.remoteHarvests = new Array<RemoteHarvest>();
+    }
 
     let pathingLookup: Dictionary<PathStep[][]> = {};
     for (const rpr of costing.translatedPaths) {
@@ -98,7 +101,25 @@ export class remoteMineExpeditionHandler extends ExpeditionResultsHandler {
       roomName: costing.getDestinationRoomName()
     };
 
-    spawn.memory.remoteMines = [remoteMine];
+    if (spawn.memory.remoteMines.length === 0) {
+      spawn.memory.remoteMines = [remoteMine];
+    } else {
+      spawn.memory.remoteMines.push(remoteMine);
+    }
+
+    // Add a remote harvest to the source at least temporarily as the path will already be utilized and it can help speed building.
+    const remoteHarvest: RemoteHarvest = {
+      harvester: null,
+      vein: <Id<Source>>costing.destinationId,
+      pathingLookup: pathingLookup,
+      roomName: costing.getDestinationRoomName()
+    };
+
+    if (spawn.memory.remoteHarvests.length === 0) {
+      spawn.memory.remoteHarvests = [remoteHarvest];
+    } else {
+      spawn.memory.remoteHarvests.push(remoteHarvest);
+    }
   }
 
   private createBuildProjects(spawn: StructureSpawn, costing: ExpansionCosting): boolean {
