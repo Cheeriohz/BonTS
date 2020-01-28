@@ -1,12 +1,11 @@
-
 export abstract class ExpeditionResultsHandler implements IExpeditionResultHandler {
-    targetIds: string[];
-    name: string;
-    constructor(targetIds: string[], name: string) {
-        this.targetIds = targetIds;
-        this.name = name;
-    };
+  targets: ExpeditionFoundTarget[];
+  name: string;
+  constructor(targets: ExpeditionFoundTarget[], name: string) {
+    this.targets = targets;
+    this.name = name;
+  }
 
-    abstract actionRoutine(spawn: StructureSpawn): void;
-    abstract storeResults(spawn: StructureSpawn): void;
+  abstract actionRoutine(spawn: StructureSpawn): void;
+  abstract storeResults(spawn: StructureSpawn): void;
 }
