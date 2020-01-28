@@ -7,11 +7,10 @@ export class RoleBuilder extends RoleCreep {
 
         if (creep.memory.working && currentEnergy === 0) {
             creep.memory.working = false;
-            creep.say('🔄 harvest');
+            creep.say('🔋 recharge');
         }
         if (!creep.memory.working && creep.store.getFreeCapacity() === 0) {
             creep.memory.working = true;
-            creep.say('🚧 build');
             creep.say("🔧 Repair");
         }
 
@@ -47,6 +46,22 @@ export class RoleBuilder extends RoleCreep {
         const targets = creep.room.find(FIND_STRUCTURES, {
             filter: (structure) => {
                 return (structure.structureType !== STRUCTURE_ROAD && structure.hits < structure.hitsMax && structure.hits < this.maxRepairThreshold)
+            }
+        });
+        if (targets.length > 0) {
+            creep.memory.precious = targets[0].id;
+            this.repair(creep);
+            return;
+        }
+        else {
+            this.checkForRoadsInUrgentNeed(creep);
+        }
+    }
+
+    private checkForRoadsInUrgentNeed(creep: Creep) {
+        const targets = creep.room.find(FIND_STRUCTURES, {
+            filter: (structure) => {
+                return (structure.structureType === STRUCTURE_ROAD && structure.hits < 2000)
             }
         });
         if (targets.length > 0) {
