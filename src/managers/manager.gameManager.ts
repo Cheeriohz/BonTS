@@ -5,6 +5,8 @@ import { Spawn } from "managers/manager.spawn";
 import { TowerManager } from "managers/structures/manager.towers";
 import { MineManager } from "./manager.mine";
 import _ from "lodash";
+import { RemoteMineManager } from "remote/manager.remote.remoteMine";
+import { CreepRequester } from "cycle/manager.creepRequester";
 
 export class GameManager {
 
@@ -35,6 +37,9 @@ export class GameManager {
                     const mm: MineManager = new MineManager(spawn.room, spawn);
                     mm.manageMine(true);
                 }
+                if (!Memory.killswitch) {
+                    GameManager.manageRemoteMine(spawn);
+                }
             }
         }
 
@@ -44,6 +49,27 @@ export class GameManager {
         // Manage cycles
         CycleManager.check();
         console.log(`Cycle ${Memory.cycle} Execution Time: ${Game.cpu.getUsed() - executionTime}`);
+    }
+
+    private static manageRemoteMine(spawn: StructureSpawn) {
+        if (spawn.memory.remoteMines && spawn.memory.remoteMines.length > 0) {
+            for (const remoteMine of spawn.memory.remoteMines) {
+                if (remoteMine.containerId) {
+                    const containerRoomName = _.last(_.keys(remoteMine.pathingLookup));
+                    if (containerRoomName) {
+                        // check to see if we have room visibility to manage
+                        const containerRoom = Game.rooms[containerRoomName];
+                        if (containerRoom) {
+                            const remoteMineManager: RemoteMineManager = new RemoteMineManager(containerRoom, spawn, remoteMine);
+                        }
+                        else {
+                            const cr: CreepRequester = new CreepRequester(spawn);
+                            cr.RequestScoutToRoom(containerRoomName);
+                        }
+                    }
+                }
+            }
+        }
     }
 
     private static runLogging() {

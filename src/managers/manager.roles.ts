@@ -10,9 +10,13 @@ import { RoleHauler } from "roleDefinitions/role.hauler";
 import { RoleUpgrader } from "roleDefinitions/role.upgrader";
 import { RoleScout } from "roleDefinitions/role.scout";
 import { ExpeditionManager } from "../expansion/manager.expedition";
+
 import { RoleDedicatedDropper } from "roleDefinitions/dedicated/role.dedicated.dropper";
 import { RoleDedicatedHauler } from "roleDefinitions/dedicated/role.dedicated.hauler";
+
 import { RoleRemoteBuilder } from "roleDefinitions/remote/role.remote.builder";
+import { RoleRemoteDropper } from "roleDefinitions/remote/role.remote.dropper";
+import { RoleRemoteHauler } from "roleDefinitions/remote/role.remote.hauler";
 
 export
     class RolesManager {
@@ -29,6 +33,8 @@ export
     private mDHauler!: RoleDedicatedHauler;
 
     private mRBuilder!: RoleRemoteBuilder;
+    private mRDropper!: RoleRemoteDropper;
+    private mRHauler!: RoleRemoteHauler;
 
     constructor() {
         this.mHarvester = new RoleHarvester();
@@ -43,6 +49,8 @@ export
         this.mDHauler = new RoleDedicatedHauler();
 
         this.mRBuilder = new RoleRemoteBuilder();
+        this.mRDropper = new RoleRemoteDropper();
+        this.mRHauler = new RoleRemoteHauler();
     }
 
     public run() {
@@ -110,6 +118,14 @@ export
         switch (creep.memory.role) {
             case CreepRole.builder: {
                 this.mRBuilder.run(creep);
+                break;
+            }
+            case CreepRole.dropper: {
+                this.mRDropper.run(creep);
+                break;
+            }
+            case CreepRole.hauler: {
+                this.mRHauler.run(creep);
                 break;
             }
             default: {

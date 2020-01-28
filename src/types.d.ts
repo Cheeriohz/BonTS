@@ -39,6 +39,7 @@ interface Memory {
   cycle: number;
   roleRoomMap: Dictionary<number[]>;
   expeditions: Expedition[];
+  killswitch: boolean;
 }
 
 

@@ -56,7 +56,7 @@ export class DedicatedCreepRequester {
     private createDedicatedRemoteDropper(dedication: string, specifiedName: string, precious?: string, orders?: CreepOrder): DedicatedCreepRequest {
         return {
             role: CreepRole.dropper,
-            body: [WORK, WORK, WORK, WORK, WORK, WORK, MOVE],
+            body: [WORK, WORK, WORK, WORK, WORK, CARRY, MOVE, MOVE],
             dedication: dedication,
             specifiedName: specifiedName,
             precious: precious,
@@ -68,7 +68,7 @@ export class DedicatedCreepRequester {
     private createDedicatedRemoteHauler(dedication: string, specifiedName: string, precious?: string, orders?: CreepOrder): DedicatedCreepRequest {
         return {
             role: CreepRole.dropper,
-            body: [WORK, WORK, WORK, WORK, WORK, WORK, MOVE],
+            body: [CARRY, CARRY, CARRY, CARRY, CARRY, WORK, MOVE, MOVE, MOVE],
             dedication: dedication,
             specifiedName: specifiedName,
             precious: precious,
