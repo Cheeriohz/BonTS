@@ -16,6 +16,9 @@ export class CreepRequester {
     if (this.scoutAlreadyRequested(roomName)) {
       return;
     }
+    if (this.rerouteUnusedScout(roomName)) {
+      return;
+    }
     const memory: CreepMemory = {
       role: CreepRole.scout,
       working: true,
@@ -60,6 +63,17 @@ export class CreepRequester {
             return true;
           }
         }
+      }
+    }
+    return false;
+  }
+
+  private rerouteUnusedScout(roomName: string): boolean {
+    for (const creep of _.values(Game.creeps)) {
+      if (creep.memory.role === CreepRole.scout && creep.memory.working === false) {
+        creep.memory.orders = { target: roomName, independentOperator: true };
+        creep.memory.working = true;
+        return true;
       }
     }
     return false;
