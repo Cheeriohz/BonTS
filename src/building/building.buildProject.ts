@@ -139,7 +139,13 @@ export class BuildProjectManager {
 
   private handOffRemoteContainerExpansion() {
     const remoteMine: RemoteMine | undefined = _.find(this.spawn.memory.remoteMines, rm => {
-      return rm.containerId === null && rm.haulers === null && rm.extractorId === null && rm.miner === null;
+      return (
+        rm.containerId === null &&
+        rm.haulers === null &&
+        rm.extractorId === null &&
+        rm.miner === null &&
+        rm.roomName === this.project.roomName
+      );
     });
     if (remoteMine) {
       const endPath = _.last(remoteMine!.pathingLookup[this.project.roomName][0]);
