@@ -31,7 +31,7 @@ export class RoleScout extends RoleRemote {
                 }
             }
             else {
-                this.travelToRoom(creep, orders.target);
+                this.travelToRoom(creep, orders.target, false);
             }
         }
         else {

@@ -4,7 +4,7 @@ export class RoleDedicatedDropper extends RoleDropper {
 
     public runDedicated(creep: Creep, dedication: string) {
         if (creep.memory.working) {
-            super.harvest(creep);
+            super.harvestPrecious(creep);
         }
         else {
             this.dedicatedRelocate(creep, dedication);
