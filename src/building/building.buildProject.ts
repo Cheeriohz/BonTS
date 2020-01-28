@@ -85,7 +85,7 @@ export class BuildProjectManager {
     private maintainActiveRemoteBuilder() {
         if (!this.getActiveRemoteBuilder(this.project.roomName)) {
             const dcr: DedicatedCreepRequester = new DedicatedCreepRequester(this.spawn);
-            dcr.createdDedicatedCreepRequest(this.project.roomName, CreepRole.builder, `${this.spawn.name}_BPR_${this.project.roomName}`);
+            dcr.createdDedicatedCreepRequest(this.project.roomName, CreepRole.builder, `${this.spawn.name}_BPR_${this.project.roomName}`, undefined, true);
         }
     }
 
