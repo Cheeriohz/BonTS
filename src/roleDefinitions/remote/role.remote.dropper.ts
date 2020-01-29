@@ -6,15 +6,16 @@ export class RoleRemoteDropper extends RoleRemote {
             if (super.harvestPrecious(creep) === ERR_NOT_ENOUGH_RESOURCES) {
                 const container: Structure | null = Game.getObjectById(creep.memory.dedication!);
                 if (container) {
-                    if ((container.hitsMax - container.hits) > 100) {
+                    if (creep.store.getUsedCapacity() === 0) {
+                        creep.withdraw(container, RESOURCE_ENERGY);
+                    }
+                    if (container.hitsMax - container.hits > 100) {
                         creep.repair(container);
                     }
                 }
             }
-        }
-        else {
+        } else {
             this.dedicatedContainerRelocateRemote(creep, creep.memory.dedication!, creep.memory.orders!.target);
         }
     }
 }
-

@@ -30,8 +30,8 @@ export class Expander {
     }
 
     private localSourceExpansion(): boolean {
-        if (!this.spawn.memory.remoteMineCount) {
-            this.spawn.memory.remoteMineCount = 0;
+        if (!this.spawn.memory.remoteMines) {
+            this.spawn.memory.remoteMines = [];
         }
         let containerUsage: number = 0;
         if (this.spawn.room.memory.containerMap) {
@@ -41,10 +41,15 @@ export class Expander {
             this.spawn.memory.sourcesUtilized = true;
             return false;
         }
-        const sources: Source[] | null = this.getSources()
+        const sources: Source[] | null = this.getSources();
         if (sources) {
             if (containerUsage < sources.length) {
-                const containerExpansion: ContainerExpansion = new ContainerExpansion(this.spawn, this.spawn.room, this.spawn.pos, false);
+                const containerExpansion: ContainerExpansion = new ContainerExpansion(
+                    this.spawn,
+                    this.spawn.room,
+                    this.spawn.pos,
+                    false
+                );
                 containerExpansion.checkForSourceExpansion(sources);
                 return true;
             }
@@ -56,10 +61,14 @@ export class Expander {
     private getSources(): Source[] | null {
         if (this.spawn.room.memory.sourceMap) {
             if (this.spawn.room.memory.sourceMap.length > 0) {
-                const sourceIds = _.map(this.spawn.room.memory.sourceMap, (s) => s.id);
+                const sourceIds = _.map(this.spawn.room.memory.sourceMap, s => s.id);
                 if (sourceIds) {
                     if (sourceIds.length > 0) {
-                        return _.compact(_.map(sourceIds, (id) => { return Game.getObjectById(id); }));
+                        return _.compact(
+                            _.map(sourceIds, id => {
+                                return Game.getObjectById(id);
+                            })
+                        );
                     }
                 }
             }
@@ -79,7 +88,7 @@ export class Expander {
             nodeName: this.spawn.room.name,
             children: [],
             scanned: true,
-            assignedCreep: "",
+            assignedCreep: ""
         };
         const expeditionProgress: ExpeditionProgress = {
             searchTreeOriginNode: searchTreeOrigin,
@@ -95,7 +104,7 @@ export class Expander {
             spawnOrigin: this.spawn.name,
             expeditionTypeName: expeditionTypeName,
             progress: expeditionProgress,
-            assignedCreeps: [],
+            assignedCreeps: []
         };
         if (!Memory.expeditions) {
             Memory.expeditions = [];
@@ -117,11 +126,5 @@ export class Expander {
         }
 
         this.spawn.memory.creepRequest.push(creepRequest);
-
     }
-
-
 }
-
-
-

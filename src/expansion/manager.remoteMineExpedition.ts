@@ -30,7 +30,8 @@ export class remoteMineExpeditionHandler extends ExpeditionResultsHandler {
     }
 
     private chooseExpansionTarget(spawn: StructureSpawn) {
-        if (this.targets.length > 1) {
+        // TODO optimize this for single target search
+        if (this.targets.length > 0) {
             // choose the closest expansion first.
             let costings: ExpansionCosting[] = new Array<ExpansionCosting>();
             for (const target of this.targets) {
@@ -170,8 +171,8 @@ export class remoteMineExpeditionHandler extends ExpeditionResultsHandler {
         if (spawn.room.memory.mine) {
             totalUtilizedContainers += 1;
         }
-        if (spawn.memory.remoteMineCount) {
-            totalUtilizedContainers += spawn.memory.remoteMineCount;
+        if (spawn.memory.remoteMines) {
+            totalUtilizedContainers += spawn.memory.remoteMines.length;
         }
         if (totalUtilizedContainers < 5) {
             return true;

@@ -1,16 +1,14 @@
-import { getContainer, refreshTree } from "../caching/manager.containerSelector"
+import { getContainer, refreshTree } from "../caching/manager.containerSelector";
 
 import { profile } from "Profiler";
 import { RoleCreep } from "./base/role.creep";
 @profile
 export class RoleDropper extends RoleCreep {
-
     public run(creep: Creep) {
         // Check if in range to harvest
         if (creep.memory.working) {
-            super.harvestPrecious(creep)
-        }
-        else {
+            super.harvestPrecious(creep);
+        } else {
             this.relocate(creep);
         }
     }
@@ -18,17 +16,14 @@ export class RoleDropper extends RoleCreep {
     private relocate(creep: Creep) {
         const containerId = getContainer(creep);
         const container = Game.getObjectById<StructureContainer>(containerId);
-        // use the working bit to determine which of two max sources can be harvested from. TODO this might have issues if my assumption is wrong.
         if (container) {
             if (creep.pos.x === container.pos.x && creep.pos.y === container.pos.y) {
                 this.updatePrecious(creep);
                 creep.memory.working = true;
-            }
-            else {
+            } else {
                 creep.moveTo(container);
             }
-        }
-        else {
+        } else {
             refreshTree(creep.room, containerId);
         }
     }
@@ -43,5 +38,4 @@ export class RoleDropper extends RoleCreep {
     private locateSource(creep: Creep): Source | null {
         return creep.pos.findClosestByRange(FIND_SOURCES);
     }
-};
-
+}
