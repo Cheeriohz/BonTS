@@ -43,7 +43,7 @@ export class remoteMineExpeditionHandler extends ExpeditionResultsHandler {
                         destination.id,
                         1
                     );
-                    console.log(JSON.stringify(expansionCosting));
+                    // console.log(JSON.stringify(expansionCosting));
                     costings.push(expansionCosting);
                 }
             }

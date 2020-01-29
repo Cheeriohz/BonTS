@@ -3,7 +3,6 @@ import _ from "lodash";
 import { RoleRemote } from "./base/role.remote";
 
 export class RoleScout extends RoleRemote {
-
     public runExpeditionScout(creep: Creep, expeditionManager: ExpeditionManager) {
         if (!creep.memory.orders) {
             expeditionManager.reportForInitialAssignment(creep);
@@ -21,20 +20,16 @@ export class RoleScout extends RoleRemote {
                 if (creep.pos.isNearTo(25, 25)) {
                     if (!orders.independentOperator) {
                         this.report(creep, expeditionManager);
-                    }
-                    else {
+                    } else {
                         expeditionManager.reassignmentRequest(creep);
                     }
-                }
-                else {
+                } else {
                     creep.moveTo(25, 25, { reusePath: 1500, ignoreCreeps: true });
                 }
-            }
-            else {
+            } else {
                 this.travelToRoom(creep, orders.target, false);
             }
-        }
-        else {
+        } else {
             expeditionManager.reassignmentRequest(creep);
             // this.logOrders(creep);
         }
@@ -50,20 +45,14 @@ export class RoleScout extends RoleRemote {
             for (const finding of findings) {
                 findingsCompiled.push(_.get(finding, "id"));
             }
-            console.log(`Findings compiled ${JSON.stringify(findingsCompiled)}`);
+            // console.log(`Findings compiled ${JSON.stringify(findingsCompiled)}`);
             expeditionManager.reportFindings(creep, findingsCompiled);
-        }
-        else {
+        } else {
             expeditionManager.reportFindings(creep, []);
         }
     }
 
     private logOrders(creep: Creep) {
-        console.log(`Orders for ${creep.name} are: ${JSON.stringify(creep.memory.orders)}`);
+        // console.log(`Orders for ${creep.name} are: ${JSON.stringify(creep.memory.orders)}`);
     }
-
-
-
-
-
 }

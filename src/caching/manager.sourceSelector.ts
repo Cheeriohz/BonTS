@@ -4,13 +4,13 @@ export function harvestSourceSmart(creep: Creep) {
     const source: Source | null = Game.getObjectById(getSource(creep));
     if (source) {
         if (creep.harvest(source) === ERR_NOT_IN_RANGE) {
-            creep.moveTo(source, { reusePath: 5, visualizePathStyle: { stroke: '#ffaa00' } });
+            creep.moveTo(source, { reusePath: 5, visualizePathStyle: { stroke: "#ffaa00" } });
         }
     }
 }
 
 export function getSource(creep: Creep): string {
-    let sourceMap = creep.room.memory.sourceMap
+    let sourceMap = creep.room.memory.sourceMap;
     // Check to see if our sourceMap has been initialized
     if (!sourceMap?.length) {
         sourceMap = [];
@@ -19,8 +19,7 @@ export function getSource(creep: Creep): string {
             for (const index in sources) {
                 sourceMap[index] = { id: sources[index].id, assigned: [] };
             }
-        }
-        else {
+        } else {
             return "";
         }
     }
@@ -35,14 +34,12 @@ export function getSource(creep: Creep): string {
             let currentAssignments: string[] = sourceMap[index].assigned;
             currentAssignments.push(creep.name);
             creep.room.memory.sourceMap = sourceMap;
-        }
-        else {
+        } else {
             sourceMap[index].assigned = [`${creep.name}`];
             creep.room.memory.sourceMap = sourceMap;
         }
         return sourceMap[index].id;
-    }
-    else {
+    } else {
         return assignment;
     }
 }
@@ -58,7 +55,7 @@ function checkIfAssigned(sourceMap: Assignment[], assignee: string): string | nu
 
 function getAssignment(sourceMap: Assignment[], room: Room) {
     const sourceRatings: SourceRating[] = [];
-    console.log(sourceMap.length);
+    // console.log(sourceMap.length);
     if (!sourceMap) {
         return 0;
     }
@@ -66,16 +63,13 @@ function getAssignment(sourceMap: Assignment[], room: Room) {
         return 0;
     }
     for (let i = 0; i < sourceMap.length; i++) {
-
         if (sourceMap[i]?.assigned) {
             if (sourceMap[i].assigned.length > 0) {
                 sourceRatings.push({ index: i, rate: sourceMap[i].assigned.length });
-            }
-            else {
+            } else {
                 sourceRatings.push({ index: i, rate: 0 });
             }
-        }
-        else {
+        } else {
             sourceRatings.push({ index: i, rate: 0 });
         }
     }

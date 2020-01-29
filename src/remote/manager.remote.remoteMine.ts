@@ -30,17 +30,7 @@ export class RemoteMineManager {
                 const miner = Game.creeps[this.mine.miner];
                 if (!miner) {
                     if (!this.creepInQueue(CreepRole.dropper)) {
-                        const container: StructureContainer | null = Game.getObjectById(this.mine.containerId!);
-                        if (container) {
-                            if (this.minerPreSpawn()) {
-                                this.requestMiner();
-                            }
-                        } else {
-                            if (!this.reassignContainer()) {
-                                this.rebuildContainer();
-                            }
-                            return;
-                        }
+                        this.requestMiner();
                     }
                 }
             }
@@ -154,7 +144,7 @@ export class RemoteMineManager {
     }
 
     private requestMiner() {
-        const minerName: string = `dMiner${this.room.name}${Game.cpu.bucket}`;
+        const minerName: string = `dMiner${this.room.name}${Game.time.toPrecision(8)}`;
         const dcr: DedicatedCreepRequester = new DedicatedCreepRequester(this.spawn);
         dcr.createdDedicatedCreepRequest({
             dedication: this.mine.containerId!,
@@ -171,7 +161,7 @@ export class RemoteMineManager {
     }
 
     private requestHauler() {
-        const haulerName: string = `dHauler${this.room.name}${Game.cpu.bucket}`;
+        const haulerName: string = `dHauler${this.room.name}${Game.time.toPrecision(8)}`;
         const dcr: DedicatedCreepRequester = new DedicatedCreepRequester(this.spawn);
         dcr.createdDedicatedCreepRequest({
             dedication: this.mine.containerId!,

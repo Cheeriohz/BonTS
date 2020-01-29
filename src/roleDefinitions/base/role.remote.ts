@@ -17,8 +17,8 @@ export class RoleRemote extends RoleCreep {
             const destination = creep.pos.findClosestByPath(<ExitConstant>target);
             if (destination) {
                 creep.moveTo(destination, {
-                    reusePath: 1500,
-                    ignoreCreeps: true
+                    reusePath: 40,
+                    ignoreCreeps: false
                 });
                 if (repairWhileMove) {
                     this.repairRoad(creep);

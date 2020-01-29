@@ -81,14 +81,16 @@ export class BuildProjectManager {
 
     private maintainActiveRemoteBuilder() {
         if (!this.getActiveRemoteBuilder(this.project.roomName)) {
-            const dcr: DedicatedCreepRequester = new DedicatedCreepRequester(this.spawn);
-            dcr.createdDedicatedCreepRequest({
-                dedication: this.project.roomName,
-                role: CreepRole.builder,
-                specifiedName: `${this.spawn.name}_BPR_${this.project.roomName}`,
-                precious: undefined,
-                isRemote: true
-            });
+            if (!this.creepInQueue(CreepRole.builder)) {
+                const dcr: DedicatedCreepRequester = new DedicatedCreepRequester(this.spawn);
+                dcr.createdDedicatedCreepRequest({
+                    dedication: this.project.roomName,
+                    role: CreepRole.builder,
+                    specifiedName: `${this.spawn.name}_BPR_${this.project.roomName}`,
+                    precious: undefined,
+                    isRemote: true
+                });
+            }
         }
     }
 
@@ -105,6 +107,12 @@ export class BuildProjectManager {
         return null;
     }
 
+    private creepInQueue(role: CreepRole) {
+        return _.find(this.spawn.memory.dedicatedCreepRequest, dc => {
+            return dc.dedication === this.project.roomName && dc.role === role;
+        });
+    }
+
     private handOffProject(remote: boolean) {
         switch (this.project.projectType) {
             case BuildProjectEnum.LocalMineralExpansion: {
@@ -114,6 +122,7 @@ export class BuildProjectManager {
                 this.handOffLocalContainerExpansion();
             }
             case BuildProjectEnum.RemoteContainerExpansion: {
+                // TODO Need to ensure if we are running multi project execution that we don't hand off the end point project
                 this.attemptRemoteContainerExpansionHandOff(remote);
             }
         }

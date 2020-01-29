@@ -49,25 +49,34 @@ export class RemoteHarvestManager {
             }
         }
     }
-    private requestharvester() {
-        const harvestName: string = `dharvest${this.harvest.vein}${Game.cpu.bucket}`;
-        const dcr: DedicatedCreepRequester = new DedicatedCreepRequester(this.spawn);
-        const orders: CreepOrder = {
-            target: this.harvest.roomName,
-            independentOperator: false
-        };
-        dcr.createdDedicatedCreepRequest({
-            dedication: this.harvest.vein,
-            role: CreepRole.harvester,
-            specifiedName: harvestName,
-            precious: undefined,
-            isRemote: true,
-            orders: orders
+
+    private creepInQueue(role: CreepRole) {
+        return _.find(this.spawn.memory.dedicatedCreepRequest, dc => {
+            return dc.dedication === this.harvest.vein && dc.role === role;
         });
-        if (this.harvest.harvesters!.length > 0) {
-            this.harvest.harvesters?.push(harvestName);
-        } else {
-            this.harvest.harvesters = [harvestName];
+    }
+
+    private requestharvester() {
+        if (!this.creepInQueue(CreepRole.harvester)) {
+            const harvestName: string = `dharvest${this.harvest.vein}${Game.time.toPrecision(8)}`;
+            const dcr: DedicatedCreepRequester = new DedicatedCreepRequester(this.spawn);
+            const orders: CreepOrder = {
+                target: this.harvest.roomName,
+                independentOperator: false
+            };
+            dcr.createdDedicatedCreepRequest({
+                dedication: this.harvest.vein,
+                role: CreepRole.harvester,
+                specifiedName: harvestName,
+                precious: undefined,
+                isRemote: true,
+                orders: orders
+            });
+            if (this.harvest.harvesters!.length > 0) {
+                this.harvest.harvesters?.push(harvestName);
+            } else {
+                this.harvest.harvesters = [harvestName];
+            }
         }
     }
 }

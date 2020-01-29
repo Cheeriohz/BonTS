@@ -23,7 +23,6 @@ export class DedicatedCreepRequester {
         isRemote?: boolean;
         orders?: CreepOrder;
     }) {
-        console.log(orders);
         if (!this.spawn.memory.dedicatedCreepRequest) {
             this.spawn.memory.dedicatedCreepRequest = [];
         }
@@ -81,7 +80,6 @@ export class DedicatedCreepRequester {
         precious?: string,
         orders?: CreepOrder
     ): DedicatedCreepRequest {
-        console.log(orders);
         return {
             role: CreepRole.harvester,
             body: [WORK, WORK, WORK, CARRY, CARRY, CARRY, CARRY, CARRY, MOVE, MOVE, MOVE],
@@ -128,7 +126,7 @@ export class DedicatedCreepRequester {
     ): DedicatedCreepRequest {
         return {
             role: CreepRole.hauler,
-            body: [CARRY, CARRY, CARRY, CARRY, CARRY, WORK, MOVE, MOVE, MOVE],
+            body: [CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, WORK, MOVE, MOVE, MOVE, MOVE],
             dedication: dedication,
             specifiedName: specifiedName,
             precious: precious,
