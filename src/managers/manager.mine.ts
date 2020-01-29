@@ -130,14 +130,14 @@ export class MineManager {
     private requestMiner(mine: Mine) {
         const minerName: string = `dMiner${this.room.name}${Game.time}`;
         const dcr: DedicatedCreepRequester = new DedicatedCreepRequester(this.spawn);
-        dcr.createdDedicatedCreepRequest(mine.containerId, CreepRole.dropper, minerName);
+        dcr.createdDedicatedCreepRequest({ dedication: mine.containerId, role: CreepRole.dropper, specifiedName: minerName });
         mine.miner = minerName;
     }
 
     private requestHauler(mine: Mine) {
         const haulerName: string = `dHauler${this.room.name}${Game.time}`;
         const dcr: DedicatedCreepRequester = new DedicatedCreepRequester(this.spawn);
-        dcr.createdDedicatedCreepRequest(mine.containerId, CreepRole.hauler, haulerName);
+        dcr.createdDedicatedCreepRequest({ dedication: mine.containerId, role: CreepRole.hauler, specifiedName: haulerName });
         mine.hauler = haulerName;
     }
 

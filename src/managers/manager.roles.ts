@@ -1,5 +1,5 @@
 // Enums
-import { CreepRole } from "../enums/enum.roles"
+import { CreepRole } from "../enums/enum.roles";
 
 // Roles
 import { RoleBuilder } from "roleDefinitions/role.builder";
@@ -17,9 +17,9 @@ import { RoleDedicatedHauler } from "roleDefinitions/dedicated/role.dedicated.ha
 import { RoleRemoteBuilder } from "roleDefinitions/remote/role.remote.builder";
 import { RoleRemoteDropper } from "roleDefinitions/remote/role.remote.dropper";
 import { RoleRemoteHauler } from "roleDefinitions/remote/role.remote.hauler";
+import { RoleRemoteHarvester } from "roleDefinitions/remote/role.remote.harvester";
 
-export
-    class RolesManager {
+export class RolesManager {
     private mHarvester!: RoleHarvester;
     private mUpgrader!: RoleUpgrader;
     private mBuilder!: RoleBuilder;
@@ -32,6 +32,7 @@ export
     private mDDropper!: RoleDedicatedDropper;
     private mDHauler!: RoleDedicatedHauler;
 
+    private mRHarvester!: RoleRemoteHarvester;
     private mRBuilder!: RoleRemoteBuilder;
     private mRDropper!: RoleRemoteDropper;
     private mRHauler!: RoleRemoteHauler;
@@ -48,6 +49,7 @@ export
         this.mDDropper = new RoleDedicatedDropper();
         this.mDHauler = new RoleDedicatedHauler();
 
+        this.mRHarvester = new RoleRemoteHarvester();
         this.mRBuilder = new RoleRemoteBuilder();
         this.mRDropper = new RoleRemoteDropper();
         this.mRHauler = new RoleRemoteHauler();
@@ -57,31 +59,25 @@ export
         for (const name in Memory.creeps) {
             if (!(name in Game.creeps)) {
                 delete Memory.creeps[name];
-            }
-            else {
+            } else {
                 this.manageRoles(Game.creeps[name]);
                 // this.manageRolesLogged(name);
             }
         }
     }
 
-
     public manageRolesLogged(creep: Creep) {
         const startTime = Game.cpu.getUsed();
         this.manageRoles(creep);
         console.log(`   Execution time for ${creep.name}: ${Game.cpu.getUsed() - startTime}`);
-
     }
-
 
     private manageRoles(creep: Creep) {
         if (creep.memory.home) {
             this.manageRemoteCreepRole(creep);
-        }
-        else if (creep.memory.dedication) {
-            this.manageDedicatedCreepRole(creep, creep.memory.dedication)
-        }
-        else {
+        } else if (creep.memory.dedication) {
+            this.manageDedicatedCreepRole(creep, creep.memory.dedication);
+        } else {
             switch (creep.memory.role) {
                 case CreepRole.harvester: {
                     this.manageHarvester(creep);
@@ -116,6 +112,10 @@ export
 
     private manageRemoteCreepRole(creep: Creep) {
         switch (creep.memory.role) {
+            case CreepRole.harvester: {
+                this.mRHarvester.run(creep);
+                break;
+            }
             case CreepRole.builder: {
                 this.mRBuilder.run(creep);
                 break;
@@ -177,5 +177,3 @@ export
         this.mScout.runExpeditionScout(creep, this.mExpeditionManager);
     }
 }
-
-

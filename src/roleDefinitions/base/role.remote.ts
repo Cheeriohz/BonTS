@@ -2,7 +2,6 @@ import { RoleCreep } from "./role.creep";
 import _ from "lodash";
 
 export class RoleRemote extends RoleCreep {
-
     /*protected run(creep: Creep) {
         if (creep)
     }*/
@@ -18,7 +17,8 @@ export class RoleRemote extends RoleCreep {
             const destination = creep.pos.findClosestByPath(<ExitConstant>target);
             if (destination) {
                 creep.moveTo(destination, {
-                    reusePath: 1500, ignoreCreeps: true
+                    reusePath: 1500,
+                    ignoreCreeps: true
                 });
                 if (repairWhileMove) {
                     this.repairRoad(creep);
@@ -28,9 +28,7 @@ export class RoleRemote extends RoleCreep {
     }
 
     private repairRoad(creep: Creep) {
-        const road = creep.pos
-            .lookFor(LOOK_STRUCTURES)
-            .find(object => object.structureType === STRUCTURE_ROAD);
+        const road = creep.pos.lookFor(LOOK_STRUCTURES).find(object => object.structureType === STRUCTURE_ROAD);
         const repairPower: number = creep.getActiveBodyparts(WORK) * 100;
         if (road && road.hits + repairPower <= road.hitsMax) {
             creep.repair(road);
@@ -41,15 +39,13 @@ export class RoleRemote extends RoleCreep {
         if (creep.room.name !== remoteRoom) {
             this.travelToRoom(creep, remoteRoom, false);
             return false;
-        }
-        else {
+        } else {
             const container = Game.getObjectById<StructureContainer>(dedication);
             if (container) {
                 if (creep.pos.x === container.pos.x && creep.pos.y === container.pos.y) {
-                    creep.memory.working === true;
+                    creep.memory.working = true;
                     return true;
-                }
-                else {
+                } else {
                     creep.moveTo(container);
                     return false;
                 }
@@ -61,8 +57,7 @@ export class RoleRemote extends RoleCreep {
     protected fillUpAtHome(creep: Creep) {
         if (creep.room.name === creep.memory.home) {
             this.fillUp(creep);
-        }
-        else {
+        } else {
             this.travelToRoom(creep, creep.memory.home!, false);
         }
     }
@@ -70,10 +65,23 @@ export class RoleRemote extends RoleCreep {
     protected constructRemote(creep: Creep, constructRoom: string, repairWhileMove: boolean) {
         if (creep.room.name === constructRoom) {
             this.construct(creep);
-        }
-        else {
+        } else {
             this.travelToRoom(creep, constructRoom, repairWhileMove);
         }
     }
 
+    protected harvestRemote(creep: Creep, harvestRoom: string, target: string) {
+        if (creep.room.name !== harvestRoom) {
+            this.travelToRoom(creep, harvestRoom, false);
+            return;
+        } else {
+            const source: Source | null = Game.getObjectById(target);
+            if (source) {
+                if (creep.harvest(source) === ERR_NOT_IN_RANGE) {
+                    creep.moveTo(source, { reusePath: 20, visualizePathStyle: { stroke: "#ffaa00" } });
+                    return;
+                }
+            }
+        }
+    }
 }

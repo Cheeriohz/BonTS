@@ -7,9 +7,9 @@ import { MineManager } from "./manager.mine";
 import _ from "lodash";
 import { RemoteMineManager } from "remote/manager.remote.remoteMine";
 import { CreepRequester } from "cycle/manager.creepRequester";
+import { RemoteHarvestManager } from "remote/manager.remote.remoteHarvest";
 
 export class GameManager {
-
     public static run() {
         if (Memory.cycle > 99) {
             Memory.cycle = 0;
@@ -31,14 +31,14 @@ export class GameManager {
         rm.run();
 
         // Manage mines
-        if (Memory.cycle % 50 === 0) {
+        if (Memory.cycle % 25 === 0) {
             for (const spawn of _.values(Game.spawns)) {
                 if (spawn.room.memory.mine) {
                     const mm: MineManager = new MineManager(spawn.room, spawn);
                     mm.manageMine(true);
                 }
                 if (!Memory.killswitch) {
-                    GameManager.manageRemoteMine(spawn);
+                    GameManager.manageRemotes(spawn);
                 }
             }
         }
@@ -51,7 +51,12 @@ export class GameManager {
         console.log(`Cycle ${Memory.cycle} Execution Time: ${Game.cpu.getUsed() - executionTime}`);
     }
 
-    private static manageRemoteMine(spawn: StructureSpawn) {
+    private static manageRemotes(spawn: StructureSpawn) {
+        this.manageRemoteMines(spawn);
+        this.manageRemoteHarvests(spawn);
+    }
+
+    private static manageRemoteMines(spawn: StructureSpawn) {
         if (spawn.memory.remoteMines && spawn.memory.remoteMines.length > 0) {
             for (const remoteMine of spawn.memory.remoteMines) {
                 if (remoteMine.containerId) {
@@ -60,13 +65,28 @@ export class GameManager {
                         // check to see if we have room visibility to manage
                         const containerRoom = Game.rooms[containerRoomName];
                         if (containerRoom) {
-                            const remoteMineManager: RemoteMineManager = new RemoteMineManager(containerRoom, spawn, remoteMine);
-                        }
-                        else {
+                            const remoteMineManager: RemoteMineManager = new RemoteMineManager(
+                                containerRoom,
+                                spawn,
+                                remoteMine
+                            );
+                            remoteMineManager.manageMine(true);
+                        } else {
                             const cr: CreepRequester = new CreepRequester(spawn);
                             cr.RequestScoutToRoom(containerRoomName);
                         }
                     }
+                }
+            }
+        }
+    }
+
+    private static manageRemoteHarvests(spawn: StructureSpawn) {
+        if (spawn.memory.remoteHarvests && spawn.memory.remoteHarvests.length > 0) {
+            for (const remoteHarvest of spawn.memory.remoteHarvests) {
+                if (remoteHarvest.vein) {
+                    const remoteHarvestManager: RemoteHarvestManager = new RemoteHarvestManager(spawn, remoteHarvest);
+                    remoteHarvestManager.manageharvest(true);
                 }
             }
         }
@@ -96,13 +116,10 @@ export class GameManager {
 
         const executionTimeCycles = Game.cpu.getUsed();
 
-
         console.log(`Cycle ${Memory.cycle} Execution Time: ${executionTimeCycles - executionTime}`);
         console.log(`   Spawning: ${executionTimeSpawner - executionTime}`);
         console.log(`   Roles: ${executionTimeRoles - executionTimeSpawner}`);
         console.log(`   Structures: ${executionTimeStructures - executionTimeRoles}`);
         console.log(`   Cycles: ${executionTimeCycles - executionTimeStructures}`);
-
     }
-
 }

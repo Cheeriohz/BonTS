@@ -11,7 +11,7 @@ interface RemoteMine extends PathingLookup {
 interface RemoteHarvest extends PathingLookup {
   vein: Id<Source>;
   roomName: string;
-  harvester: string | null;
+  harvesters: string[] | null;
 }
 
 interface Mine {
