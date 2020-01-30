@@ -18,6 +18,7 @@ import { RoleRemoteBuilder } from "roleDefinitions/remote/role.remote.builder";
 import { RoleRemoteDropper } from "roleDefinitions/remote/role.remote.dropper";
 import { RoleRemoteHauler } from "roleDefinitions/remote/role.remote.hauler";
 import { RoleRemoteHarvester } from "roleDefinitions/remote/role.remote.harvester";
+import { RoleRemoteReserver } from "roleDefinitions/remote/role.remote.reserver";
 
 export class RolesManager {
     private mHarvester!: RoleHarvester;
@@ -36,6 +37,7 @@ export class RolesManager {
     private mRBuilder!: RoleRemoteBuilder;
     private mRDropper!: RoleRemoteDropper;
     private mRHauler!: RoleRemoteHauler;
+    private mRReserver!: RoleRemoteReserver;
 
     constructor() {
         this.mHarvester = new RoleHarvester();
@@ -53,6 +55,7 @@ export class RolesManager {
         this.mRBuilder = new RoleRemoteBuilder();
         this.mRDropper = new RoleRemoteDropper();
         this.mRHauler = new RoleRemoteHauler();
+        this.mRReserver = new RoleRemoteReserver();
     }
 
     public run() {
@@ -126,6 +129,10 @@ export class RolesManager {
             }
             case CreepRole.hauler: {
                 this.mRHauler.run(creep);
+                break;
+            }
+            case CreepRole.reserver: {
+                this.mRReserver.run(creep);
                 break;
             }
             default: {

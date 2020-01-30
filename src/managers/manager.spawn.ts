@@ -173,7 +173,7 @@ const basicBodyPlus = [WORK, WORK, CARRY, CARRY, MOVE, MOVE]; // 400 Energy, for
 const dropMinerBody = [WORK, WORK, WORK, WORK, WORK, WORK, MOVE]; // 650 Energy
 //const haulerBody = [CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, MOVE, MOVE, MOVE] // 600 Energy
 const haulerBody = [CARRY, CARRY, CARRY, CARRY, MOVE, MOVE]; // 600 Energy
-const droneBody = [CARRY, CARRY, WORK, WORK, WORK, WORK, MOVE, MOVE, MOVE]; // 800 Energy
+const droneBody = [CARRY, WORK, WORK, WORK, WORK, WORK, WORK, WORK, MOVE, MOVE, MOVE]; // 800 Energy
 const repairBody = [
     MOVE,
     MOVE,

@@ -6,6 +6,7 @@ interface CreepMemory {
     dedication?: string | null;
     precious?: string | null;
     home?: string | null;
+    path?: PathStep[] | null;
 }
 
 interface RoomMemory {
