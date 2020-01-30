@@ -171,7 +171,7 @@ export class DedicatedCreepRequester {
 
     private createDedicatedRemoteReserver(dedication: string, specifiedName: string): DedicatedCreepRequest {
         return {
-            role: CreepRole.hauler,
+            role: CreepRole.reserver,
             body: [CLAIM, MOVE],
             dedication: dedication,
             specifiedName: specifiedName,

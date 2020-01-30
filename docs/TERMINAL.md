@@ -1,6 +1,7 @@
 Most basic harvester spawn
 ---------------------------
 Game.spawns['Sp1'].spawnCreep([WORK,CARRY,MOVE], "Harvester" + Game.time.toString(), {memory: {role: 0, working: false}});
+Game.spawns['Sp1'].spawnCreep([WORK,WORK,CARRY,CARRY,MOVE,MOVE], "Builder" + Game.time.toString(), {memory: {role: 2, working: false}});
 
 Bronze Era Spawns
 ---------------------------
