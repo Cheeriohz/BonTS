@@ -8,6 +8,7 @@ import _ from "lodash";
 import { RemoteMineManager } from "remote/manager.remote.remoteMine";
 import { CreepRequester } from "cycle/manager.creepRequester";
 import { RemoteHarvestManager } from "remote/manager.remote.remoteHarvest";
+import { ReservationManager } from "remote/manager.remote.reservation";
 
 export class GameManager {
     public static run() {
@@ -52,8 +53,18 @@ export class GameManager {
     }
 
     private static manageRemotes(spawn: StructureSpawn) {
+        this.manageRemoteReservations(spawn);
         this.manageRemoteMines(spawn);
         this.manageRemoteHarvests(spawn);
+    }
+
+    private static manageRemoteReservations(spawn: StructureSpawn) {
+        if (spawn.memory.remoteReservations && spawn.memory.remoteReservations.length > 0) {
+            for (const reservation of spawn.memory.remoteReservations) {
+                const reservationManager: ReservationManager = new ReservationManager(reservation, spawn);
+                reservationManager.manageReservation();
+            }
+        }
     }
 
     private static manageRemoteMines(spawn: StructureSpawn) {

@@ -104,7 +104,8 @@ export class remoteMineExpeditionHandler extends ExpeditionResultsHandler {
             type: RESOURCE_ENERGY,
             vein: <Id<Source>>costing.destinationId,
             pathingLookup: pathingLookup,
-            roomName: costing.getDestinationRoomName()
+            roomName: costing.getDestinationRoomName(),
+            reserved: false
         };
 
         if (spawn.memory.remoteMines.length === 0) {
@@ -118,7 +119,8 @@ export class remoteMineExpeditionHandler extends ExpeditionResultsHandler {
             harvesters: null,
             vein: <Id<Source>>costing.destinationId,
             pathingLookup: pathingLookup,
-            roomName: costing.getDestinationRoomName()
+            roomName: costing.getDestinationRoomName(),
+            reserved: false
         };
 
         if (spawn.memory.remoteHarvests.length === 0) {

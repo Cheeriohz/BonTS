@@ -31,6 +31,7 @@ interface SpawnMemory {
     sourcesUtilized: boolean;
     buildProjects: BuildProject[] | null;
     remoteHarvests: RemoteHarvest[] | null;
+    remoteReservations: RemoteReservation[] | null;
 }
 
 interface Memory {

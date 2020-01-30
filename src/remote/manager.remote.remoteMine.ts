@@ -39,7 +39,11 @@ export class RemoteMineManager {
         }
         if (this.mine.haulers) {
             this.removeUnusedHaulers();
-            if (this.mine.haulers.length < 2) {
+            let haulerCap = 2;
+            if (this.mine.reserved) {
+                haulerCap = 4;
+            }
+            if (this.mine.haulers.length < haulerCap) {
                 if (!this.creepInQueue(CreepRole.hauler)) {
                     if (this.haulerNeeded()) {
                         this.requestHauler();
@@ -155,7 +159,8 @@ export class RemoteMineManager {
             orders: {
                 target: this.mine.roomName,
                 independentOperator: false
-            }
+            },
+            reserved: this.mine.reserved
         });
         this.mine.miner = minerName;
     }

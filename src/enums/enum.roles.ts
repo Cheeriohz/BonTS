@@ -1,4 +1,3 @@
-
 export enum CreepRole {
     harvester = 0,
     upgrader,
@@ -6,6 +5,6 @@ export enum CreepRole {
     dropper,
     hauler,
     drone,
-    scout
+    scout,
+    reserver
 }
-
