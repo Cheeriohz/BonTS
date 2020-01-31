@@ -14,8 +14,11 @@ export class RoleRemoteDropper extends RoleRemote {
                     }
                 }
             }
+            creep.build(Game.getObjectById<ConstructionSite<BuildableStructureConstant>>(creep.memory.dedication!)!);
+            return;
         } else {
             this.dedicatedContainerRelocateRemote(creep, creep.memory.dedication!, creep.memory.orders!.target);
+            return;
         }
     }
 }

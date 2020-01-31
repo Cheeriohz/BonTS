@@ -126,7 +126,7 @@ export class DedicatedCreepRequester {
     ): DedicatedCreepRequest {
         return {
             role: CreepRole.dropper,
-            body: [WORK, WORK, WORK, CARRY, MOVE, MOVE],
+            body: [WORK, WORK, WORK, WORK, CARRY, MOVE, MOVE],
             dedication: dedication,
             specifiedName: specifiedName,
             precious: precious,
@@ -172,7 +172,7 @@ export class DedicatedCreepRequester {
     private createDedicatedRemoteReserver(dedication: string, specifiedName: string): DedicatedCreepRequest {
         return {
             role: CreepRole.reserver,
-            body: [CLAIM, MOVE],
+            body: [MOVE, CLAIM, CLAIM],
             dedication: dedication,
             specifiedName: specifiedName,
             precious: null,

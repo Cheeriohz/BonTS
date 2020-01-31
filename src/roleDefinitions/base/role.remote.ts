@@ -27,12 +27,77 @@ export class RoleRemote extends RoleCreep {
         }
     }
 
-    private repairRoad(creep: Creep) {
+    protected repairRoad(creep: Creep) {
         const road = creep.pos.lookFor(LOOK_STRUCTURES).find(object => object.structureType === STRUCTURE_ROAD);
         const repairPower: number = creep.getActiveBodyparts(WORK) * 100;
         if (road && road.hits + repairPower <= road.hitsMax) {
             creep.repair(road);
         }
+    }
+
+    protected renew(creep: Creep, timeToLiveThreshold: number): boolean {
+        // TODO more robustness.
+        if (creep.room.memory.spawns && creep.room.memory.spawns.length > 0) {
+            if (creep.ticksToLive && creep.ticksToLive < timeToLiveThreshold) {
+                if (creep.room.energyAvailable > this.creepRenewCost(creep)) {
+                    const spawn: StructureSpawn | null = Game.getObjectById<StructureSpawn>(
+                        creep.room.memory.spawns[0]
+                    );
+                    if (spawn && !spawn.spawning) {
+                        if (creep.pos.isNearTo(spawn)) {
+                            spawn.renewCreep(creep);
+                            return true;
+                        } else {
+                            creep.moveTo(spawn, { ignoreCreeps: false, reusePath: 5 });
+                            return false;
+                        }
+                    }
+                }
+            }
+        }
+        return false;
+    }
+
+    protected creepRenewCost(creep: Creep): number {
+        let totalCost: number = 0;
+        const bodyPartTotal = creep.body.length;
+        for (const bodyPart of creep.body) {
+            switch (bodyPart.type) {
+                case MOVE: {
+                    totalCost += 50;
+                    break;
+                }
+                case WORK: {
+                    totalCost += 100;
+                    break;
+                }
+                case CARRY: {
+                    totalCost += 50;
+                    break;
+                }
+                case ATTACK: {
+                    totalCost += 80;
+                    break;
+                }
+                case RANGED_ATTACK: {
+                    totalCost += 150;
+                    break;
+                }
+                case TOUGH: {
+                    totalCost += 10;
+                    break;
+                }
+                case HEAL: {
+                    totalCost += 250;
+                    break;
+                }
+                case CLAIM: {
+                    totalCost += 600;
+                    break;
+                }
+            }
+        }
+        return totalCost / 2.5 / bodyPartTotal;
     }
 
     protected dedicatedContainerRelocateRemote(creep: Creep, dedication: string, remoteRoom: string): boolean {
@@ -46,7 +111,7 @@ export class RoleRemote extends RoleCreep {
                     creep.memory.working = true;
                     return true;
                 } else {
-                    creep.moveTo(container);
+                    creep.moveTo(container.pos);
                     return false;
                 }
             }
@@ -65,8 +130,10 @@ export class RoleRemote extends RoleCreep {
     protected constructRemote(creep: Creep, constructRoom: string, repairWhileMove: boolean) {
         if (creep.room.name === constructRoom) {
             this.construct(creep);
+            return;
         } else {
             this.travelToRoom(creep, constructRoom, repairWhileMove);
+            return;
         }
     }
 

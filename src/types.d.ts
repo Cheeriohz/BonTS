@@ -10,6 +10,7 @@ interface CreepMemory {
 }
 
 interface RoomMemory {
+    spawns: string[] | null;
     era: number;
     sourceMap: Assignment[];
     containerMap: Assignment[] | null;

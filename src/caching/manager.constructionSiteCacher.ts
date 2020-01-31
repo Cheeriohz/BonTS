@@ -9,24 +9,25 @@ export class ConstructionSiteCacher {
                 // Check if site already pulled and still valid.
                 const roomSite = this.roomSiteMap[room.name];
                 if (roomSite) {
-                    return roomSite
-                }
-                else {
+                    return roomSite;
+                } else {
                     // See if we need to refresh our target.
-                    const site = Game.getObjectById<ConstructionSite<BuildableStructureConstant>>(room.memory.constructionSites[room.memory.constructionSites.length - 1])
+                    const site = Game.getObjectById<ConstructionSite<BuildableStructureConstant>>(
+                        room.memory.constructionSites[room.memory.constructionSites.length - 1]
+                    );
                     if (site) {
                         // Store object for local cycle memory and return it.
                         _.set(this.roomSiteMap, room.name, site);
                         return site;
-                    }
-                    else {
+                    } else {
                         // Refresh our object list.
                         return this.popAndRefreshLazy(room);
                     }
                 }
+            } else {
+                this.updateConstructionSites(room);
             }
-        }
-        else {
+        } else {
             this.updateConstructionSites(room);
         }
         return null;
@@ -40,20 +41,21 @@ export class ConstructionSiteCacher {
     private static popAndRefreshLazy(room: Room) {
         if (room.memory.constructionSites.length > 1) {
             room.memory.constructionSites.pop();
-            const site = Game.getObjectById<ConstructionSite<BuildableStructureConstant>>(room.memory.constructionSites[room.memory.constructionSites.length - 1]);
+            const site = Game.getObjectById<ConstructionSite<BuildableStructureConstant>>(
+                room.memory.constructionSites[room.memory.constructionSites.length - 1]
+            );
             _.set(this.roomSiteMap, room.name, site);
             return site;
-        }
-        else {
+        } else {
             room.memory.constructionSites.pop();
             return null;
         }
-
     }
 
     public static updateConstructionSites(room: Room) {
-        room.memory.constructionSites = _.map(_.filter(Game.constructionSites, (cs) => cs?.room?.name === room.name), 'id');
+        room.memory.constructionSites = _.map(
+            _.filter(_.values(Game.constructionSites), cs => cs?.room?.name === room.name),
+            "id"
+        );
     }
-
-
 }

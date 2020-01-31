@@ -28,7 +28,8 @@ export class RoleRemoteHauler extends RoleRemote {
         else {
             const storage: StructureStorage | undefined = this.checkStorageForDeposit(creep.room);
             if (storage) {
-                this.depositMove(creep, storage);
+				this.depositMove(creep, storage);
+				this.repairRoad(creep);
             }
         }
     }

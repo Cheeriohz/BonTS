@@ -22,10 +22,12 @@ export class RoleRemoteBuilder extends RoleRemote {
         }
 
         if (creep.memory.working) {
-            this.constructRemote(creep, creep.memory.dedication!, true);
+			this.constructRemote(creep, creep.memory.dedication!, true);
+			return;
         }
         else {
-            this.fillUpAtHome(creep);
+			this.fillUpAtHome(creep);
+			return;
         }
     }
 
