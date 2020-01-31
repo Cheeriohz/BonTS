@@ -20,8 +20,7 @@ export class ContainerExpansion {
         const sourcePositions: RoomPosition[] | null = this.identifySourcesWithoutContainer(sources);
         if (sourcePositions) {
             this.identifyExpansionTarget(sourcePositions, BuildProjectEnum.LocalContainerExpansion);
-        }
-        else {
+        } else {
             return;
         }
     }
@@ -30,9 +29,6 @@ export class ContainerExpansion {
         const mineralPositions: RoomPosition[] | null = this.identifyMineralsWithoutContainer();
         if (mineralPositions) {
             this.identifyExpansionTarget(mineralPositions, BuildProjectEnum.LocalMineralExpansion);
-        }
-        else {
-            return;
         }
     }
 
@@ -53,7 +49,9 @@ export class ContainerExpansion {
             }
         }
         if (sources.length > 0) {
-            return _.map(sources, (s) => { return s.pos; });
+            return _.map(sources, s => {
+                return s.pos;
+            });
         }
         return null;
     }
@@ -64,7 +62,9 @@ export class ContainerExpansion {
         if (minerals) {
             for (const mineral of minerals) {
                 const nearbyContainer: Structure[] | null = mineral.pos.findInRange(FIND_STRUCTURES, 3, {
-                    filter: (s) => { return (s.structureType == STRUCTURE_CONTAINER); }
+                    filter: s => {
+                        return s.structureType == STRUCTURE_CONTAINER;
+                    }
                 });
                 if (nearbyContainer.length === 0) {
                     unTappedMinerals.push(mineral);
@@ -72,7 +72,9 @@ export class ContainerExpansion {
             }
         }
         if (unTappedMinerals.length > 0) {
-            return _.map(unTappedMinerals, (m) => { return m.pos; });
+            return _.map(unTappedMinerals, m => {
+                return m.pos;
+            });
         }
         return null;
     }
@@ -83,21 +85,16 @@ export class ContainerExpansion {
             const path: PathStep[] = this.originPos.findPathTo(closest, { ignoreCreeps: true });
             if (this.visualizeOnly) {
                 this.visualizeContainerExpansion(path);
-            }
-            else {
+            } else {
                 const bpc: buildProjectCreator = new buildProjectCreator(this.room, this.spawn);
                 if (projectType === BuildProjectEnum.LocalMineralExpansion) {
                     bpc.createBuildProjectLocalMineExpansion(path, projectType);
-                }
-                else if (projectType === BuildProjectEnum.LocalContainerExpansion) {
+                } else if (projectType === BuildProjectEnum.LocalContainerExpansion) {
                     bpc.createBuildProjectContainerExpansion(path, projectType);
                 }
-
             }
         }
     }
-
-
 
     private visualizeContainerExpansion(path: PathStep[]) {
         const visualizer: Visualizer = new Visualizer();

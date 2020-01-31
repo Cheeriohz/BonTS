@@ -11,6 +11,7 @@ import { ContainerExpansion } from "building/building.containerExpansion";
 import { BuildProjectManager } from "building/building.buildProject";
 import _ from "lodash";
 import { ExpeditionResultsHandlerMapper } from "expansion/expansion.expeditionResultsHandlerMap";
+import { RCLUpgradeHandler } from "./manager.handleRCLUpgrades";
 
 export class CycleManager {
     public static check() {
@@ -45,7 +46,6 @@ export class CycleManager {
     private static everyCycle() {
         ConstructionSiteCacher.dispose();
         ControllerCacher.dispose();
-        this.handleRCLUpgrades(Game.spawns["Sp1"]);
     }
 
     private static updateSpawnConstructionSiteMaps() {
@@ -71,7 +71,7 @@ export class CycleManager {
 
             this.handleSpawnReassess(spawn);
 
-            this.handleRCLUpgrades(spawn);
+            RCLUpgradeHandler.handleRCLUpgrades(spawn);
 
             this.handleExpeditionResultsAction(spawn);
         }
@@ -114,30 +114,6 @@ export class CycleManager {
         if (spawn.memory?.reassess) {
             const reassessment: SpawnReassment = new SpawnReassment(spawn);
             reassessment.reassess();
-        }
-    }
-
-    private static handleRCLUpgrades(spawn: StructureSpawn) {
-        if (spawn.memory?.rclUpgrades) {
-            const rclUpgradeEvent: RCLUpgradeEvent = spawn.memory.rclUpgrades[0];
-            if (rclUpgradeEvent) {
-                switch (rclUpgradeEvent.newRclLevel) {
-                    case 6: {
-                        const containerExpansion: ContainerExpansion = new ContainerExpansion(
-                            spawn,
-                            spawn.room,
-                            spawn.pos,
-                            false
-                        );
-                        containerExpansion.checkForMineralExpansion();
-                        _.remove(spawn.memory.rclUpgrades, rclUpgradeEvent);
-                        break;
-                    }
-                    default: {
-                        console.log(`No handling implemented for RCL Level ${rclUpgradeEvent.newRclLevel}`);
-                    }
-                }
-            }
         }
     }
 

@@ -9,6 +9,11 @@ export class buildProjectCreator {
         this.spawn = spawn;
     }
 
+    public createBuildProjectSingleSite(pos: RoomPosition, structureType: BuildableStructureConstant) {
+        const buildOrder = [{ x: pos.x, y: pos.y, type: structureType }];
+        this.pushBuildProjectToSpawn(buildOrder, BuildProjectEnum.SingleConstructionSiteNoFollowUp);
+    }
+
     // Last Pathstep will become an extractor. Next to last pathstep will become a container. Remaining will become roads'
     public createBuildProjectLocalMineExpansion(path: PathStep[], projectType: BuildProjectEnum) {
         const extractorLocation: PathStep | undefined = path.pop();
@@ -49,8 +54,7 @@ export class buildProjectCreator {
         };
         if (!this.spawn.memory.buildProjects) {
             this.spawn.memory.buildProjects = [buildProject];
-        }
-        else {
+        } else {
             this.spawn.memory.buildProjects.push(buildProject);
         }
     }
@@ -63,8 +67,7 @@ export class buildProjectCreator {
                 if (roadPathStep) {
                     buildOrders.push(this.createRoadBuildOrder(roadPathStep));
                 }
-            }
-            else {
+            } else {
                 // Let it drop into the void.
                 path.pop();
             }
@@ -88,18 +91,19 @@ export class buildProjectCreator {
             const presentObjects: Structure[] | null = this.room.lookForAt(LOOK_STRUCTURES, pathStep.x, pathStep.y);
             if (presentObjects) {
                 for (const structure of presentObjects) {
-                    if (structure.structureType === STRUCTURE_ROAD
-                        || structure.structureType === STRUCTURE_CONTAINER
-                        || structure.structureType === STRUCTURE_LINK
-                        || structure.structureType === STRUCTURE_STORAGE
-                        || structure.structureType === STRUCTURE_TERMINAL
-                        || structure.structureType === STRUCTURE_TOWER
-                        || structure.structureType === STRUCTURE_WALL) {
+                    if (
+                        structure.structureType === STRUCTURE_ROAD ||
+                        structure.structureType === STRUCTURE_CONTAINER ||
+                        structure.structureType === STRUCTURE_LINK ||
+                        structure.structureType === STRUCTURE_STORAGE ||
+                        structure.structureType === STRUCTURE_TERMINAL ||
+                        structure.structureType === STRUCTURE_TOWER ||
+                        structure.structureType === STRUCTURE_WALL
+                    ) {
                         return false;
                     }
                 }
-            }
-            else {
+            } else {
                 return true;
             }
             return true;
