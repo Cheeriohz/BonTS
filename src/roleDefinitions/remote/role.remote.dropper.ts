@@ -1,7 +1,9 @@
 import { RoleRemote } from "roleDefinitions/base/role.remote";
+import { profile } from "Profiler";
 
+@profile
 export class RoleRemoteDropper extends RoleRemote {
-    public run(creep: Creep) {
+    public runRemote(creep: Creep) {
         if (creep.memory.working) {
             if (super.harvestPrecious(creep) === ERR_NOT_ENOUGH_RESOURCES) {
                 const container: Structure | null = Game.getObjectById(creep.memory.dedication!);

@@ -7,6 +7,9 @@ interface CreepMemory {
     precious?: string | null;
     home?: string | null;
     path?: PathStep[] | null;
+    stuckCount?: number | null;
+    moved?: boolean | null;
+    repairWhileMove?: boolean | null;
 }
 
 interface RoomMemory {

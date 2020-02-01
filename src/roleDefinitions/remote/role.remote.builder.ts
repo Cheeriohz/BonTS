@@ -1,38 +1,33 @@
-
 import { RoleRemote } from "roleDefinitions/base/role.remote";
-import { RemoteMineHandler } from "remote/remote.remoteMineHandler";
 import { RemoteDispatcher } from "remote/remote.dispatcher";
 
-
 export class RoleRemoteBuilder extends RoleRemote {
-
-    public run(creep: Creep) {
-        const currentEnergy = creep.store[RESOURCE_ENERGY]
+    public runRemote(creep: Creep) {
+        const currentEnergy = creep.store[RESOURCE_ENERGY];
         if (creep.memory.working && currentEnergy === 0) {
             creep.memory.working = false;
-            creep.say('🔄 harvest');
+            creep.say("🔄 harvest");
             //this.testRemoteDispatchR(creep)
             //return;
         }
         if (!creep.memory.working && creep.store.getFreeCapacity() === 0) {
             creep.memory.working = true;
-            creep.say('🚧 build');
+            creep.say("🚧 build");
             //this.testRemoteDispatch(creep);
             //return;
         }
 
         if (creep.memory.working) {
-			this.constructRemote(creep, creep.memory.dedication!, true);
-			return;
-        }
-        else {
-			this.fillUpAtHome(creep);
-			return;
+            this.constructRemote(creep, creep.memory.dedication!, true);
+            return;
+        } else {
+            this.fillUpAtHome(creep);
+            return;
         }
     }
 
     private testRemoteDispatchR(creep: Creep) {
-        const spawn = Game.spawns['Sp1'];
+        const spawn = Game.spawns["Sp1"];
         if (spawn) {
             const remoteMines = spawn.memory.remoteMines;
             if (remoteMines) {
@@ -50,7 +45,7 @@ export class RoleRemoteBuilder extends RoleRemote {
     }
 
     private testRemoteDispatch(creep: Creep) {
-        const spawn = Game.spawns['Sp1'];
+        const spawn = Game.spawns["Sp1"];
         if (spawn) {
             const remoteMines = spawn.memory.remoteMines;
             if (remoteMines) {
@@ -65,4 +60,4 @@ export class RoleRemoteBuilder extends RoleRemote {
             }
         }
     }
-};
+}

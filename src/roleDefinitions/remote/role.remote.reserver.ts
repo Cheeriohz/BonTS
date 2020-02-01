@@ -1,7 +1,9 @@
 import { RoleRemote } from "roleDefinitions/base/role.remote";
+import { profile } from "Profiler";
 
+@profile
 export class RoleRemoteReserver extends RoleRemote {
-    public run(creep: Creep) {
+    public runRemote(creep: Creep) {
         if (creep.memory.working) {
             creep.reserveController(creep.room.controller!);
         } else {

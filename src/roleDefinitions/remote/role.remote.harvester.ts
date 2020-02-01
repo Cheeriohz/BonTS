@@ -1,7 +1,9 @@
 import { RoleRemote } from "roleDefinitions/base/role.remote";
+import { profile } from "Profiler";
 
+@profile
 export class RoleRemoteHarvester extends RoleRemote {
-    public run(creep: Creep) {
+    public runRemote(creep: Creep) {
         if (creep.memory.working && creep.store.getUsedCapacity() === 0) {
             creep.memory.working = false;
             creep.say("⛏️");

@@ -1,28 +1,82 @@
 import { RoleCreep } from "./role.creep";
 import _ from "lodash";
+import { profile } from "Profiler";
 
+@profile
 export class RoleRemote extends RoleCreep {
-    /*protected run(creep: Creep) {
-        if (creep)
-    }*/
-
-    protected travelToRoomByCachedPath(creep: Creep, roomName: string, cachedPath: PathStep[]) {
-        throw "I Haven't implemented this yet.";
+    public run(creep: Creep): boolean {
+        if (creep.fatigue) {
+            return false;
+        }
+        if (creep.memory.path && creep.memory.path?.length > 0) {
+            this.stuckHandler(creep);
+            // Arrived condition
+            if (creep.memory.path?.length === 0) {
+                creep.moveByPath(creep.memory.path);
+                creep.memory.path = null;
+                creep.memory.repairWhileMove = null;
+                return true;
+            } else {
+                // We still have traveling to do.
+                creep.moveByPath(creep.memory.path);
+                if (creep.memory.repairWhileMove) {
+                    this.repairRoad(creep);
+                }
+                return false;
+            }
+        }
+        return true;
     }
 
-    // TODO implement some form of caching here. These searches are pretty expensive iirc.
+    private serializePosition(pos: RoomPosition): string {
+        return `${pos.x}${pos.y}`;
+    }
+
+    private stuckHandler(creep: Creep) {
+        const lastPos = _.first(creep.memory.path);
+        if (lastPos!.x != creep.pos.x || lastPos!.y != creep.pos.y) {
+            if (creep.memory.stuckCount) creep.memory.stuckCount += 1;
+            else creep.memory.stuckCount = 1;
+            if (creep.memory.stuckCount == 2) {
+                this.fixStuck(creep);
+            } else if (creep.memory.stuckCount > 2) {
+                delete creep.memory.path;
+                creep.memory.stuckCount = 0;
+            }
+        } else {
+            creep.memory.path = _.tail(creep.memory.path);
+        }
+    }
+
+    private fixStuck(creep: Creep) {
+        const currentPathStep = _.first(creep.memory.path);
+        if (currentPathStep) {
+            const blockers = creep.room.lookForAt(LOOK_CREEPS, currentPathStep.x, currentPathStep.y);
+            if (blockers.length > 0) {
+                const blocker = _.first(blockers);
+                blocker!.moveTo(creep.pos.x, creep.pos.y);
+                blocker!.memory.moved = true;
+            }
+        }
+    }
+
+    private cachedTravel(destination: RoomPosition, creep: Creep, repairWhileMove: boolean) {
+        const path = creep.pos.findPathTo(destination, { ignoreCreeps: true });
+        if (path) {
+            if (repairWhileMove) {
+                creep.memory.repairWhileMove = true;
+            }
+            creep.memory.path = path;
+            this.run(creep);
+        }
+    }
+
     protected travelToRoom(creep: Creep, roomName: string, repairWhileMove: boolean) {
         let target = Game.map.findExit(creep.room.name, roomName);
         if (target > 0) {
             const destination = creep.pos.findClosestByPath(<ExitConstant>target);
             if (destination) {
-                creep.moveTo(destination, {
-                    reusePath: 40,
-                    ignoreCreeps: false
-                });
-                if (repairWhileMove) {
-                    this.repairRoad(creep);
-                }
+                this.cachedTravel(destination, creep, repairWhileMove);
             }
         }
     }

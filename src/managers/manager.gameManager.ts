@@ -38,9 +38,7 @@ export class GameManager {
                     const mm: MineManager = new MineManager(spawn.room, spawn);
                     mm.manageMine(true);
                 }
-                if (!Memory.killswitch) {
-                    GameManager.manageRemotes(spawn);
-                }
+                GameManager.manageRemotes(spawn);
             }
         }
 
