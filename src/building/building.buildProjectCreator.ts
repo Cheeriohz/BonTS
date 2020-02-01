@@ -9,6 +9,10 @@ export class buildProjectCreator {
         this.spawn = spawn;
     }
 
+    public passThroughCreate(buildOrders: BuildOrder[]) {
+        this.pushBuildProjectToSpawn(buildOrders, BuildProjectEnum.PassThroughCreate);
+    }
+
     public createBuildProjectSingleSite(pos: RoomPosition, structureType: BuildableStructureConstant) {
         const buildOrder = [{ x: pos.x, y: pos.y, type: structureType }];
         this.pushBuildProjectToSpawn(buildOrder, BuildProjectEnum.SingleConstructionSiteNoFollowUp);

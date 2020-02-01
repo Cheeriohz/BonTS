@@ -22,6 +22,7 @@ interface RoomMemory {
     sourceLinks: Id<StructureLink>[] | null;
     dumpLinks: Id<StructureLink>[] | null;
     mine: Mine | null;
+    reservedBuilds?: BuildOrder[] | null;
 }
 
 interface SpawnMemory {

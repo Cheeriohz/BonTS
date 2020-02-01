@@ -12,6 +12,7 @@ import { BuildProjectManager } from "building/building.buildProject";
 import _ from "lodash";
 import { ExpeditionResultsHandlerMapper } from "expansion/expansion.expeditionResultsHandlerMap";
 import { RCLUpgradeHandler } from "./manager.handleRCLUpgrades";
+import { LabExpansion } from "building/building.labExpansion";
 
 export class CycleManager {
     public static check() {

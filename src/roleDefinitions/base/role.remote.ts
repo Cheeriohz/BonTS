@@ -9,20 +9,21 @@ export class RoleRemote extends RoleCreep {
             return false;
         }
         if (creep.memory.path && creep.memory.path?.length > 0) {
-            this.stuckHandler(creep);
-            // Arrived condition
-            if (creep.memory.path?.length === 0) {
-                creep.moveByPath(creep.memory.path);
-                creep.memory.path = null;
-                creep.memory.repairWhileMove = null;
-                return true;
-            } else {
-                // We still have traveling to do.
-                creep.moveByPath(creep.memory.path);
-                if (creep.memory.repairWhileMove) {
-                    this.repairRoad(creep);
+            if (this.stuckHandler(creep)) {
+                // Arrived condition
+                if (creep.memory.path.length === 1) {
+                    creep.move(creep.memory.path[0].direction);
+                    creep.memory.path = null;
+                    creep.memory.repairWhileMove = null;
+                    return true;
+                } else {
+                    // We still have traveling to do.
+                    creep.move(creep.memory.path[0].direction);
+                    if (creep.memory.repairWhileMove) {
+                        this.repairRoad(creep);
+                    }
+                    return false;
                 }
-                return false;
             }
         }
         return true;
@@ -32,7 +33,7 @@ export class RoleRemote extends RoleCreep {
         return `${pos.x}${pos.y}`;
     }
 
-    private stuckHandler(creep: Creep) {
+    private stuckHandler(creep: Creep): boolean {
         const lastPos = _.first(creep.memory.path);
         if (lastPos!.x != creep.pos.x || lastPos!.y != creep.pos.y) {
             if (creep.memory.stuckCount) creep.memory.stuckCount += 1;
@@ -42,10 +43,12 @@ export class RoleRemote extends RoleCreep {
             } else if (creep.memory.stuckCount > 2) {
                 delete creep.memory.path;
                 creep.memory.stuckCount = 0;
+                return false;
             }
         } else {
             creep.memory.path = _.tail(creep.memory.path);
         }
+        return true;
     }
 
     private fixStuck(creep: Creep) {

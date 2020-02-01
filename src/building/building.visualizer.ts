@@ -1,23 +1,35 @@
-export class Visualizer {
+import _ from "lodash";
 
+export class Visualizer {
     private lineStyle: LineStyle = {
-        width: .5,
+        width: 0.5,
         color: "#FAAC58",
         opacity: 0.5,
         lineStyle: "dashed"
     };
 
     private circleStyle: CircleStyle = {
-        radius: .2,
+        radius: 0.2,
         stroke: "#FAAC58",
-        strokeWidth: .05,
+        strokeWidth: 0.05,
         fill: "#767A80"
     };
 
+    public drawBuildOrders(buildOrders: BuildOrder[], anchor: RoomPosition, opts = {}): void {
+        _.defaults(opts, { opacity: 0.5 });
+        let vis = new RoomVisual(anchor.roomName);
+        for (const buildOrder of buildOrders) {
+            vis.structure(buildOrder.x, buildOrder.y, buildOrder.type, opts);
+        }
+	}
+	
 
-
-
-    public visualizeRoadCrossRooms(startRoom: string, startPoint: RoomPosition, endRoom: string, endPoint: RoomPosition) {
+    public visualizeRoadCrossRooms(
+        startRoom: string,
+        startPoint: RoomPosition,
+        endRoom: string,
+        endPoint: RoomPosition
+    ) {
         // RoomVisual.
         throw "Not Implemented";
     }
@@ -38,7 +50,7 @@ export class Visualizer {
     public visualizeTargetCallout(roomName: string, startPoint: RoomPosition, endPoint: RoomPosition) {
         const visualizer: RoomVisual = new RoomVisual(roomName);
         if (visualizer) {
-            visualizer.line(startPoint, endPoint, this.lineStyle)
+            visualizer.line(startPoint, endPoint, this.lineStyle);
         }
     }
 }

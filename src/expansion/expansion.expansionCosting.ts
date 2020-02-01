@@ -1,6 +1,8 @@
 import _ from "lodash";
+import { GeneralBuilding } from "building/building.general";
+import { SourceMapGenerator } from "source-map";
 
-export class ExpansionCosting {
+export class ExpansionCosting extends GeneralBuilding {
     private origin!: RoomPosition;
     private destination!: RoomPosition;
     public destinationId!: string;
@@ -10,6 +12,7 @@ export class ExpansionCosting {
     public cost: number = Number.MAX_VALUE;
 
     constructor(origin: RoomPosition, destination: RoomPosition, destinationId: string, completionRange: number) {
+        super();
         this.origin = origin;
         this.destination = destination;
         this.destinationId = destinationId;
@@ -120,63 +123,5 @@ export class ExpansionCosting {
             });
         }
         return { roomName: roomName, path: pathSteps };
-    }
-
-    private getDirectionConstant(dx: number, dy: number): DirectionConstant {
-        switch (dx) {
-            case 0: {
-                switch (dy) {
-                    case 1: {
-                        return BOTTOM;
-                    }
-                    case -1: {
-                        return TOP;
-                    }
-                    default: {
-                        console.log("Error invalid dy for a pathstep");
-                    }
-                }
-                break;
-            }
-            case 1: {
-                switch (dy) {
-                    case 0: {
-                        return RIGHT;
-                    }
-                    case 1: {
-                        return BOTTOM_RIGHT;
-                    }
-                    case -1: {
-                        return TOP_RIGHT;
-                    }
-                    default: {
-                        console.log("Error invalid dy for a pathstep");
-                    }
-                }
-                break;
-            }
-            case -1: {
-                switch (dy) {
-                    case 0: {
-                        return LEFT;
-                    }
-                    case 1: {
-                        return BOTTOM_LEFT;
-                    }
-                    case -1: {
-                        return TOP_LEFT;
-                    }
-                    default: {
-                        console.log("Error invalid dy for a pathstep");
-                    }
-                }
-                break;
-            }
-            default: {
-                console.log("Error invalid dx for a pathstep");
-                break;
-            }
-        }
-        throw `dx: ${dx}  dy: ${dy} was invalid`;
     }
 }

@@ -1,6 +1,7 @@
 import { ContainerExpansion } from "building/building.containerExpansion";
 import { TerminalExpansion } from "building/building.terminalExpansion";
 import _ from "lodash";
+import { LabExpansion } from "building/building.labExpansion";
 
 export class RCLUpgradeHandler {
     public static handleRCLUpgrades(spawn: StructureSpawn) {
@@ -26,11 +27,22 @@ export class RCLUpgradeHandler {
         const containerExpansion: ContainerExpansion = new ContainerExpansion(spawn, spawn.room, spawn.pos, false);
         containerExpansion.checkForMineralExpansion();
 
-        const terminalExpansion: TerminalExpansion = new TerminalExpansion(spawn);
-        if (terminalExpansion.enqueueTerminalProject()) {
-            return true;
-        } else {
+        // Check if we need a terminal.
+        if (
+            !_.find(
+                _.values(Game.structures),
+                s => s.room.name === spawn.room.name && s.structureType === STRUCTURE_TERMINAL
+            )
+        ) {
+            const terminalExpansion: TerminalExpansion = new TerminalExpansion(spawn);
+            if (!terminalExpansion.enqueueTerminalProject()) {
+                return false;
+            }
+        }
+        const le: LabExpansion = new LabExpansion(Game.spawns["Sp1"]);
+        if (!le.enqueueLabProject(3)) {
             return false;
         }
+        return true;
     }
 }
