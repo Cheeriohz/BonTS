@@ -120,7 +120,8 @@ export class remoteMineExpeditionHandler extends ExpeditionResultsHandler {
             vein: <Id<Source>>costing.destinationId,
             pathingLookup: pathingLookup,
             roomName: costing.getDestinationRoomName(),
-            reserved: false
+            reserved: false,
+            type: RESOURCE_ENERGY
         };
 
         if (spawn.memory.remoteHarvests.length === 0) {

@@ -68,7 +68,7 @@ export class RemoteHarvestManager {
                 dedication: this.harvest.vein,
                 role: CreepRole.harvester,
                 specifiedName: harvestName,
-                precious: undefined,
+                precious: this.harvest.type,
                 isRemote: true,
                 orders: orders
             });

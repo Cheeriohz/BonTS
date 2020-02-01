@@ -19,6 +19,7 @@ interface RemoteHarvest extends PathingLookup {
     roomName: string;
     harvesters: string[] | null;
     reserved: boolean;
+    type: ResourceConstant;
 }
 
 interface RemoteReservation {

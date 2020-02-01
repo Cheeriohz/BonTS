@@ -4,10 +4,10 @@ export class RoleRemoteHarvester extends RoleRemote {
     public run(creep: Creep) {
         if (creep.memory.working && creep.store.getUsedCapacity() === 0) {
             creep.memory.working = false;
-            creep.say("⛏️ harvest");
+            creep.say("⛏️");
         } else if (!creep.memory.working && creep.store.getFreeCapacity() === 0) {
             creep.memory.working = true;
-            creep.say("😓 work");
+            creep.say("😓");
         }
 
         if (creep.memory.working) {
@@ -17,10 +17,12 @@ export class RoleRemoteHarvester extends RoleRemote {
                     return;
                 } else {
                     if (creep.room.storage) {
-                        this.depositMove(creep, creep.room.storage);
+                        this.depositMoveSpecified(creep, creep.room.storage, <ResourceConstant>creep.memory.precious!);
                         return;
                     } else {
-                        this.fillClosest(creep, true);
+                        if (creep.memory.precious === RESOURCE_ENERGY) {
+                            this.fillClosest(creep, true);
+                        }
                         return;
                     }
                 }
