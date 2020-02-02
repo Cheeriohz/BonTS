@@ -4,7 +4,7 @@ import { buildProjectCreator } from "./building.buildProjectCreator";
 import { GeneralBuilding } from "./building.general";
 import { Visualizer } from "./building.visualizer";
 
-export class LabExpansion extends GeneralBuilding {
+export class LabAddition extends GeneralBuilding {
     private spawn!: StructureSpawn;
     private rt!: RoomTerrain;
     private goodPositions: RoomPosition[] = [];
@@ -14,6 +14,38 @@ export class LabExpansion extends GeneralBuilding {
         super();
         this.spawn = spawn;
         this.rt = spawn.room.getTerrain();
+    }
+
+    public alreadyProcessedSuccessfully(rclLevel: number): boolean {
+        console.log(`resevedBuilds in memory: ${JSON.stringify(this.spawn.room.memory.reservedBuilds)} `);
+        const reservedBuilds = _.filter(this.spawn.room.memory.reservedBuilds, bo => bo.type === STRUCTURE_LAB);
+        console.log(`filtered reservedBuilds: ${JSON.stringify(reservedBuilds)} `);
+        switch (rclLevel) {
+            case 6: {
+                if (reservedBuilds && reservedBuilds.length > 0) {
+                    return true;
+                } else {
+                    return false;
+                }
+            }
+            case 7: {
+                if (reservedBuilds && reservedBuilds.length > 4) {
+                    return false;
+                } else {
+                    return true;
+                }
+            }
+            case 8: {
+                if (!reservedBuilds || reservedBuilds.length === 0) {
+                    return true;
+                } else {
+                    return false;
+                }
+            }
+            default: {
+                return false;
+            }
+        }
     }
 
     public enqueueLabProject(labsToBuild: number): boolean {

@@ -13,11 +13,45 @@ export class RemoteHarvestManager {
 
     public manageharvest(checkPersonnel: boolean) {
         if (checkPersonnel) {
-            this.checkPersonnel();
+            if (this.harvest.type === RESOURCE_ENERGY) {
+                this.checkSourcePersonnel();
+            } else {
+                this.checkMinePersonnel();
+            }
         }
     }
 
-    private checkPersonnel() {
+    private checkMinePersonnel() {
+        if (this.spawn.spawning) {
+            return;
+        }
+        if (this.harvest.harvesters === null) {
+            if (this.checkExtractorCompletion()) {
+                this.harvest.harvesters = [];
+            } else {
+                return;
+            }
+        }
+
+        if (this.mineralDormant()) {
+            return;
+        }
+        if (this.harvest.harvesters) {
+            if (this.harvestPreSpawn()) {
+                this.requestharvester();
+                return;
+            }
+            this.removeUnusedHarvesters();
+            if (this.harvest.harvesters.length < 2) {
+                this.requestharvester();
+            }
+        } else {
+            this.harvest.harvesters = [];
+            this.requestharvester();
+        }
+    }
+
+    private checkSourcePersonnel() {
         if (this.spawn.spawning) {
             return;
         }
@@ -78,5 +112,31 @@ export class RemoteHarvestManager {
                 this.harvest.harvesters = [harvestName];
             }
         }
+    }
+
+    private mineralDormant(): boolean {
+        const vein: Mineral | Deposit | null = Game.getObjectById<Mineral | Deposit>(this.harvest.vein);
+        if (vein) {
+            const mineralAmount = _.get(vein, "mineralAmount", null);
+            if (mineralAmount) {
+                // TODO Make this more robust
+                if (mineralAmount < 2000) {
+                    return true;
+                } else {
+                    return false;
+                }
+            }
+        }
+        return true;
+    }
+
+    private checkExtractorCompletion(): boolean {
+        const mineral: Mineral | null = Game.getObjectById(this.harvest.vein);
+        if (mineral) {
+            if (mineral.pos.lookFor(LOOK_STRUCTURES).length > 0) {
+                return true;
+            }
+        }
+        return false;
     }
 }
