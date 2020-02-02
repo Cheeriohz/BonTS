@@ -77,23 +77,37 @@ export class ExpansionCosting extends GeneralBuilding {
         (25, 50) | (24, 0):(25, 0):(26, 0)   => +,+ : 0,+ : -,+   |  1   0  -1 |  |  1   1   1 |
         (25, 0) | (24, 50):(25, 50):(26, 50) => +,- : 0,- : -,-   |  1   0  -1 |  | -1  -1  -1 |
         */
+        // (48, 36)  (1, 35)
         let lastOriginPath = _.last(originRoom.path);
+        let psuedoBorderPath: PathStep = {
+            x: lastOriginPath!.x + lastOriginPath!.dx,
+            y: lastOriginPath!.y + lastOriginPath!.dy,
+            dx: 0,
+            dy: 0,
+            direction: 1
+        };
+
         const firstDestinationPath = _.first(destinationRoom.path);
-        if (lastOriginPath!.x === 49) {
-            lastOriginPath!.dx = 1;
-        } else if (lastOriginPath!.x === 0) {
-            lastOriginPath!.dx = -1;
+        if (psuedoBorderPath!.x === 49) {
+            psuedoBorderPath!.dx = 1;
+            psuedoBorderPath.x = 0;
+        } else if (psuedoBorderPath!.x === 0) {
+            psuedoBorderPath!.dx = -1;
+            psuedoBorderPath.x = 49;
         } else {
-            lastOriginPath!.dx = firstDestinationPath!.x - lastOriginPath!.x;
+            psuedoBorderPath!.dx = firstDestinationPath!.x - psuedoBorderPath!.x;
         }
-        if (lastOriginPath!.y === 49) {
-            lastOriginPath!.dy = 1;
-        } else if (lastOriginPath!.y === 0) {
-            lastOriginPath!.dy = -1;
+        if (psuedoBorderPath!.y === 49) {
+            psuedoBorderPath!.dy = 1;
+            psuedoBorderPath!.y = 0;
+        } else if (psuedoBorderPath!.y === 0) {
+            psuedoBorderPath!.dy = -1;
+            psuedoBorderPath!.y = 49;
         } else {
-            lastOriginPath!.dy = firstDestinationPath!.y - lastOriginPath!.y;
+            psuedoBorderPath!.dy = firstDestinationPath!.y - psuedoBorderPath!.y;
         }
-        lastOriginPath!.direction = this.getDirectionConstant(lastOriginPath!.dx, lastOriginPath!.dy);
+        psuedoBorderPath!.direction = this.getDirectionConstant(lastOriginPath!.dx, lastOriginPath!.dy);
+        destinationRoom.path = _.concat([psuedoBorderPath], destinationRoom.path);
     }
 
     private mapRoomPath(roomName: string, positions: RoomPosition[]): RoomPathCostingRetainer {
@@ -103,8 +117,8 @@ export class ExpansionCosting extends GeneralBuilding {
             const dx: number = pos.x - lastPosition.x;
             const dy: number = pos.y - lastPosition.y;
             const ps: PathStep = {
-                x: lastPosition.x,
-                y: lastPosition.y,
+                x: pos.x,
+                y: pos.y,
                 dx: dx,
                 dy: dy,
                 direction: this.getDirectionConstant(dx, dy)
@@ -112,15 +126,10 @@ export class ExpansionCosting extends GeneralBuilding {
             pathSteps.push(ps);
             lastPosition = pos;
         }
-        const finalPosition: RoomPosition | undefined = _.last(positions);
-        if (finalPosition) {
-            pathSteps.push({
-                x: finalPosition.x,
-                y: finalPosition.y,
-                dx: 0,
-                dy: 0,
-                direction: TOP
-            });
+        // Check to see if our final position is a border.
+        const finalPosition: PathStep | undefined = _.last(pathSteps);
+        if (finalPosition!.x === 0 || finalPosition!.y === 0 || finalPosition!.x === 49 || finalPosition!.y === 49) {
+            _.remove(pathSteps, finalPosition);
         }
         return { roomName: roomName, path: pathSteps };
     }

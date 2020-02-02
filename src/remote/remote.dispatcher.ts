@@ -1,26 +1,34 @@
 import _ from "lodash";
 
 export class RemoteDispatcher {
-
     public RequestDispatch(dispatchRequest: RemoteDispatchRequest, pathingLookup: PathingLookup): PathStep[] | null {
         let index = 1;
         if (dispatchRequest.departing) {
             index = 0;
         }
-        console.log(JSON.stringify(pathingLookup.pathingLookup));
-        const path = pathingLookup.pathingLookup[dispatchRequest.creep.room.name][index];
-        console.log(`acquired path is: ${path}`);
-        if (path) {
-            return this.cutPath(dispatchRequest.creep.pos, path);//this.routeToPath(dispatchRequest.creep.pos, path);
+        //console.log(JSON.stringify(pathingLookup.pathingLookup));
+        let path: PathStep[] = [];
+        if (dispatchRequest.departing) {
+            for (const roomPath of _.values(pathingLookup.pathingLookup)) {
+                path = _.concat(path, roomPath[index]);
+            }
+        } else {
+            for (const roomPath of _.values(pathingLookup.pathingLookup).reverse()) {
+                path = _.concat(path, roomPath[index]);
+            }
         }
-        else {
+
+        if (path) {
+            return path; //this.cutPath(dispatchRequest.creep.pos, path);//this.routeToPath(dispatchRequest.creep.pos, path);
+        } else {
             return null;
         }
     }
 
     private cutPath(pos: RoomPosition, path: PathStep[]): PathStep[] {
-
-        return _.dropWhile(path, (p) => { return p.x !== pos.x || p.y !== pos.y; });
+        return _.dropWhile(path, p => {
+            return p.x !== pos.x || p.y !== pos.y;
+        });
     }
 
     private routeToPath(pos: RoomPosition, path: PathStep[]): PathStep[] {
@@ -30,17 +38,15 @@ export class RemoteDispatcher {
             const currentDistance = this.getDistanceDelta(pos, v);
             if (currentDistance === 0) {
                 return _.concat(this.routeToPoint(pos, v), _.drop(path, i + 1));
-            }
-            else if (currentDistance > lastDistance) {
+            } else if (currentDistance > lastDistance) {
                 // Though imprecise, this should help short circuit a more robust lookup and help pair us up decently well.
                 return _.concat(this.routeToPoint(pos, v), _.drop(path, i + 1));
-            }
-            else {
+            } else {
                 lastDistance = currentDistance;
             }
         }
         // Probably should never get here...
-        console.log("Interim Routing Failure in dispatcher")
+        console.log("Interim Routing Failure in dispatcher");
         return path;
     }
 
@@ -49,6 +55,6 @@ export class RemoteDispatcher {
     }
 
     private getDistanceDelta(pos: RoomPosition, point: PathStep): number {
-        return Math.hypot((pos.x - point.x), (pos.y - point.y));
+        return Math.hypot(pos.x - point.x, pos.y - point.y);
     }
 }

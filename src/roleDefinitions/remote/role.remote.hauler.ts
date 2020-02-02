@@ -5,14 +5,25 @@ import { profile } from "Profiler";
 @profile
 export class RoleRemoteHauler extends RoleRemote {
     public runRemote(creep: Creep) {
-        let dispatchPath = null;
         if (creep.memory.working && creep.store.getUsedCapacity() === 0) {
             creep.memory.working = false;
             creep.say("🏗️");
+            const rmh: RemoteMineHandler = new RemoteMineHandler();
+            const path = rmh.requestRemoteDispatch({ departing: true, creep: creep });
+            if (path) {
+                this.travelByCachedPath(false, creep, path);
+                return;
+            }
         }
         if (!creep.memory.working && creep.store.getFreeCapacity() === 0) {
             creep.memory.working = true;
             creep.say("💦");
+            const rmh: RemoteMineHandler = new RemoteMineHandler();
+            const path = rmh.requestRemoteDispatch({ departing: false, creep: creep });
+            if (path) {
+                this.travelByCachedPath(true, creep, path);
+                return;
+            }
         }
 
         if (creep.memory.working) {

@@ -38,7 +38,7 @@ export class RoleRemote extends RoleCreep {
         if (lastPos!.x != creep.pos.x || lastPos!.y != creep.pos.y) {
             if (creep.memory.stuckCount) creep.memory.stuckCount += 1;
             else creep.memory.stuckCount = 1;
-            if (creep.memory.stuckCount == 2) {
+            if (creep.memory.stuckCount === 2) {
                 this.fixStuck(creep);
             } else if (creep.memory.stuckCount > 2) {
                 delete creep.memory.path;
@@ -46,6 +46,7 @@ export class RoleRemote extends RoleCreep {
                 return false;
             }
         } else {
+            creep.memory.stuckCount = 0;
             creep.memory.path = _.tail(creep.memory.path);
         }
         return true;
@@ -63,15 +64,20 @@ export class RoleRemote extends RoleCreep {
         }
     }
 
-    private cachedTravel(destination: RoomPosition, creep: Creep, repairWhileMove: boolean) {
+    protected cachedTravel(destination: RoomPosition, creep: Creep, repairWhileMove: boolean) {
         const path = creep.pos.findPathTo(destination, { ignoreCreeps: true });
         if (path) {
-            if (repairWhileMove) {
-                creep.memory.repairWhileMove = true;
-            }
-            creep.memory.path = path;
-            this.run(creep);
+            this.travelByCachedPath(repairWhileMove, creep, path);
         }
+    }
+
+    protected travelByCachedPath(repairWhileMove: boolean, creep: Creep, path: PathStep[]) {
+        if (repairWhileMove) {
+            creep.memory.repairWhileMove = true;
+        }
+        creep.memory.path = path;
+        creep.memory.stuckCount = 0;
+        this.run(creep);
     }
 
     protected travelToRoom(creep: Creep, roomName: string, repairWhileMove: boolean) {
