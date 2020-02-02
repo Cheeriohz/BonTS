@@ -13,6 +13,7 @@ import _ from "lodash";
 import { ExpeditionResultsHandlerMapper } from "expansion/expansion.expeditionResultsHandlerMap";
 import { RCLUpgradeHandler } from "./manager.handleRCLUpgrades";
 import { LabExpansion } from "building/building.labExpansion";
+import { RemoteMineHandler } from "remote/remote.remoteMineHandler";
 
 export class CycleManager {
     public static check() {
