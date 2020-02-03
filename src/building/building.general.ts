@@ -1,4 +1,41 @@
+import _ from "lodash";
+import { Visualizer } from "./building.visualizer";
+
 export class GeneralBuilding {
+    protected cardinalDirections = [TOP, RIGHT, BOTTOM, LEFT];
+    protected cardinals: Array<[number, number]> = [
+        [0, -1],
+        [1, 0],
+        [0, 1],
+        [-1, 0]
+    ];
+
+    protected calculateOrthogonalDistance(a: RoomPosition, b: RoomPosition): number {
+        return Math.abs(a.x - b.x) + Math.abs(a.y - b.y);
+    }
+
+    protected createExtensionBuildOrder(x: number, y: number): BuildOrder {
+        return { x: x, y: y, type: STRUCTURE_EXTENSION };
+    }
+
+    protected createRoadBuildOrder(x: number, y: number): BuildOrder {
+        return { x: x, y: y, type: STRUCTURE_ROAD };
+    }
+
+    // The x,y should be the top of the diamond
+    protected buildRoadDiamond(x: number, y: number): BuildOrder[] {
+        return [
+            this.createRoadBuildOrder(x, y),
+            this.createRoadBuildOrder(x + 1, y + 1),
+            this.createRoadBuildOrder(x + 2, y + 2),
+            this.createRoadBuildOrder(x + 1, y + 3),
+            this.createRoadBuildOrder(x, y + 4),
+            this.createRoadBuildOrder(x - 1, y + 3),
+            this.createRoadBuildOrder(x - 2, y + 2),
+            this.createRoadBuildOrder(x - 1, y + 1)
+        ];
+    }
+
     protected getDirectionConstant(dx: number, dy: number): DirectionConstant {
         switch (dx) {
             case 0: {
@@ -124,5 +161,112 @@ export class GeneralBuilding {
             s.structureType === STRUCTURE_WALL ||
             s.structureType === STRUCTURE_ROAD
         );
+    }
+
+    protected visualizeBuild(buildOrders: BuildOrder[], roomName: string) {
+        const rv: Visualizer = new Visualizer();
+        rv.drawBuildOrders(buildOrders, roomName);
+    }
+
+    protected distanceTransformRaw(roomName: string, logTransform: boolean) {
+        let vis = new RoomVisual(roomName);
+        const roomTerrain = Game.map.getRoomTerrain(roomName);
+
+        let topDownPass = new PathFinder.CostMatrix();
+        for (let y = 0; y < 50; ++y) {
+            for (let x = 0; x < 50; ++x) {
+                if (roomTerrain.get(x, y) === TERRAIN_MASK_WALL) {
+                    topDownPass.set(x, y, 0);
+                } else {
+                    topDownPass.set(
+                        x,
+                        y,
+                        Math.min(
+                            topDownPass.get(x - 1, y - 1),
+                            topDownPass.get(x, y - 1),
+                            topDownPass.get(x + 1, y - 1),
+                            topDownPass.get(x - 1, y)
+                        ) + 1
+                    );
+                }
+            }
+        }
+
+        for (let y = 49; y >= 0; --y) {
+            for (let x = 49; x >= 0; --x) {
+                let value = Math.min(
+                    topDownPass.get(x, y),
+                    topDownPass.get(x + 1, y + 1) + 1,
+                    topDownPass.get(x, y + 1) + 1,
+                    topDownPass.get(x - 1, y + 1) + 1,
+                    topDownPass.get(x + 1, y) + 1
+                );
+                topDownPass.set(x, y, value);
+                vis.circle(x, y, { radius: value / 25 });
+            }
+        }
+        if (logTransform) {
+            this.logDistanceTransform(topDownPass);
+        }
+        return topDownPass;
+    }
+
+    protected distanceTransformOccupied(roomName: string, existingStructures: RoomPosition[], logTransform: boolean) {
+        let vis = new RoomVisual(roomName);
+        const roomTerrain = Game.map.getRoomTerrain(roomName);
+
+        let topDownPass = new PathFinder.CostMatrix();
+        for (let y = 0; y < 50; ++y) {
+            for (let x = 0; x < 50; ++x) {
+                if (roomTerrain.get(x, y) === TERRAIN_MASK_WALL) {
+                    topDownPass.set(x, y, 0);
+                } else if (
+                    _.find(existingStructures, es => {
+                        return es.x === x && es.y === y;
+                    })
+                ) {
+                    topDownPass.set(x, y, 0);
+                } else {
+                    topDownPass.set(
+                        x,
+                        y,
+                        Math.min(
+                            topDownPass.get(x - 1, y - 1),
+                            topDownPass.get(x, y - 1),
+                            topDownPass.get(x + 1, y - 1),
+                            topDownPass.get(x - 1, y)
+                        ) + 1
+                    );
+                }
+            }
+        }
+
+        for (let y = 49; y >= 0; --y) {
+            for (let x = 49; x >= 0; --x) {
+                let value = Math.min(
+                    topDownPass.get(x, y),
+                    topDownPass.get(x + 1, y + 1) + 1,
+                    topDownPass.get(x, y + 1) + 1,
+                    topDownPass.get(x - 1, y + 1) + 1,
+                    topDownPass.get(x + 1, y) + 1
+                );
+                topDownPass.set(x, y, value);
+                vis.circle(x, y, { radius: value / 25 });
+            }
+        }
+        if (logTransform) {
+            this.logDistanceTransform(topDownPass);
+        }
+        return topDownPass;
+    }
+
+    private logDistanceTransform(matrix: CostMatrix) {
+        for (let y = 0; y < 50; y++) {
+            let buffer: string = "";
+            for (let x = 0; x < 50; x++) {
+                buffer += matrix.get(x, y);
+            }
+            console.log(buffer);
+        }
     }
 }

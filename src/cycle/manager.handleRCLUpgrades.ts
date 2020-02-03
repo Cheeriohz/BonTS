@@ -3,9 +3,11 @@ import { TerminalExpansion } from "building/building.terminalExpansion";
 import _ from "lodash";
 import { LabAddition } from "building/building.labAddtition";
 import { RemoteHarvestHandler } from "remote/remote.remoteHarvestHandler";
+import { ExtensionAddition } from "building/building.extensionAddition";
 
 export class RCLUpgradeHandler {
     public static handleRCLUpgrades(spawn: StructureSpawn) {
+        // TODO This requires us moving our RCLUpgrade to be room level or global rather than just spawn level... eventually
         if (spawn.memory?.rclUpgrades) {
             const rclUpgradeEvent: RCLUpgradeEvent = spawn.memory.rclUpgrades[0];
             if (rclUpgradeEvent) {
@@ -56,6 +58,9 @@ export class RCLUpgradeHandler {
     }
 
     private static handleRCLUpgradeTo7(spawn: StructureSpawn): boolean {
+        if (!this.handleRoomExtensionsEnqueue([spawn], true, 50)) {
+            return false;
+        }
         /*
 		const sa: SpawnAddition = new SpawnAddition(spawn);
 		if(!sa.enqueSpawnProject()) {
@@ -82,5 +87,29 @@ export class RCLUpgradeHandler {
 		}
 		*/
         return true;
+    }
+
+    private static handleRoomExtensionsEnqueue(
+        spawns: StructureSpawn[],
+        buildRoads: boolean,
+        extensionCap: number
+    ): boolean {
+        const ea: ExtensionAddition = new ExtensionAddition(spawns, buildRoads);
+        const returnCode = ea.alreadyProcessedSuccessfully(extensionCap);
+        switch (returnCode) {
+            case 0: {
+                return ea.enqueueExtensionsProject();
+            }
+            case 1: {
+                return true;
+            }
+            case 2: {
+                return false;
+            }
+            default: {
+                console.log("Unexpected return code in handleRoomExtensionsEnqueue");
+                return false;
+            }
+        }
     }
 }

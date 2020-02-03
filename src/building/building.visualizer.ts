@@ -15,14 +15,14 @@ export class Visualizer {
         fill: "#767A80"
     };
 
-    public drawBuildOrders(buildOrders: BuildOrder[], anchor: RoomPosition, opts = {}): void {
+    public drawBuildOrders(buildOrders: BuildOrder[], roomName: string, opts = {}): void {
         _.defaults(opts, { opacity: 0.5 });
-        let vis = new RoomVisual(anchor.roomName);
+        let vis = new RoomVisual(roomName);
         for (const buildOrder of buildOrders) {
             vis.structure(buildOrder.x, buildOrder.y, buildOrder.type, opts);
         }
-	}
-	
+        vis.connectRoads(opts);
+    }
 
     public visualizeRoadCrossRooms(
         startRoom: string,

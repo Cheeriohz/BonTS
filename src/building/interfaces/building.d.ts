@@ -1,4 +1,3 @@
-
 interface BuildProject {
     buildOrders: BuildOrder[];
     roomName: string;
@@ -10,4 +9,9 @@ interface BuildOrder {
     x: number;
     y: number;
     type: BuildableStructureConstant;
+}
+
+interface NeighboringPositions {
+    pos: RoomPosition;
+    neighbors: RoomPosition[];
 }

@@ -14,14 +14,7 @@ export function getSource(creep: Creep): string {
     // Check to see if our sourceMap has been initialized
     if (!sourceMap?.length) {
         sourceMap = [];
-        const sources: Source[] | null = creep.room.find(FIND_SOURCES);
-        if (sources) {
-            for (const index in sources) {
-                sourceMap[index] = { id: sources[index].id, assigned: [] };
-            }
-        } else {
-            return "";
-        }
+        GetSources(creep.room, sourceMap);
     }
     if (sourceMap.length === 1) {
         return sourceMap[0].id;
@@ -41,6 +34,15 @@ export function getSource(creep: Creep): string {
         return sourceMap[index].id;
     } else {
         return assignment;
+    }
+}
+
+export function GetSources(room: Room, sourceMap: Assignment[]) {
+    const sources: Source[] | null = room.find(FIND_SOURCES);
+    if (sources) {
+        for (const index in sources) {
+            sourceMap[index] = { id: sources[index].id, assigned: [] };
+        }
     }
 }
 
