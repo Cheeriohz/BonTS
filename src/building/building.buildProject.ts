@@ -125,6 +125,10 @@ export class BuildProjectManager {
                 // TODO Need to ensure if we are running multi project execution that we don't hand off the end point project
                 this.attemptRemoteContainerExpansionHandOff(remote);
             }
+            case BuildProjectEnum.SingleConstructionSiteNoFollowUp:
+            case BuildProjectEnum.PassThroughCreate: {
+                _.remove(this.spawn.memory.buildProjects!, this.project);
+            }
         }
     }
 
