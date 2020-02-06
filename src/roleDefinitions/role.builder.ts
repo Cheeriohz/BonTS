@@ -1,13 +1,13 @@
 import { RoleCreep } from "./base/role.creep";
 export class RoleBuilder extends RoleCreep {
-    private maxRepairThreshold: number = 1000000
+    private maxRepairThreshold: number = 2000000;
 
     public run(creep: Creep) {
-        const currentEnergy = creep.store[RESOURCE_ENERGY]
+        const currentEnergy = creep.store[RESOURCE_ENERGY];
 
         if (creep.memory.working && currentEnergy === 0) {
             creep.memory.working = false;
-            creep.say('🔋 recharge');
+            creep.say("🔋 recharge");
         }
         if (!creep.memory.working && creep.store.getFreeCapacity() === 0) {
             creep.memory.working = true;
@@ -15,11 +15,10 @@ export class RoleBuilder extends RoleCreep {
         }
 
         if (creep.memory.working) {
-            if (!(this.construct(creep))) {
+            if (!this.construct(creep)) {
                 this.repair(creep);
             }
-        }
-        else {
+        } else {
             this.fillUp(creep);
         }
     }
@@ -27,50 +26,69 @@ export class RoleBuilder extends RoleCreep {
     private repair(creep: Creep) {
         if (creep.memory.precious) {
             const repairTarget: Structure | null = Game.getObjectById(creep.memory.precious);
-            if (repairTarget && repairTarget.hits !== this.maxRepairThreshold && repairTarget.hits !== repairTarget.hitsMax) {
+            if (
+                repairTarget &&
+                repairTarget.hits !== this.maxRepairThreshold &&
+                repairTarget.hits !== repairTarget.hitsMax
+            ) {
                 this.repairMove(creep, repairTarget);
-            }
-            else {
+            } else {
                 creep.memory.precious = null;
                 this.repair(creep);
                 return;
             }
-        }
-        else {
+        } else {
             this.getRepairTarget(creep);
         }
-
     }
 
     private getRepairTarget(creep: Creep) {
         const targets = creep.room.find(FIND_STRUCTURES, {
-            filter: (structure) => {
-                return (structure.structureType !== STRUCTURE_ROAD && structure.hits < structure.hitsMax && structure.hits < this.maxRepairThreshold)
+            filter: structure => {
+                return (
+                    structure.structureType !== STRUCTURE_ROAD &&
+                    structure.structureType !== STRUCTURE_WALL &&
+                    structure.hits < structure.hitsMax &&
+                    structure.hits < this.maxRepairThreshold
+                );
             }
         });
         if (targets.length > 0) {
             creep.memory.precious = targets[0].id;
             this.repair(creep);
             return;
-        }
-        else {
+        } else {
             this.checkForRoadsInUrgentNeed(creep);
         }
     }
 
     private checkForRoadsInUrgentNeed(creep: Creep) {
         const targets = creep.room.find(FIND_STRUCTURES, {
-            filter: (structure) => {
-                return (structure.structureType === STRUCTURE_ROAD && structure.hits < 2000)
+            filter: structure => {
+                return structure.structureType === STRUCTURE_ROAD && structure.hits < 2000;
             }
         });
         if (targets.length > 0) {
             creep.memory.precious = targets[0].id;
             this.repair(creep);
             return;
+        } else {
+            this.checkForWallsThatCouldUsePatching(creep);
         }
-        else {
+    }
+
+    private checkForWallsThatCouldUsePatching(creep: Creep) {
+        const targets = creep.room.find(FIND_STRUCTURES, {
+            filter: structure => {
+                return structure.structureType === STRUCTURE_WALL && structure.hits < this.maxRepairThreshold;
+            }
+        });
+        if (targets.length > 0) {
+            creep.memory.precious = targets[0].id;
+            this.repair(creep);
+            return;
+        } else {
             this.upgradeController(creep);
         }
     }
-};
+}

@@ -39,7 +39,11 @@ export class RoleRemote extends RoleCreep {
             if (creep.memory.stuckCount) creep.memory.stuckCount += 1;
             else creep.memory.stuckCount = 1;
             if (creep.memory.stuckCount === 2) {
-                this.fixStuck(creep);
+                if (this.fixStuck(creep)) {
+                    return true;
+                } else {
+                    return false;
+                }
             } else if (creep.memory.stuckCount > 2) {
                 delete creep.memory.path;
                 creep.memory.stuckCount = 0;
@@ -52,16 +56,30 @@ export class RoleRemote extends RoleCreep {
         return true;
     }
 
-    private fixStuck(creep: Creep) {
+    private fixStuck(creep: Creep): boolean {
         const currentPathStep = _.first(creep.memory.path);
         if (currentPathStep) {
             const blockers = creep.room.lookForAt(LOOK_CREEPS, currentPathStep.x, currentPathStep.y);
             if (blockers.length > 0) {
                 const blocker = _.first(blockers);
-                blocker!.moveTo(creep.pos.x, creep.pos.y);
-                blocker!.memory.moved = true;
+                if (blocker) {
+                    blocker.moveTo(creep.pos.x, creep.pos.y);
+                    if (blocker.memory) {
+                        blocker.memory.moved = true;
+                        return true;
+                    } else {
+                        delete creep.memory.path;
+                        creep.memory.stuckCount = 0;
+                        return false;
+                    }
+                } else {
+                    delete creep.memory.path;
+                    creep.memory.stuckCount = 0;
+                    return false;
+                }
             }
         }
+        return false;
     }
 
     protected cachedTravel(destination: RoomPosition, creep: Creep, repairWhileMove: boolean) {

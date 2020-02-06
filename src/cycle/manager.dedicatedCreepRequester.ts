@@ -85,6 +85,18 @@ export class DedicatedCreepRequester {
                 }
                 break;
             }
+            case CreepRole.knight: {
+                if (isRemote) {
+                    this.spawn.memory.dedicatedCreepRequest.push(
+                        this.createDedicatedRemoteKnight(dedication, specifiedName, precious, orders)
+                    );
+                    break;
+                }
+                this.spawn.memory.dedicatedCreepRequest.push(
+                    this.createDedicatedKnight(dedication, specifiedName, precious, orders)
+                );
+                break;
+            }
             default: {
                 console.log(`Cannot created dedicated creep of role: ${CreepRole[role]}`);
             }
@@ -131,6 +143,82 @@ export class DedicatedCreepRequester {
             specifiedName: specifiedName,
             precious: precious,
             home: this.spawn.room.name,
+            orders: orders
+        };
+    }
+
+    private createDedicatedRemoteKnight(
+        dedication: string,
+        specifiedName: string,
+        precious?: string,
+        orders?: CreepOrder
+    ): DedicatedCreepRequest {
+        return {
+            role: CreepRole.knight,
+            body: [
+                TOUGH,
+                TOUGH,
+                TOUGH,
+                TOUGH,
+                ATTACK,
+                ATTACK,
+                ATTACK,
+                ATTACK,
+                MOVE,
+                MOVE,
+                MOVE,
+                MOVE,
+                MOVE,
+                MOVE,
+                MOVE,
+                MOVE,
+                MOVE,
+                MOVE,
+                HEAL,
+                HEAL
+            ],
+            dedication: dedication,
+            specifiedName: specifiedName,
+            precious: precious,
+            home: this.spawn.room.name,
+            orders: orders
+        };
+    }
+
+    private createDedicatedKnight(
+        dedication: string,
+        specifiedName: string,
+        precious?: string,
+        orders?: CreepOrder
+    ): DedicatedCreepRequest {
+        return {
+            role: CreepRole.knight,
+            body: [
+                TOUGH,
+                TOUGH,
+                TOUGH,
+                TOUGH,
+                ATTACK,
+                ATTACK,
+                ATTACK,
+                ATTACK,
+                MOVE,
+                MOVE,
+                MOVE,
+                MOVE,
+                MOVE,
+                MOVE,
+                MOVE,
+                MOVE,
+                MOVE,
+                MOVE,
+                HEAL,
+                HEAL
+            ],
+            dedication: dedication,
+            specifiedName: specifiedName,
+            precious: precious,
+            home: null,
             orders: orders
         };
     }

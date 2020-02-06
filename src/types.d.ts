@@ -10,6 +10,8 @@ interface CreepMemory {
     stuckCount?: number | null;
     moved?: boolean | null;
     repairWhileMove?: boolean | null;
+    hitsLast?: number | null;
+    mrf?: boolean;
 }
 
 interface RoomMemory {
@@ -23,6 +25,7 @@ interface RoomMemory {
     dumpLinks: Id<StructureLink>[] | null;
     mine: Mine | null;
     reservedBuilds?: BuildOrder[] | null;
+    target?: string | null;
 }
 
 interface SpawnMemory {
@@ -38,6 +41,8 @@ interface SpawnMemory {
     buildProjects: BuildProject[] | null;
     remoteHarvests: RemoteHarvest[] | null;
     remoteReservations: RemoteReservation[] | null;
+    roomHarass: RoomHarrass[] | null;
+    remotePatrols: RemotePatrol[] | null;
 }
 
 interface Memory {

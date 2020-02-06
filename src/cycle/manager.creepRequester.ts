@@ -5,7 +5,7 @@ import _ from "lodash";
 // Requests here should ensure we don't create infinite requests without external request management.
 export class CreepRequester {
     private spawn!: StructureSpawn;
-    private rampartMaxRepairThreshold: number = 1000000;
+    private rampartMaxRepairThreshold: number = 2000000;
     private builderSpawnThreshold: number = 100000;
 
     constructor(spawn: StructureSpawn) {
@@ -44,9 +44,10 @@ export class CreepRequester {
         if (
             !this.RepairCreepRequested() &&
             !this.HaveRepairWorker() &&
-            (this.HaveDamagedRamparts() ||
-                this.HaveDamagedContainers() ||
-                this.spawn.room.memory.constructionSites.length > 0)
+            (this.spawn.room.memory.target ||
+                this.spawn.room.memory.constructionSites.length > 0 ||
+                this.HaveDamagedRamparts() ||
+                this.HaveDamagedContainers())
         ) {
             this.RequestRepairBot();
         }

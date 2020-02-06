@@ -22,6 +22,20 @@ interface RemoteHarvest extends PathingLookup {
     type: ResourceConstant;
 }
 
+interface RoomHarrass extends PathingLookup {
+    roomName: string;
+    knights: string[] | null;
+    count: number;
+    pauseToTime: number;
+}
+
+interface RemotePatrol extends PathingLookup {
+    roomName: string;
+    checkRooms: string[];
+    knights: string[] | null;
+    count: number;
+}
+
 interface RemoteReservation {
     roomName: string;
     spawnTime: number;

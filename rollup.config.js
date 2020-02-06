@@ -9,24 +9,34 @@ import screeps from "rollup-plugin-screeps";
 let cfg;
 const dest = process.env.DEST;
 if (!dest) {
-  console.log("No destination specified - code will be compiled but not uploaded");
+    console.log("No destination specified - code will be compiled but not uploaded");
 } else if ((cfg = require("./screeps.json")[dest]) == null) {
-  throw new Error("Invalid upload destination");
+    throw new Error("Invalid upload destination");
 }
 
-export default {
-  input: "src/main.ts",
-  output: {
-    file: "dist/main.js",
-    format: "cjs",
-    sourcemap: true
-  },
-
-  plugins: [
-    clear({ targets: ["dist"] }),
-    resolve(),
-    commonjs(),
-    typescript({tsconfig: "./tsconfig.json"}),
-    screeps({config: cfg, dryRun: cfg == null})
-  ]
-}
+export default [
+    {
+        input: "src/main.ts",
+        output: {
+            file: "dist/main.js",
+            format: "cjs",
+            sourcemap: true
+        },
+        plugins: [
+            clear({ targets: ["dist"] }),
+            resolve(),
+            commonjs(),
+            typescript({ tsconfig: "./tsconfig.json" }),
+            screeps({ config: cfg, dryRun: cfg == null })
+        ]
+    }
+    // {
+    //     input: "src/utils/Console.js",
+    //     output: {
+    //         file: "dist/console.js",
+    //         format: "cjs",
+    //         sourcemap: true
+    //     },
+    //     plugins: [clear({ targets: ["dist"] }), resolve(), commonjs(), screeps({ config: cfg, dryRun: cfg == null })]
+    // }
+];

@@ -20,6 +20,10 @@ import { RoleRemoteHauler } from "roleDefinitions/remote/role.remote.hauler";
 import { RoleRemoteHarvester } from "roleDefinitions/remote/role.remote.harvester";
 import { RoleRemoteReserver } from "roleDefinitions/remote/role.remote.reserver";
 import { RoleRemote } from "roleDefinitions/base/role.remote";
+import { RoleRemoteKnight } from "roleDefinitions/remote/role.remote.knight";
+import { RoleTopper } from "roleDefinitions/role.topper";
+import { RoleDedicatedKnight } from "roleDefinitions/dedicated/role.dedicated.knight";
+import { RoleRemoteArcher } from "roleDefinitions/remote/role.remote.archer";
 
 export class RolesManager {
     private mHarvester!: RoleHarvester;
@@ -30,9 +34,11 @@ export class RolesManager {
     private mDrone!: RoleDrone;
     private mScout!: RoleScout;
     private mExpeditionManager: ExpeditionManager | undefined;
+    private mTopper!: RoleTopper;
 
     private mDDropper!: RoleDedicatedDropper;
     private mDHauler!: RoleDedicatedHauler;
+    private mDKnight!: RoleDedicatedKnight;
 
     private mRR!: RoleRemote;
     private mRHarvester!: RoleRemoteHarvester;
@@ -40,6 +46,8 @@ export class RolesManager {
     private mRDropper!: RoleRemoteDropper;
     private mRHauler!: RoleRemoteHauler;
     private mRReserver!: RoleRemoteReserver;
+    private mRKnight!: RoleRemoteKnight;
+    private mRArcher!: RoleRemoteArcher;
 
     constructor() {
         this.mHarvester = new RoleHarvester();
@@ -49,9 +57,11 @@ export class RolesManager {
         this.mHauler = new RoleHauler();
         this.mDrone = new RoleDrone();
         this.mScout = new RoleScout();
+        this.mTopper = new RoleTopper();
 
         this.mDDropper = new RoleDedicatedDropper();
         this.mDHauler = new RoleDedicatedHauler();
+        this.mDKnight = new RoleDedicatedKnight();
 
         this.mRR = new RoleRemote();
         this.mRHarvester = new RoleRemoteHarvester();
@@ -59,6 +69,8 @@ export class RolesManager {
         this.mRDropper = new RoleRemoteDropper();
         this.mRHauler = new RoleRemoteHauler();
         this.mRReserver = new RoleRemoteReserver();
+        this.mRKnight = new RoleRemoteKnight();
+        this.mRArcher = new RoleRemoteArcher();
     }
 
     public run() {
@@ -67,7 +79,7 @@ export class RolesManager {
                 delete Memory.creeps[name];
             } else {
                 this.manageRoles(Game.creeps[name]);
-                // this.manageRolesLogged(name);
+                //this.manageRolesLogged(Game.creeps[name]);
             }
         }
     }
@@ -115,6 +127,10 @@ export class RolesManager {
                 }
                 case CreepRole.scout: {
                     this.manageScout(creep);
+                    break;
+                }
+                case CreepRole.topper: {
+                    this.manageTopper(creep);
                 }
             }
         }
@@ -143,6 +159,14 @@ export class RolesManager {
                     this.mRReserver.runRemote(creep);
                     break;
                 }
+                case CreepRole.knight: {
+                    this.mRKnight.runRemote(creep);
+                    break;
+				}
+				case CreepRole.archer: {
+                    this.mRArcher.runRemote(creep);
+                    break;
+                }
                 default: {
                     console.log(`No remote role exists for creep: ${creep.name}`);
                 }
@@ -158,6 +182,10 @@ export class RolesManager {
             }
             case CreepRole.hauler: {
                 this.mDHauler.runDedicated(creep, dedication);
+                break;
+            }
+            case CreepRole.knight: {
+                this.mDKnight.runDedicated(creep);
                 break;
             }
             default: {
@@ -191,5 +219,8 @@ export class RolesManager {
             this.mExpeditionManager = new ExpeditionManager();
         }
         this.mScout.runExpeditionScout(creep, this.mExpeditionManager);
+    }
+    private manageTopper(creep: Creep) {
+        this.mTopper.run(creep);
     }
 }

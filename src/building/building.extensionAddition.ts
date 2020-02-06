@@ -27,7 +27,7 @@ export class ExtensionAddition extends GeneralBuilding {
 
     public alreadyProcessedSuccessfully(extensionCountTarget: number): number {
         for (const spawn of this.spawns) {
-            if (spawn.memory.buildProjects && spawn.memory.buildProjects) {
+            if (spawn.memory.buildProjects && spawn.memory.buildProjects.length > 0) {
                 return 2;
             }
         }

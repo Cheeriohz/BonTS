@@ -26,7 +26,55 @@ export class RoleCreep {
         return harvestSourceSmart(creep);
     }
 
+    protected leaveBorder(creep: Creep) {
+        if (creep.pos.y === 0) {
+            creep.moveTo(creep.pos.x, creep.pos.y + 2);
+        } else if (creep.pos.y === 49) {
+            creep.moveTo(creep.pos.x, creep.pos.y + -2);
+        } else if (creep.pos.x === 0) {
+            creep.moveTo(creep.pos.x + 2, creep.pos.y);
+        } else if (creep.pos.x === 49) {
+            creep.moveTo(creep.pos.x - 2, creep.pos.y);
+        }
+    }
+
+    protected oppositeDirection(direction: DirectionConstant): DirectionConstant {
+        switch (direction) {
+            case TOP: {
+                return BOTTOM;
+            }
+            case TOP_RIGHT: {
+                return BOTTOM_LEFT;
+            }
+            case TOP_LEFT: {
+                return BOTTOM_RIGHT;
+            }
+            case RIGHT: {
+                return LEFT;
+            }
+            case LEFT: {
+                return RIGHT;
+            }
+            case BOTTOM: {
+                return TOP;
+            }
+            case BOTTOM_LEFT: {
+                return TOP_RIGHT;
+            }
+            case BOTTOM_RIGHT: {
+                return TOP_LEFT;
+            }
+        }
+    }
+
     protected fillClosest(creep: Creep, ignoreLinks: boolean): boolean {
+        if (creep.room.memory.target) {
+            const tower = this.findClosestTower(creep);
+            if (tower) {
+                this.depositMove(creep, tower);
+                return true;
+            }
+        }
         if (!ignoreLinks) {
             const link = this.checkForLinktoFill(creep);
             if (link) {
@@ -43,6 +91,10 @@ export class RoleCreep {
         if (fillableOther) {
             this.depositMove(creep, fillableOther);
             return true;
+        }
+        const terminal = creep.room.terminal;
+        if (terminal) {
+            this.depositMove(creep, terminal);
         }
         const storage = this.checkStorageForDeposit(creep.room);
         if (storage) {
@@ -163,6 +215,18 @@ export class RoleCreep {
                 structure.structureType === findType && structure.store.getFreeCapacity(RESOURCE_ENERGY) > 0;
             }
         });
+        return queryItem;
+    }
+
+    protected findClosestTower(creep: Creep): Structure | null {
+        const queryItem: Structure | null = creep.pos.findClosestByRange(FIND_STRUCTURES, {
+            filter: structure => {
+                return (
+                    structure.structureType === STRUCTURE_TOWER && structure.store.getFreeCapacity(RESOURCE_ENERGY) > 0
+                );
+            }
+        });
+        // console.log(JSON.stringify(queryItem));
         return queryItem;
     }
 

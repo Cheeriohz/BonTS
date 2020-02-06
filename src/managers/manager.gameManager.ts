@@ -9,6 +9,8 @@ import { RemoteMineManager } from "remote/manager.remote.remoteMine";
 import { CreepRequester } from "cycle/manager.creepRequester";
 import { RemoteHarvestManager } from "remote/manager.remote.remoteHarvest";
 import { ReservationManager } from "remote/manager.remote.reservation";
+import { RoomHarassManager } from "remote/manager.remote.roomHarrass";
+import { RemotePatrolManager } from "remote/manager.remote.patrol";
 
 export class GameManager {
     public static run() {
@@ -54,6 +56,26 @@ export class GameManager {
         this.manageRemoteReservations(spawn);
         this.manageRemoteMines(spawn);
         this.manageRemoteHarvests(spawn);
+        this.manageRoomHarass(spawn);
+        this.managePatrol(spawn);
+    }
+
+    private static managePatrol(spawn: StructureSpawn) {
+        if (spawn.memory.remotePatrols && spawn.memory.remotePatrols.length > 0) {
+            for (const remotePatrol of spawn.memory.remotePatrols) {
+                const remotePatrolManager: RemotePatrolManager = new RemotePatrolManager(spawn, remotePatrol);
+                remotePatrolManager.managePatrol();
+            }
+        }
+    }
+
+    private static manageRoomHarass(spawn: StructureSpawn) {
+        if (spawn.memory.roomHarass && spawn.memory.roomHarass.length > 0) {
+            for (const roomHarass of spawn.memory.roomHarass) {
+                const harrassmentManager: RoomHarassManager = new RoomHarassManager(spawn, roomHarass);
+                harrassmentManager.manageHarass();
+            }
+        }
     }
 
     private static manageRemoteReservations(spawn: StructureSpawn) {

@@ -1,5 +1,4 @@
 import { RoleRemote } from "roleDefinitions/base/role.remote";
-import { RemoteDispatcher } from "remote/remote.dispatcher";
 
 export class RoleRemoteBuilder extends RoleRemote {
     public runRemote(creep: Creep) {
@@ -23,41 +22,6 @@ export class RoleRemoteBuilder extends RoleRemote {
         } else {
             this.fillUpAtHome(creep);
             return;
-        }
-    }
-
-    private testRemoteDispatchR(creep: Creep) {
-        const spawn = Game.spawns["Sp1"];
-        if (spawn) {
-            const remoteMines = spawn.memory.remoteMines;
-            if (remoteMines) {
-                const remoteMine = remoteMines[0];
-                const remoteDispatcher: RemoteDispatcher = new RemoteDispatcher();
-                const time = Game.cpu.getUsed();
-                const path = remoteDispatcher.RequestDispatch({ creep: creep, departing: false }, remoteMine);
-                console.log(`Dispatch Lookup Takes: ${Game.cpu.getUsed() - time}`);
-                if (path) {
-                    creep.moveByPath(path);
-                    creep.moveByPath(path);
-                }
-            }
-        }
-    }
-
-    private testRemoteDispatch(creep: Creep) {
-        const spawn = Game.spawns["Sp1"];
-        if (spawn) {
-            const remoteMines = spawn.memory.remoteMines;
-            if (remoteMines) {
-                const remoteMine = remoteMines[0];
-                const remoteDispatcher: RemoteDispatcher = new RemoteDispatcher();
-                const time = Game.cpu.getUsed();
-                const path = remoteDispatcher.RequestDispatch({ creep: creep, departing: true }, remoteMine);
-                console.log(`Dispatch Lookup Takes: ${Game.cpu.getUsed() - time}`);
-                if (path) {
-                    creep.moveByPath(path);
-                }
-            }
         }
     }
 }

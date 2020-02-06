@@ -102,13 +102,20 @@ export class Spawn {
                         )
                     ) {
                         this.checkForSpawnRequest(spawn);
+                        if (
+                            (spawn.room.energyAvailable < 400 || spawn.room.memory.target) &&
+                            spawn.room.storage &&
+                            spawn.room.storage.store.getFreeCapacity() < 400000
+                        ) {
+                            SimpleEraSpawnHelper.spawnGeneric(room, topperBody, 1, CreepRole.topper);
+                        }
                     }
                 }
             }
         }
     }
 
-    private static checkForSpawnRequest(spawn: StructureSpawn) {
+    private static checkForSpawnRequest(spawn: StructureSpawn): boolean {
         if (spawn.memory.creepRequest) {
             if (spawn.memory.creepRequest.length > 0) {
                 const request: CreepRequest = spawn.memory.creepRequest[0];
@@ -126,6 +133,7 @@ export class Spawn {
                             spawn.memory.creepRequest,
                             spawn.memory.creepRequest.length - 1
                         );
+                        return false;
                     }
                 } else {
                     if (
@@ -136,9 +144,9 @@ export class Spawn {
                             spawn.memory.creepRequest,
                             spawn.memory.creepRequest.length - 1
                         );
+                        return false;
                     }
                 }
-                return;
             }
         }
         if (spawn.memory.dedicatedCreepRequest) {
@@ -160,10 +168,11 @@ export class Spawn {
                         spawn.memory.dedicatedCreepRequest,
                         spawn.memory.dedicatedCreepRequest.length - 1
                     );
+                    return false;
                 }
-                return;
             }
         }
+        return true;
     }
 }
 
@@ -172,6 +181,7 @@ const basicBody = [WORK, CARRY, MOVE]; // 200 Energy
 const basicBodyPlus = [WORK, WORK, CARRY, CARRY, MOVE, MOVE]; // 400 Energy, for testing
 const dropMinerBody = [WORK, WORK, WORK, WORK, WORK, WORK, MOVE]; // 650 Energy
 //const haulerBody = [CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, MOVE, MOVE, MOVE] // 600 Energy
+const topperBody = [CARRY, CARRY, MOVE];
 const haulerBody = [CARRY, CARRY, CARRY, CARRY, MOVE, MOVE]; // 600 Energy
 const droneBody = [CARRY, WORK, WORK, WORK, WORK, WORK, WORK, WORK, MOVE, MOVE, MOVE]; // 800 Energy
 const repairBody = [
