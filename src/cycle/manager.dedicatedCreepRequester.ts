@@ -97,6 +97,15 @@ export class DedicatedCreepRequester {
                 );
                 break;
             }
+            case CreepRole.archer: {
+                if (isRemote) {
+                    this.spawn.memory.dedicatedCreepRequest.push(
+                        this.createDedicatedRemoteArcher(dedication, specifiedName, precious, orders)
+                    );
+                    break;
+                }
+                break;
+            }
             default: {
                 console.log(`Cannot created dedicated creep of role: ${CreepRole[role]}`);
             }
@@ -219,6 +228,23 @@ export class DedicatedCreepRequester {
             specifiedName: specifiedName,
             precious: precious,
             home: null,
+            orders: orders
+        };
+    }
+
+    private createDedicatedRemoteArcher(
+        dedication: string,
+        specifiedName: string,
+        precious?: string,
+        orders?: CreepOrder
+    ): DedicatedCreepRequest {
+        return {
+            role: CreepRole.archer,
+            body: [MOVE, MOVE, MOVE, MOVE, MOVE, RANGED_ATTACK, RANGED_ATTACK, RANGED_ATTACK, RANGED_ATTACK, HEAL],
+            dedication: dedication,
+            specifiedName: specifiedName,
+            precious: precious,
+            home: this.spawn.room.name,
             orders: orders
         };
     }

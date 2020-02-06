@@ -22,10 +22,10 @@ export class RoomHarassManager {
         if (this.roomSafeMode()) {
             return;
         }
-        this.maintainKnights();
+        this.maintainHarrassment();
     }
 
-    private maintainKnights() {
+    private maintainHarrassment() {
         if (this.spawn.spawning) {
             return;
         }
@@ -35,12 +35,21 @@ export class RoomHarassManager {
                 return;
             }
             this.removeUnusedknights();
-            if (this.harass.knights.length < this.harass.count) {
+            if (this.harass.knights.length < this.harass.knightCap) {
                 this.requestKnight();
             }
         } else {
             this.harass.knights = [];
             this.requestKnight();
+        }
+        if (this.harass.archers) {
+            this.removeUnusedArchers();
+            if (this.harass.archers.length < this.harass.archerCap) {
+                this.requestArcher();
+            }
+        } else {
+            this.harass.archers = [];
+            this.requestArcher();
         }
     }
 
@@ -53,6 +62,16 @@ export class RoomHarassManager {
             if (!Game.creeps[knight]) {
                 _.remove(this.harass.knights!, h => {
                     return h === knight;
+                });
+            }
+        }
+    }
+
+    private removeUnusedArchers() {
+        for (const archer of this.harass.archers!) {
+            if (!Game.creeps[archer]) {
+                _.remove(this.harass.archers!, h => {
+                    return h === archer;
                 });
             }
         }
@@ -84,6 +103,30 @@ export class RoomHarassManager {
                 this.harass.knights?.push(knightName);
             } else {
                 this.harass.knights = [knightName];
+            }
+        }
+    }
+
+    private requestArcher() {
+        if (!this.creepInQueue(CreepRole.knight)) {
+            const archerName: string = `archer${Game.time.toPrecision(8)}`;
+            const dcr: DedicatedCreepRequester = new DedicatedCreepRequester(this.spawn);
+            const orders: CreepOrder = {
+                target: this.harass.roomName,
+                independentOperator: false
+            };
+            dcr.createdDedicatedCreepRequest({
+                dedication: "",
+                role: CreepRole.archer,
+                specifiedName: archerName,
+                precious: undefined,
+                isRemote: true,
+                orders: orders
+            });
+            if (this.harass.archers!.length > 0) {
+                this.harass.archers?.push(archerName);
+            } else {
+                this.harass.archers = [archerName];
             }
         }
     }

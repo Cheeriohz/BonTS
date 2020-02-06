@@ -1,6 +1,7 @@
 import { RoleRemote } from "roleDefinitions/base/role.remote";
 import _ from "lodash";
 
+// TODO Store nearby allies for efficiency or just add squads.
 export class RoleRemoteKnight extends RoleRemote {
     public runRemote(creep: Creep) {
         if (!creep.memory.working && creep.room.name === creep.memory.orders!.target) {
@@ -84,13 +85,13 @@ export class RoleRemoteKnight extends RoleRemote {
         if (creep.hitsMax !== creep.hits) {
             creep.heal(creep);
         } else {
-            const nearCreep: Creep[] | null = creep.pos.findInRange(FIND_MY_CREEPS, 3, {
+            const nearCreep: Creep | null = creep.pos.findClosestByRange(FIND_MY_CREEPS, {
                 filter: c => {
                     return c.hits !== c.hitsMax;
                 }
             });
-            if (nearCreep) {
-                creep.heal(nearCreep[0]);
+            if (nearCreep && creep.pos.getRangeTo(nearCreep) < 4) {
+                creep.heal(nearCreep);
             }
         }
     }
@@ -101,7 +102,10 @@ export class RoleRemoteKnight extends RoleRemote {
             const harrassTarget: Creep | null = creep.pos.findClosestByPath(harassTargets);
             if (harrassTarget) {
                 if (harrassTarget.getActiveBodyparts(RANGED_ATTACK)) {
-                    creep.memory.mrf = true;
+                    const alliesNear = creep.pos.findInRange(FIND_MY_CREEPS, 5);
+                    if (alliesNear.length < 2) {
+                        creep.memory.mrf = true;
+                    }
                 }
                 creep.memory.dedication = harrassTarget.id;
                 this.attackTarget(creep, harrassTarget);
@@ -147,8 +151,7 @@ export class RoleRemoteKnight extends RoleRemote {
     private attackTarget(creep: Creep, victim: Creep | Structure) {
         if (victim) {
             const rangeToVictim = creep.pos.getRangeTo(victim);
-            console.log(rangeToVictim);
-            if ((creep.memory.mrf && rangeToVictim === 3) || rangeToVictim === 2) {
+            if (creep.memory.mrf && (rangeToVictim === 3 || rangeToVictim === 2)) {
                 // Move away
                 creep.move(this.oppositeDirection(creep.pos.getDirectionTo(victim)));
             } else if (rangeToVictim > 1) {
@@ -190,7 +193,10 @@ export class RoleRemoteKnight extends RoleRemote {
             }
         });
         if (hostileRanged) {
-            creep.memory.mrf = true;
+            const alliesNear = creep.pos.findInRange(FIND_MY_CREEPS, 5);
+            if (alliesNear.length < 2) {
+                creep.memory.mrf = true;
+            }
             creep.memory.dedication = hostileRanged.id;
             this.attackTarget(creep, hostileRanged);
             return true;

@@ -25,7 +25,9 @@ interface RemoteHarvest extends PathingLookup {
 interface RoomHarrass extends PathingLookup {
     roomName: string;
     knights: string[] | null;
-    count: number;
+    knightCap: number;
+    archers: string[] | null;
+    archerCap: number;
     pauseToTime: number;
 }
 
