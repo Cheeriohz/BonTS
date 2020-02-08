@@ -18,8 +18,9 @@ export class ExpeditionManager {
                 }
             }
         }
-        // If we haven't found orders to distribute, sleep
-        creep.memory.working = false;
+        // If we haven't found orders to distribute, let the scout operate independently
+        creep.memory.orders = { target: "", independentOperator: true };
+        creep.memory.working = true;
     }
 
     public reportFindings(creep: Creep, findings: string[]) {

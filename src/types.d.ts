@@ -26,9 +26,6 @@ interface CreepMemory {
 }
 
 interface RoomMemory {
-    // TODO remove obsolete
-    era: number;
-
     //* Object Caching
     sourceMap: Assignment[];
     containerMap: Assignment[] | null;
@@ -59,6 +56,7 @@ interface RoomMemory {
     rcl: number | null;
     rclUpgrades: RCLUpgradeEvent[] | null;
     lowRCLBoost: boolean;
+    staticUpgraders: boolean;
 }
 
 interface SpawnMemory {
@@ -76,12 +74,21 @@ interface SpawnMemory {
 }
 
 interface Memory {
-    uuid: number;
-    log: any;
-    cycle: number;
-    roleRoomMap: Dictionary<number[]>;
-    expeditions: Expedition[];
+    //* Global Debug Tools
     showReserved: boolean;
+    log: any;
+
+    //* Integral Game Memory
+    cycle: number;
+
+    //* Creep Tracking
+    roleRoomMap: Dictionary<number[]>;
+
+    //? Expeditions - Is this necessary anymore?
+    expeditions: Expedition[];
+
+    //* Scouting
+    scouting: Scouting;
 }
 
 interface Dictionary<T> {
