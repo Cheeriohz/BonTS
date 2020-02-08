@@ -3,8 +3,7 @@ import { Visualizer } from "./building.visualizer";
 import { BuildProjectEnum } from "./interfaces/building.enum";
 import { buildProjectCreator } from "./building.buildProjectCreator";
 
-// TODO RENAME LOCAL EXPANSION
-export class ContainerExpansion {
+export class LocalExpansion {
     private spawn!: StructureSpawn;
     private room!: Room;
     private originPos!: RoomPosition;
@@ -58,12 +57,13 @@ export class ContainerExpansion {
         }
     }
 
-    public checkForSourceExpansion(sources: Source[]): void {
-        const sourcePositions: RoomPosition[] | null = this.identifySourcesWithoutContainer(sources);
-        if (sourcePositions) {
-            this.identifyExpansionTarget(sourcePositions, BuildProjectEnum.LocalContainerExpansion);
-        } else {
-            return;
+    public checkForContainerExpansion(): void {
+        if (this.spawn.room.memory.reservedBuilds) {
+            const containers = _.filter(this.spawn.room.memory.reservedBuilds, b => b.type === STRUCTURE_CONTAINER);
+            if (containers && containers.length > 0) {
+                const bpc: buildProjectCreator = new buildProjectCreator(this.spawn.room, this.spawn);
+                bpc.createBuildProjectContainerExpansion(containers);
+            }
         }
     }
 
@@ -134,7 +134,8 @@ export class ContainerExpansion {
                 if (projectType === BuildProjectEnum.LocalMineralExpansion) {
                     bpc.createBuildProjectLocalMineExpansion(path, projectType);
                 } else if (projectType === BuildProjectEnum.LocalContainerExpansion) {
-                    bpc.createBuildProjectContainerExpansion(path, projectType);
+                    // TODO refactor this
+                    //bpc.createBuildProjectContainerExpansion(path, projectType);
                 }
             }
         }

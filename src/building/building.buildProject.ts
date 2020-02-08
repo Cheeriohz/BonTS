@@ -131,7 +131,7 @@ export class BuildProjectManager {
                 _.remove(this.spawn.room.memory.buildProjects!, p => p === this.project);
             }
             case BuildProjectEnum.ExtensionBootstrap: {
-				SpawnTemplate.migrateToDropHauling(this.spawn.room);
+                SpawnTemplate.migrateToDropHauling(this.spawn.room);
                 _.remove(this.spawn.room.memory.buildProjects!, p => p === this.project);
             }
         }

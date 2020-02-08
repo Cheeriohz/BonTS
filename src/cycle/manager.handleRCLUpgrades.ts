@@ -1,10 +1,11 @@
-import { ContainerExpansion } from "building/building.containerExpansion";
+import { LocalExpansion } from "building/building.LocalExpansion";
 import { TerminalExpansion } from "building/building.terminalExpansion";
 import _ from "lodash";
 import { LabAddition } from "building/building.labAddtition";
 import { RemoteHarvestHandler } from "remote/remote.remoteHarvestHandler";
 import { ExtensionAddition } from "building/building.extensionAddition";
 import { SpawnTemplate } from "spawning/spawning.templating";
+import { CreepRequester } from "spawning/manager.creepRequester";
 
 export class RCLUpgradeHandler {
     public static handleRCLUpgrades(spawn: StructureSpawn) {
@@ -40,15 +41,24 @@ export class RCLUpgradeHandler {
     }
 
     private static handleRCLUpgradeTo2(spawn: StructureSpawn): boolean {
-        const containerExpansion: ContainerExpansion = new ContainerExpansion(spawn, spawn.room, spawn.pos, false);
-        containerExpansion.routeToSources();
-        containerExpansion.routeToController();
+        const localExpansion: LocalExpansion = new LocalExpansion(spawn, spawn.room, spawn.pos, false);
+        localExpansion.routeToSources();
+        localExpansion.routeToController();
+        // TODO Create close local extension builder.
+        const cr: CreepRequester = new CreepRequester(spawn);
+        cr.RequestIndependentScout();
+        return true;
+    }
+
+    private static handleRCLUpgradeTo3(spawn: StructureSpawn): boolean {
+        const localExpansion: LocalExpansion = new LocalExpansion(spawn, spawn.room, spawn.pos, false);
+        localExpansion.checkForContainerExpansion();
         return true;
     }
 
     private static handleRCLUpgradeTo6(spawn: StructureSpawn): boolean {
-        const containerExpansion: ContainerExpansion = new ContainerExpansion(spawn, spawn.room, spawn.pos, false);
-        containerExpansion.checkForMineralExpansion();
+        const localExpansion: LocalExpansion = new LocalExpansion(spawn, spawn.room, spawn.pos, false);
+        localExpansion.checkForMineralExpansion();
 
         // Check if we need a terminal.
         if (

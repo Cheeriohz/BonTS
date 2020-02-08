@@ -3,7 +3,9 @@ interface CreepMemory {
     role: number;
     working: boolean;
 
+    // * Assistive Large Memory Blocks
     orders?: CreepOrder | null;
+    taxi?: Taxi | null;
 
     // * Id Caching
     dedication?: string | null;
@@ -93,6 +95,13 @@ interface Memory {
 
 interface Dictionary<T> {
     [index: string]: T;
+}
+
+interface Taxi {
+    client: string;
+    destination: RoomPosition;
+    priority: number;
+    originalRole: number;
 }
 
 // `global` extension samples

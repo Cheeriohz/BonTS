@@ -32,8 +32,13 @@ export class buildProjectCreator {
         }
     }
 
+    public createBuildProjectContainerExpansion(buildOrders: BuildOrder[]) {
+        this.pushBuildProjectToSpawn(buildOrders, BuildProjectEnum.LocalContainerExpansion);
+    }
+
+    // ? Obsolete
     // Last pathstep will become a container. Remaining pathsteps will become roads.
-    public createBuildProjectContainerExpansion(path: PathStep[], projectType: BuildProjectEnum) {
+    public createBuildProjectContainerExpansionLegacy(path: PathStep[], projectType: BuildProjectEnum) {
         const containerLocation: PathStep | undefined = path.pop();
         if (containerLocation) {
             let buildOrders: BuildOrder[] = [this.createContainerBuildOrder(containerLocation)];

@@ -1,5 +1,6 @@
 import { CreepRole } from "enums/enum.roles";
 import _ from "lodash";
+import { buildProjectCreator } from "building/building.buildProjectCreator";
 
 export function getdropMapPosition(creep: Creep): { x: number; y: number } | null {
     let dropMap = creep.room.memory.dropMap;
@@ -44,6 +45,15 @@ function findSourceDropPickups(room: Room): AssignmentPosition[] {
                 determineDropPositionForRoomposition(source.pos, allPickups);
             }
         }
+    }
+    if (allPickups.length !== 0) {
+        const containerReservations: BuildOrder[] = _.map(allPickups, p => {
+            return { x: p.x, y: p.y, type: STRUCTURE_CONTAINER };
+        });
+        if (!room.memory.reservedBuilds) {
+            room.memory.reservedBuilds = [];
+        }
+        room.memory.reservedBuilds = _.concat(room.memory.reservedBuilds, containerReservations);
     }
     return allPickups;
 }

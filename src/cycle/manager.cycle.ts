@@ -7,7 +7,7 @@ import { Expander } from "../expansion/manager.expander";
 import { LinkManager } from "../managers/structures/manager.links";
 import { SpawnReassment } from "./manager.spawnReassessment";
 import { CreepRequester } from "../spawning/manager.creepRequester";
-import { ContainerExpansion } from "building/building.containerExpansion";
+import { LocalExpansion } from "building/building.LocalExpansion";
 import { BuildProjectManager } from "building/building.buildProject";
 import _ from "lodash";
 import { ExpeditionResultsHandlerMapper } from "expansion/expansion.expeditionResultsHandlerMap";
@@ -76,9 +76,6 @@ export class CycleManager {
 
     private static spawnLevelTasksLongTerm() {
         for (const spawn of _.values(Game.spawns)) {
-            const expander: Expander = new Expander(spawn);
-            expander.mineExpansion();
-
             this.cleanUpTrees(spawn.room);
 
             this.handleSpawnReassess(spawn);

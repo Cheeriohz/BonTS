@@ -1,7 +1,7 @@
 import { CreepRole } from "enums/enum.roles";
 import { ExpeditionManager } from "./manager.expedition";
 import _ from "lodash";
-import { ContainerExpansion } from "building/building.containerExpansion";
+import { LocalExpansion } from "building/building.LocalExpansion";
 
 export class Expander {
     private spawn!: StructureSpawn;
@@ -10,6 +10,7 @@ export class Expander {
         this.spawn = spawn;
     }
 
+    // ? Entire class is borderline obsolete. Might be reusable after some refactoring.
     public mineExpansion() {
         // If we have an untapped local container location, first expand to it.
         if (this.spawn.room.controller!.level > 2) {
@@ -46,7 +47,7 @@ export class Expander {
         const sources: Source[] | null = this.getSources();
         if (sources) {
             if (containerUsage < sources.length) {
-                const containerExpansion: ContainerExpansion = new ContainerExpansion(
+                const containerExpansion: LocalExpansion = new LocalExpansion(
                     this.spawn,
                     this.spawn.room,
                     this.spawn.pos,

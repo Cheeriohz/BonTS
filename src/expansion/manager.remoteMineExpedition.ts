@@ -157,7 +157,7 @@ export class remoteMineExpeditionHandler extends ExpeditionResultsHandler {
             success = false;
         } else {
             const bpc: buildProjectCreator = new buildProjectCreator(room, spawn);
-            bpc.createBuildProjectContainerExpansion(clonedPath, BuildProjectEnum.RemoteContainerExpansion);
+            bpc.createBuildProjectContainerExpansionLegacy(clonedPath, BuildProjectEnum.RemoteContainerExpansion);
         }
         return success;
     }
