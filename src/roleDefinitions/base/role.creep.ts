@@ -63,7 +63,7 @@ export class RoleCreep {
         return harvestSourceSmart(creep);
     }
 
-    protected fillClosest(creep: Creep, ignoreLinks: boolean): boolean {
+    protected fillClosest(creep: Creep, ignoreLinks: boolean, fillUpgraders?: boolean): boolean {
         if (creep.room.memory.target) {
             const tower = this.findClosestTower(creep);
             if (tower) {
@@ -97,8 +97,10 @@ export class RoleCreep {
             this.depositMove(creep, storage);
             return true;
         }
-        if (this.refillUpgraders(creep)) {
-            return true;
+        if (fillUpgraders) {
+            if (this.refillUpgraders(creep)) {
+                return true;
+            }
         }
         return false;
     }
@@ -110,7 +112,7 @@ export class RoleCreep {
             }
         });
         if (upgraders && upgraders.length > 0) {
-            const transferTarget = _.first(upgraders);
+            const transferTarget = creep.pos.findClosestByPath(upgraders);
             this.transferMove(creep, transferTarget!);
             return true;
         }
@@ -382,16 +384,21 @@ export class RoleCreep {
         }
     }
 
-    protected leaveBorder(creep: Creep) {
+    protected leaveBorder(creep: Creep): boolean {
         if (creep.pos.y === 0) {
             creep.moveTo(creep.pos.x, creep.pos.y + 2);
+            return false;
         } else if (creep.pos.y === 49) {
             creep.moveTo(creep.pos.x, creep.pos.y + -2);
+            return false;
         } else if (creep.pos.x === 0) {
             creep.moveTo(creep.pos.x + 2, creep.pos.y);
+            return false;
         } else if (creep.pos.x === 49) {
             creep.moveTo(creep.pos.x - 2, creep.pos.y);
+            return false;
         }
+        return true;
     }
 
     protected oppositeDirection(direction: DirectionConstant): DirectionConstant {

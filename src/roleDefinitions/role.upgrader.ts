@@ -5,6 +5,9 @@ export class RoleUpgrader extends RoleCreep {
         const currentEnergy = creep.store[RESOURCE_ENERGY];
 
         if (creep.memory.working && currentEnergy === 0) {
+            if (creep.room.memory.staticUpgraders) {
+                return;
+            }
             creep.memory.working = false;
             if (creep.room.memory.lowRCLBoost) {
                 if (this.idSpawnForWithdrawal(creep)) {

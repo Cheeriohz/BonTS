@@ -3,6 +3,7 @@ import { getContainer, refreshTree } from "../caching/manager.containerSelector"
 import { profile } from "Profiler";
 import { RoleCreep } from "./base/role.creep";
 import { getSource } from "caching/manager.sourceSelector";
+import { getdropMapPosition } from "caching/caching.dropPickupCacher";
 @profile
 export class RoleDropper extends RoleCreep {
     public run(creep: Creep) {
@@ -15,10 +16,14 @@ export class RoleDropper extends RoleCreep {
     }
 
     private relocate(creep: Creep) {
+        if (creep.memory.preciousPosition) {
+            this.checkInPosition(creep, creep.memory.preciousPosition);
+        }
         const containerId = getContainer(creep);
         if (containerId) {
             const container = Game.getObjectById<StructureContainer>(containerId);
             if (container) {
+                creep.memory.preciousPosition = container.pos;
                 this.checkInPosition(creep, container.pos);
             } else {
                 refreshTree(creep.room, containerId);
@@ -29,6 +34,28 @@ export class RoleDropper extends RoleCreep {
     }
 
     private handleNoContainers(creep: Creep) {
+        if (creep.memory.precious) {
+            const source: Source | null = Game.getObjectById(creep.memory.precious);
+            if (source) {
+                if (creep.pos.getRangeTo(source) === 1) {
+                    this.updatePrecious(creep);
+                    creep.memory.working = true;
+                    this.harvestPrecious(creep);
+                } else {
+                    creep.moveTo(source);
+                }
+            }
+        }
+        const dropLocation = getdropMapPosition(creep);
+        if (dropLocation) {
+            creep.memory.preciousPosition = { x: dropLocation.x, y: dropLocation.y };
+            creep.memory.path = creep.pos.findPathTo(dropLocation.x, dropLocation.y, { ignoreCreeps: true });
+            this.pathHandling(creep);
+        }
+    }
+
+    //? Probably Obsolete
+    private _handleNoContainers(creep: Creep) {
         if (creep.memory.precious) {
             const source: Source | null = Game.getObjectById(creep.memory.precious);
             if (source) {
@@ -52,12 +79,12 @@ export class RoleDropper extends RoleCreep {
         }
     }
 
-    private checkInPosition(creep: Creep, pos: RoomPosition) {
+    private checkInPosition(creep: Creep, pos: { x: number; y: number }) {
         if (creep.pos.x === pos.x && creep.pos.y === pos.y) {
             this.updatePrecious(creep);
             creep.memory.working = true;
         } else {
-            creep.moveTo(pos);
+            creep.moveTo(pos.x, pos.y);
         }
     }
 

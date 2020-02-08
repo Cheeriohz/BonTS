@@ -21,11 +21,14 @@ export class SpawnTemplate {
     }
 
     public static migrateToDropHauling(room: Room) {
+        const sourceCount = room.memory.sourceMap.length;
         room.memory.templates![CreepRole.upgrader] = [WORK, WORK, WORK, WORK, CARRY, CARRY, MOVE];
         room.memory.templates![CreepRole.harvester] = [WORK, WORK, WORK, CARRY, CARRY, MOVE, MOVE, MOVE];
-        room.memory.roleTargets![CreepRole.dropper] = 2;
-        room.memory.roleTargets![CreepRole.hauler] = 2;
-        // TODO finish
+        room.memory.roleTargets![CreepRole.dropper] = sourceCount;
+        room.memory.roleTargets![CreepRole.hauler] = 2 * sourceCount;
+        room.memory.roleTargets![CreepRole.upgrader] = 2 * sourceCount;
+        room.memory.roleTargets![CreepRole.harvester] = 0;
+        room.memory.staticUpgraders = true;
     }
 
     private static getDefaultForRole(role: Number): BodyPartConstant[] {
