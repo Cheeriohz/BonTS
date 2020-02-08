@@ -12,6 +12,22 @@ export class CreepRequester {
         this.spawn = spawn;
     }
 
+    public RequestIndependentScout() {
+        const memory: CreepMemory = {
+            role: CreepRole.scout,
+            working: true,
+            orders: {
+                target: "",
+                independentOperator: true
+            }
+        };
+        const scoutRequest: CreepRequest = { role: CreepRole.scout, body: [MOVE], memory: memory };
+        if (!this.spawn.memory.creepRequest) {
+            this.spawn.memory.creepRequest = [];
+        }
+        this.spawn.memory.creepRequest.push(scoutRequest);
+    }
+
     public RequestScoutToRoom(roomName: string) {
         if (this.scoutAlreadyRequested(roomName)) {
             return;

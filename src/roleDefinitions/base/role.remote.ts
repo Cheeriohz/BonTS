@@ -8,10 +8,13 @@ export class RoleRemote extends RoleCreep {
         return `${pos.x}${pos.y}`;
     }
 
-    protected cachedTravel(destination: RoomPosition, creep: Creep, repairWhileMove: boolean) {
+    protected cachedTravel(destination: RoomPosition, creep: Creep, repairWhileMove: boolean): boolean {
         const path = creep.pos.findPathTo(destination, { ignoreCreeps: true });
         if (path) {
             this.travelByCachedPath(repairWhileMove, creep, path);
+            return true;
+        } else {
+            return false;
         }
     }
 
@@ -29,9 +32,10 @@ export class RoleRemote extends RoleCreep {
         if (target > 0) {
             const destination = creep.pos.findClosestByPath(<ExitConstant>target);
             if (destination) {
-                this.cachedTravel(destination, creep, repairWhileMove);
+                return this.cachedTravel(destination, creep, repairWhileMove);
             }
         }
+        return false;
     }
 
     protected renew(creep: Creep, timeToLiveThreshold: number): boolean {

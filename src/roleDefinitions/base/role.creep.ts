@@ -468,8 +468,7 @@ export class RoleCreep {
                     return false;
                 }
             } else if (creep.memory.stuckCount > 2) {
-                delete creep.memory.path;
-                creep.memory.stuckCount = 0;
+                this.cleanUpPath(creep);
                 return false;
             }
         } else {
@@ -479,6 +478,14 @@ export class RoleCreep {
         return true;
     }
 
+    private cleanUpPath(creep: Creep) {
+        delete creep.memory.path;
+        creep.memory.stuckCount = 0;
+        if (creep.memory.role === CreepRole.scout && creep.memory.orders && creep.memory.orders.independentOperator) {
+            creep.memory.orders.target = "";
+        }
+    }
+
     private fixStuck(creep: Creep): boolean {
         const currentPathStep = _.first(creep.memory.path);
         if (currentPathStep) {
@@ -486,22 +493,40 @@ export class RoleCreep {
             if (blockers.length > 0) {
                 const blocker = _.first(blockers);
                 if (blocker) {
-                    blocker.moveTo(creep.pos.x, creep.pos.y);
-                    if (blocker.memory) {
-                        blocker.memory.moved = true;
-                        return true;
+                    if (blocker.fatigue) {
+                        return this.pathingOvertake(creep);
                     } else {
-                        delete creep.memory.path;
-                        creep.memory.stuckCount = 0;
-                        return false;
+                        blocker.moveTo(creep.pos.x, creep.pos.y);
+                        if (blocker.memory) {
+                            blocker.memory.moved = true;
+                            return true;
+                        } else {
+                            this.cleanUpPath(creep);
+                            return false;
+                        }
                     }
                 } else {
-                    delete creep.memory.path;
-                    creep.memory.stuckCount = 0;
+                    this.cleanUpPath(creep);
                     return false;
                 }
             }
         }
+        return false;
+    }
+
+    private pathingOvertake(creep: Creep): boolean {
+        if (creep.memory.path && creep.memory.path.length >= 3) {
+            const routeToPathStep = creep.memory.path[2];
+            if (routeToPathStep) {
+                const routeToPos = new RoomPosition(routeToPathStep.x, routeToPathStep.y, creep.room.name);
+                const bypassPath = creep.pos.findPathTo(routeToPos, { ignoreCreeps: false });
+                if (bypassPath) {
+                    creep.memory.path = _.concat(bypassPath, _.drop(creep.memory.path, 3));
+                    return true;
+                }
+            }
+        }
+        // TODO Add other overtake options
         return false;
     }
 
