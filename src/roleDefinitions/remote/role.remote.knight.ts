@@ -9,7 +9,6 @@ export class RoleRemoteKnight extends RoleRemote {
             creep.say("⚔️");
         }
 
-        this.checkHeal(creep);
         if (creep.memory.working) {
             if ((creep.hits + 1) / creep.hitsMax < 0.7) {
                 this.flee(creep);
@@ -20,6 +19,7 @@ export class RoleRemoteKnight extends RoleRemote {
                     if (creep.memory.orders && creep.room.name === creep.memory.orders.target) {
                         this.checkLock(creep);
                     } else {
+                        this.checkHeal(creep);
                         this.moveInToHarass(creep);
                     }
                 }
@@ -28,6 +28,7 @@ export class RoleRemoteKnight extends RoleRemote {
             creep.memory.hitsLast = creep.hits;
             return;
         } else {
+            this.checkHeal(creep);
             this.moveInToHarass(creep);
             return;
         }
@@ -48,13 +49,6 @@ export class RoleRemoteKnight extends RoleRemote {
     private moveInToHarass(creep: Creep) {
         this.travelToRoom(creep, creep.memory.orders!.target, false);
         this.leaveBorder(creep);
-    }
-
-    private attackNear(creep: Creep) {
-        const creepNear: Creep[] | null = creep.pos.findInRange(FIND_HOSTILE_CREEPS, 1);
-        if (creepNear && creepNear.length > 1) {
-            this.attackTarget(creep, _.first(creepNear)!);
-        }
     }
 
     private checkLock(creep: Creep) {
@@ -78,7 +72,9 @@ export class RoleRemoteKnight extends RoleRemote {
                 creep.memory.precious = null;
             }
         }
-        this.findHarrass(creep);
+        if (!this.findHarrass(creep)) {
+            this.checkHeal(creep);
+        }
     }
 
     private checkHeal(creep: Creep) {
@@ -97,6 +93,9 @@ export class RoleRemoteKnight extends RoleRemote {
     }
 
     private findHarrass(creep: Creep) {
+		if(this.safeModeBlocking(creep)) {
+			return;
+		}
         const harassTargets: Creep[] = creep.room.find(FIND_HOSTILE_CREEPS);
         if (harassTargets && harassTargets.length > 0) {
             const harrassTarget: Creep | null = creep.pos.findClosestByPath(harassTargets);
@@ -108,8 +107,7 @@ export class RoleRemoteKnight extends RoleRemote {
                     }
                 }
                 creep.memory.dedication = harrassTarget.id;
-                this.attackTarget(creep, harrassTarget);
-                return;
+                return this.attackTarget(creep, harrassTarget);
             }
         }
         const harrassStructures: Structure[] = creep.room.find(FIND_HOSTILE_STRUCTURES, {
@@ -125,12 +123,12 @@ export class RoleRemoteKnight extends RoleRemote {
             const harrassStructure: Structure | null = creep.pos.findClosestByPath(harrassStructures);
             if (harrassStructure) {
                 creep.memory.precious = harrassStructure.id;
-                this.attackTarget(creep, harrassStructure);
-                return;
+
+                return this.attackTarget(creep, harrassStructure);
             }
         }
         if (this.stompConstruction(creep)) {
-            return;
+            return true;
         }
         const wall: Structure | null = creep.pos.findClosestByPath(FIND_STRUCTURES, {
             filter: structure => {
@@ -142,21 +140,40 @@ export class RoleRemoteKnight extends RoleRemote {
         if (wall) {
             creep.memory.precious = null;
             creep.memory.dedication = null;
-            this.attackTarget(creep, wall);
-            return;
+            return this.attackTarget(creep, wall);
         }
-        this.leaveBorder(creep);
-    }
+        creep.moveTo(25, 25);
+        return false;
+	}
 
-    private attackTarget(creep: Creep, victim: Creep | Structure) {
+	private safeModeBlocking(creep: Creep) {
+		if(creep.room.controller && creep.room.controller.safeMode) {
+			const sources = creep.room.find(FIND_SOURCES);
+			const sourceTarget = _.first(_.sortBy(sources, (s) => s.pos.findInRange(FIND_CREEPS, 1).find.length));
+			if(sourceTarget) {
+				creep.memory.dedication = sourceTarget.id;
+				creep.moveTo(sourceTarget);
+				return true;
+			}
+		}
+		return false;
+	}
+
+    private attackTarget(creep: Creep, victim: Creep | Structure): boolean {
         if (victim) {
             const rangeToVictim = creep.pos.getRangeTo(victim);
             if (creep.memory.mrf && (rangeToVictim === 3 || rangeToVictim === 2)) {
                 // Move away
                 creep.move(this.oppositeDirection(creep.pos.getDirectionTo(victim)));
+                const alliesNear = creep.pos.findInRange(FIND_MY_CREEPS, 5);
+                if (alliesNear.length > 1) {
+                    creep.memory.mrf = false;
+                }
+                return false;
             } else if (rangeToVictim > 1) {
                 // Check if you can reach the target
                 creep.moveTo(victim.pos);
+                return false;
             } else {
                 if (victim.pos.x !== 49 && victim.pos.x !== 0 && victim.pos.y !== 49 && victim.pos.x !== 0) {
                     creep.move(creep.pos.getDirectionTo(victim));
@@ -165,7 +182,18 @@ export class RoleRemoteKnight extends RoleRemote {
                 }
             }
             creep.attack(victim);
+            return true;
         }
+        return false;
+    }
+
+    private attackNear(creep: Creep): boolean {
+        const creepNear: Creep[] | null = creep.pos.findInRange(FIND_HOSTILE_CREEPS, 1);
+        if (creepNear && creepNear.length > 1) {
+            this.attackTarget(creep, _.first(creepNear)!);
+            return true;
+        }
+        return false;
     }
 
     private flee(creep: Creep) {
@@ -173,6 +201,7 @@ export class RoleRemoteKnight extends RoleRemote {
             const escape = creep.pos.findClosestByPath(FIND_EXIT);
             if (escape) {
                 creep.moveTo(escape);
+                this.checkHeal(creep);
             }
         } else {
             this.leaveBorder(creep);
@@ -180,7 +209,9 @@ export class RoleRemoteKnight extends RoleRemote {
                 this.moveInToHarass(creep);
             } else {
                 if (!this.handleRangedKiting(creep)) {
-                    this.attackNear(creep);
+                    if (!this.attackNear(creep)) {
+                        this.checkHeal(creep);
+                    }
                 }
             }
         }
@@ -198,8 +229,7 @@ export class RoleRemoteKnight extends RoleRemote {
                 creep.memory.mrf = true;
             }
             creep.memory.dedication = hostileRanged.id;
-            this.attackTarget(creep, hostileRanged);
-            return true;
+            return this.attackTarget(creep, hostileRanged);
         }
         return false;
     }

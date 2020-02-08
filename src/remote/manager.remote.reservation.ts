@@ -1,4 +1,4 @@
-import { DedicatedCreepRequester } from "cycle/manager.dedicatedCreepRequester";
+import { DedicatedCreepRequester } from "spawning/manager.dedicatedCreepRequester";
 import { CreepRole } from "enums/enum.roles";
 
 const reserverThreshold: number = 1200;

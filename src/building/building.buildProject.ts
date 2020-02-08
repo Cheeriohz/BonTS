@@ -1,10 +1,11 @@
 import { ConstructionSiteCacher } from "caching/manager.constructionSiteCacher";
-import { CreepRequester } from "cycle/manager.creepRequester";
+import { CreepRequester } from "spawning/manager.creepRequester";
 import { BuildProjectEnum } from "./interfaces/building.enum";
 import _ from "lodash";
 import { buildEmptyContainerMap } from "caching/manager.containerSelector";
 import { CreepRole } from "enums/enum.roles";
-import { DedicatedCreepRequester } from "cycle/manager.dedicatedCreepRequester";
+import { DedicatedCreepRequester } from "spawning/manager.dedicatedCreepRequester";
+import { SpawnTemplate } from "spawning/spawning.templating";
 
 export class BuildProjectManager {
     private spawn!: StructureSpawn;
@@ -127,20 +128,24 @@ export class BuildProjectManager {
             }
             case BuildProjectEnum.SingleConstructionSiteNoFollowUp:
             case BuildProjectEnum.PassThroughCreate: {
-                _.remove(this.spawn.memory.buildProjects!, this.project);
+                _.remove(this.spawn.room.memory.buildProjects!, p => p === this.project);
+            }
+            case BuildProjectEnum.ExtensionBootstrap: {
+				SpawnTemplate.migrateToDropHauling(this.spawn.room);
+                _.remove(this.spawn.room.memory.buildProjects!, p => p === this.project);
             }
         }
     }
 
     private attemptRemoteContainerExpansionHandOff(remote: boolean) {
-        if (this.spawn.memory.buildProjects!.length > 1) {
+        if (this.spawn.room.memory.buildProjects!.length > 1) {
             // There are more build Projects for this remote expansion, remove the current project and allow it to continue.
-            _.remove(this.spawn.memory.buildProjects!, this.project);
+            _.remove(this.spawn.room.memory.buildProjects!, this.project);
             if (remote) {
                 // If we are already in the remote phase, reassign the remote builder.
                 const remoteBot = this.getActiveRemoteBuilder(this.project.roomName);
                 if (remoteBot) {
-                    remoteBot.memory.dedication = this.spawn.memory.buildProjects![0].roomName;
+                    remoteBot.memory.dedication = this.spawn.room.memory.buildProjects![0].roomName;
                 }
             }
             // kickoff the next build project immediately.
@@ -179,7 +184,7 @@ export class BuildProjectManager {
                                 reserved
                             );
                             this.spawn.room.createConstructionSite(container.pos.x, container.pos.y, STRUCTURE_ROAD);
-                            _.remove(this.spawn.memory.buildProjects!, this.project);
+                            _.remove(this.spawn.room.memory.buildProjects!, this.project);
                             if (this.spawn.memory.remoteHarvests) {
                                 _.remove(this.spawn.memory.remoteHarvests, rh => {
                                     return rh.vein === source.id;
@@ -235,7 +240,7 @@ export class BuildProjectManager {
     private kickOffNextProject() {
         const projectManager: BuildProjectManager = new BuildProjectManager(
             this.spawn,
-            this.spawn.memory.buildProjects![0]
+            this.spawn.room.memory.buildProjects![0]
         );
         projectManager.manageProject();
     }
@@ -247,7 +252,7 @@ export class BuildProjectManager {
         }
         buildEmptyContainerMap([], this.spawn.room);
         this.clearHaulerContainerSelection(this.spawn.room);
-        _.remove(this.spawn.memory.buildProjects!, this.project);
+        _.remove(this.spawn.room.memory.buildProjects!, this.project);
     }
 
     private clearHaulerContainerSelection(room: Room) {
@@ -286,7 +291,7 @@ export class BuildProjectManager {
                     };
                 }
                 this.spawn.room.createConstructionSite(container.pos.x, container.pos.y, STRUCTURE_ROAD);
-                _.remove(this.spawn.memory.buildProjects!, this.project);
+                _.remove(this.spawn.room.memory.buildProjects!, this.project);
             }
         }
     }

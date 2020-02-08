@@ -1,12 +1,12 @@
 // Managers
 import { CycleManager } from "cycle/manager.cycle";
 import { RolesManager } from "managers/manager.roles";
-import { Spawn } from "managers/manager.spawn";
+import { Spawn } from "spawning/manager.spawn";
 import { TowerManager } from "managers/structures/manager.towers";
 import { MineManager } from "./manager.mine";
 import _ from "lodash";
 import { RemoteMineManager } from "remote/manager.remote.remoteMine";
-import { CreepRequester } from "cycle/manager.creepRequester";
+import { CreepRequester } from "spawning/manager.creepRequester";
 import { RemoteHarvestManager } from "remote/manager.remote.remoteHarvest";
 import { ReservationManager } from "remote/manager.remote.reservation";
 import { RoomHarassManager } from "remote/manager.remote.roomHarrass";

@@ -24,8 +24,10 @@ import { RoleRemoteKnight } from "roleDefinitions/remote/role.remote.knight";
 import { RoleTopper } from "roleDefinitions/role.topper";
 import { RoleDedicatedKnight } from "roleDefinitions/dedicated/role.dedicated.knight";
 import { RoleRemoteArcher } from "roleDefinitions/remote/role.remote.archer";
+import { RoleCreep } from "roleDefinitions/base/role.creep";
 
 export class RolesManager {
+    private mRC!: RoleCreep;
     private mHarvester!: RoleHarvester;
     private mUpgrader!: RoleUpgrader;
     private mBuilder!: RoleBuilder;
@@ -40,7 +42,6 @@ export class RolesManager {
     private mDHauler!: RoleDedicatedHauler;
     private mDKnight!: RoleDedicatedKnight;
 
-    private mRR!: RoleRemote;
     private mRHarvester!: RoleRemoteHarvester;
     private mRBuilder!: RoleRemoteBuilder;
     private mRDropper!: RoleRemoteDropper;
@@ -50,6 +51,7 @@ export class RolesManager {
     private mRArcher!: RoleRemoteArcher;
 
     constructor() {
+        this.mRC = new RoleCreep();
         this.mHarvester = new RoleHarvester();
         this.mUpgrader = new RoleUpgrader();
         this.mBuilder = new RoleBuilder();
@@ -63,7 +65,6 @@ export class RolesManager {
         this.mDHauler = new RoleDedicatedHauler();
         this.mDKnight = new RoleDedicatedKnight();
 
-        this.mRR = new RoleRemote();
         this.mRHarvester = new RoleRemoteHarvester();
         this.mRBuilder = new RoleRemoteBuilder();
         this.mRDropper = new RoleRemoteDropper();
@@ -94,82 +95,81 @@ export class RolesManager {
         if (creep.memory.moved) {
             creep.memory.moved = null;
             return;
-        }
-        if (creep.memory.home) {
-            this.manageRemoteCreepRole(creep);
-        } else if (creep.memory.dedication) {
-            this.manageDedicatedCreepRole(creep, creep.memory.dedication);
-        } else {
-            switch (creep.memory.role) {
-                case CreepRole.harvester: {
-                    this.manageHarvester(creep);
-                    break;
-                }
-                case CreepRole.upgrader: {
-                    this.manageUpgrader(creep);
-                    break;
-                }
-                case CreepRole.builder: {
-                    this.manageBuilder(creep);
-                    break;
-                }
-                case CreepRole.dropper: {
-                    this.manageDropper(creep);
-                    break;
-                }
-                case CreepRole.hauler: {
-                    this.manageHauler(creep);
-                    break;
-                }
-                case CreepRole.drone: {
-                    this.manageDrone(creep);
-                    break;
-                }
-                case CreepRole.scout: {
-                    this.manageScout(creep);
-                    break;
-                }
-                case CreepRole.topper: {
-                    this.manageTopper(creep);
+        } else if (this.mRC.pathHandling(creep)) {
+            if (creep.memory.home) {
+                this.manageRemoteCreepRole(creep);
+            } else if (creep.memory.dedication) {
+                this.manageDedicatedCreepRole(creep, creep.memory.dedication);
+            } else {
+                switch (creep.memory.role) {
+                    case CreepRole.harvester: {
+                        this.manageHarvester(creep);
+                        break;
+                    }
+                    case CreepRole.upgrader: {
+                        this.manageUpgrader(creep);
+                        break;
+                    }
+                    case CreepRole.builder: {
+                        this.manageBuilder(creep);
+                        break;
+                    }
+                    case CreepRole.dropper: {
+                        this.manageDropper(creep);
+                        break;
+                    }
+                    case CreepRole.hauler: {
+                        this.manageHauler(creep);
+                        break;
+                    }
+                    case CreepRole.drone: {
+                        this.manageDrone(creep);
+                        break;
+                    }
+                    case CreepRole.scout: {
+                        this.manageScout(creep);
+                        break;
+                    }
+                    case CreepRole.topper: {
+                        this.manageTopper(creep);
+                    }
                 }
             }
         }
     }
 
     private manageRemoteCreepRole(creep: Creep) {
-        if (this.mRR.run(creep)) {
-            switch (creep.memory.role) {
-                case CreepRole.harvester: {
-                    this.mRHarvester.runRemote(creep);
-                    break;
-                }
-                case CreepRole.builder: {
-                    this.mRBuilder.runRemote(creep);
-                    break;
-                }
-                case CreepRole.dropper: {
-                    this.mRDropper.runRemote(creep);
-                    break;
-                }
-                case CreepRole.hauler: {
-                    this.mRHauler.runRemote(creep);
-                    break;
-                }
-                case CreepRole.reserver: {
-                    this.mRReserver.runRemote(creep);
-                    break;
-                }
-                case CreepRole.knight: {
-                    this.mRKnight.runRemote(creep);
-                    break;
-				}
-				case CreepRole.archer: {
-                    this.mRArcher.runRemote(creep);
-                    break;
-                }
-                default: {
-                    console.log(`No remote role exists for creep: ${creep.name}`);
-                }
+        switch (creep.memory.role) {
+            case CreepRole.harvester: {
+                this.mRHarvester.runRemote(creep);
+                break;
+            }
+            case CreepRole.builder: {
+                this.mRBuilder.runRemote(creep);
+                break;
+            }
+            case CreepRole.dropper: {
+                this.mRDropper.runRemote(creep);
+                break;
+            }
+            case CreepRole.hauler: {
+                this.mRHauler.runRemote(creep);
+                break;
+            }
+            case CreepRole.reserver: {
+                this.mRReserver.runRemote(creep);
+                break;
+            }
+            case CreepRole.knight: {
+                this.mRKnight.runRemote(creep);
+                break;
+            }
+            case CreepRole.archer: {
+                this.mRArcher.runRemote(creep);
+                break;
+            }
+            default: {
+                console.log(`No remote role exists for creep: ${creep.name}`);
             }
         }
     }

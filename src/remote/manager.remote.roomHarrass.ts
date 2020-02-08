@@ -1,6 +1,8 @@
 import _ from "lodash";
 import { CreepRole } from "enums/enum.roles";
-import { DedicatedCreepRequester } from "cycle/manager.dedicatedCreepRequester";
+import { DedicatedCreepRequester } from "spawning/manager.dedicatedCreepRequester";
+import { BodyBuilder } from "spawning/spawning.bodyBuilder";
+import { RemoteShared } from "./remote.shared";
 
 export class RoomHarassManager {
     spawn!: StructureSpawn;
@@ -23,17 +25,28 @@ export class RoomHarassManager {
             return;
         }
         this.maintainHarrassment();
+        if (this.harass.reassign) {
+            this.handleReassignment();
+        }
+    }
+
+    private handleReassignment() {
+        for (const name of _.compact(_.concat(this.harass.archers, this.harass.knights, [this.harass.downgrader]))) {
+            const creep = Game.creeps[name];
+            if (creep) {
+                creep.memory.working = false;
+                creep.memory.orders = { target: this.harass.roomName, independentOperator: false };
+            }
+        }
+        this.harass.reassign = false;
     }
 
     private maintainHarrassment() {
         if (this.spawn.spawning) {
             return;
         }
+        this.harassPreSpawn();
         if (this.harass.knights) {
-            if (this.harassPreSpawn()) {
-                this.requestKnight();
-                return;
-            }
             this.removeUnusedknights();
             if (this.harass.knights.length < this.harass.knightCap) {
                 this.requestKnight();
@@ -51,15 +64,49 @@ export class RoomHarassManager {
             this.harass.archers = [];
             this.requestArcher();
         }
+        if (this.harass.dgStrength > 0) {
+            if (this.harass.downgrader) {
+                const dg = Game.creeps[this.harass.downgrader];
+                if (!dg) {
+                    this.requestDowngrader(this.harass.dgStrength);
+                }
+            }
+        }
     }
 
     private harassPreSpawn(): boolean {
+        for (const name of _.compact(_.concat(this.harass.archers, this.harass.knights, [this.harass.downgrader]))) {
+            const creep = Game.creeps[name];
+            if (creep) {
+                if (creep.hits > 0 && creep.ticksToLive && creep.ticksToLive < this.harass.distance + 50) {
+                    switch (creep.memory.role) {
+                        case CreepRole.knight: {
+                            _.remove(this.harass.knights!, h => {
+                                return h === name;
+                            });
+                            break;
+                        }
+                        case CreepRole.archer: {
+                            _.remove(this.harass.archers!, h => {
+                                return h === name;
+                            });
+                            break;
+                        }
+                        case CreepRole.knight: {
+                            this.harass.downgrader = null;
+                            break;
+                        }
+                    }
+                }
+            }
+        }
         return false;
     }
 
     private removeUnusedknights() {
         for (const knight of this.harass.knights!) {
             if (!Game.creeps[knight]) {
+                console.log(`Removing unused knight ${knight}`);
                 _.remove(this.harass.knights!, h => {
                     return h === knight;
                 });
@@ -70,6 +117,7 @@ export class RoomHarassManager {
     private removeUnusedArchers() {
         for (const archer of this.harass.archers!) {
             if (!Game.creeps[archer]) {
+                console.log(`Removing unused archer ${archer}`);
                 _.remove(this.harass.archers!, h => {
                     return h === archer;
                 });
@@ -84,6 +132,10 @@ export class RoomHarassManager {
     }
 
     private requestKnight() {
+        let body = null;
+        if (this.harass.kStrength + this.harass.kHeal > 0) {
+            body = BodyBuilder.FillDualType(ATTACK, this.harass.kStrength, HEAL, this.harass.kHeal, true);
+        }
         if (!this.creepInQueue(CreepRole.knight)) {
             const knightName: string = `knight${Game.time.toPrecision(8)}`;
             const dcr: DedicatedCreepRequester = new DedicatedCreepRequester(this.spawn);
@@ -97,7 +149,8 @@ export class RoomHarassManager {
                 specifiedName: knightName,
                 precious: undefined,
                 isRemote: true,
-                orders: orders
+                orders: orders,
+                body: body ?? undefined
             });
             if (this.harass.knights!.length > 0) {
                 this.harass.knights?.push(knightName);
@@ -108,7 +161,11 @@ export class RoomHarassManager {
     }
 
     private requestArcher() {
-        if (!this.creepInQueue(CreepRole.knight)) {
+        let body = null;
+        if (this.harass.kStrength + this.harass.kHeal > 0) {
+            body = BodyBuilder.FillDualType(RANGED_ATTACK, this.harass.aStrength, HEAL, this.harass.aHeal);
+        }
+        if (!this.creepInQueue(CreepRole.archer)) {
             const archerName: string = `archer${Game.time.toPrecision(8)}`;
             const dcr: DedicatedCreepRequester = new DedicatedCreepRequester(this.spawn);
             const orders: CreepOrder = {
@@ -121,13 +178,35 @@ export class RoomHarassManager {
                 specifiedName: archerName,
                 precious: undefined,
                 isRemote: true,
-                orders: orders
+                orders: orders,
+                body: body ?? undefined
             });
             if (this.harass.archers!.length > 0) {
                 this.harass.archers?.push(archerName);
             } else {
                 this.harass.archers = [archerName];
             }
+        }
+    }
+
+    private requestDowngrader(size: number) {
+        if (!this.creepInQueue(CreepRole.reserver)) {
+            const claimer: string = `claimer${Game.time.toPrecision(8)}`;
+            const dcr: DedicatedCreepRequester = new DedicatedCreepRequester(this.spawn);
+            const orders: CreepOrder = {
+                target: this.harass.roomName,
+                independentOperator: false
+            };
+            dcr.createdDedicatedCreepRequest({
+                dedication: "",
+                role: CreepRole.reserver,
+                specifiedName: claimer,
+                precious: undefined,
+                isRemote: true,
+                orders: orders,
+                body: BodyBuilder.FillMonotype(CLAIM, size)
+            });
+            this.harass.downgrader = claimer;
         }
     }
 

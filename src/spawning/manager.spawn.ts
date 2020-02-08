@@ -6,27 +6,55 @@ import { RoomEra } from "../enums/enum.roomEra";
 import { SpawnErasConfig } from "../configurable/configurable.spawnEras";
 
 // Shared
-import { CivilizedEraSpawnHelper } from "./shared/manager.shared.civilizedEraSpawns";
-import { SimpleEraSpawnHelper } from "./shared/manager.shared.simpleEraSpawns";
-import { ManagerHelperSpawner } from "./shared/manager.shared.spawner";
+import { CivilizedEraSpawnHelper } from "../managers/shared/manager.shared.civilizedEraSpawns";
+import { SimpleEraSpawnHelper } from "../managers/shared/manager.shared.simpleEraSpawns";
+import { ManagerHelperSpawner } from "../managers/shared/manager.shared.spawner";
 
 // Dependencies
 import _ from "lodash";
+import { SpawnTemplate } from "./spawning.templating";
 
 export class Spawn {
     private static spawnConfig: SpawnErasConfig = new SpawnErasConfig();
 
     public static run() {
         const spawns = Game.spawns;
-        for (const spawn in spawns) {
-            // check to see if we can spawn.
-            if (Game.spawns[spawn].room.memory.era === RoomEra.stone) {
-                this.stoneSpawning(Game.spawns[spawn].room);
-            } else if (Game.spawns[spawn].room.memory.era === RoomEra.copper) {
-                this.copperSpawning(Game.spawns[spawn].room);
-            } else if (Game.spawns[spawn].room.memory.era === RoomEra.bronze) {
-                this.bronzeSpawning(Game.spawns[spawn]);
+        for (const spawn of _.values(spawns)) {
+            if (!spawn.room.memory.templates) {
+                SpawnTemplate.configureRoomSpawnTemplates(spawn.room);
             }
+            this.manageCreepSpawn(spawn);
+            // // check to see if we can spawn.
+            // if (spawn.room.memory.era === RoomEra.stone) {
+            //     this.stoneSpawning(spawn.room);
+            // } else if (spawn.room.memory.era === RoomEra.copper) {
+            //     this.copperSpawning(spawn.room);
+            // } else if (spawn.room.memory.era === RoomEra.bronze) {
+            //     this.bronzeSpawning(spawn);
+            // }
+        }
+    }
+
+    private static manageCreepSpawn(spawn: StructureSpawn) {
+        if (spawn.spawning) {
+            return;
+        }
+        const countMap = Memory.roleRoomMap[spawn.room.name];
+        if (countMap) {
+            for (let i = 0; i < spawn.room.memory.roleTargets!.length; i++) {
+                if (countMap[i] < spawn.room.memory.roleTargets![i]) {
+                    SimpleEraSpawnHelper.spawnGeneric(
+                        spawn.room,
+                        spawn.room.memory.templates![i],
+                        spawn.room.memory.roleTargets![i],
+                        i
+                    );
+                    return;
+                }
+            }
+            this.checkForSpawnRequest(spawn);
+        } else {
+            ManagerHelperSpawner.spawnACreep(spawn, [WORK, CARRY, MOVE], CreepRole[0], 0);
         }
     }
 

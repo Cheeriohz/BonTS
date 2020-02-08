@@ -27,7 +27,7 @@ export class ExtensionAddition extends GeneralBuilding {
 
     public alreadyProcessedSuccessfully(extensionCountTarget: number): number {
         for (const spawn of this.spawns) {
-            if (spawn.memory.buildProjects && spawn.memory.buildProjects.length > 0) {
+            if (spawn.room.memory.buildProjects && spawn.room.memory.buildProjects.length > 0) {
                 return 2;
             }
         }
@@ -323,9 +323,11 @@ export class ExtensionAddition extends GeneralBuilding {
             GetSources(this.room, this.room.memory.sourceMap);
         }
         for (const sourceAssignment of this.room.memory.sourceMap) {
-            const source = Game.getObjectById<Source>(sourceAssignment.id);
-            if (source) {
-                this.sources.push(source);
+            if (sourceAssignment.id) {
+                const source = Game.getObjectById<Source>(sourceAssignment.id);
+                if (source) {
+                    this.sources.push(source);
+                }
             }
         }
     }

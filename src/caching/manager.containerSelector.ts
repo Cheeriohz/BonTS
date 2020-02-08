@@ -1,10 +1,13 @@
 import _ from "lodash";
 
-export function getContainer(creep: Creep): string {
-    let containerMap = creep.room.memory.containerMap
+export function getContainer(creep: Creep): string | null {
+    let containerMap = creep.room.memory.containerMap;
     // Check to see if our containerMap has been initialized
     if (!containerMap || containerMap.length == 0) {
         containerMap = buildEmptyContainerMap(containerMap, creep.room);
+    }
+    if (containerMap.length === 0) {
+        return "";
     }
     if (containerMap.length === 1) {
         creep.room.memory.containerMap = containerMap;
@@ -17,11 +20,9 @@ export function getContainer(creep: Creep): string {
         containerMap[mapIndex].assigned.push(creep.name);
         creep.room.memory.containerMap = containerMap;
         return containerMap[mapIndex].id;
-    }
-    else {
+    } else {
         return assignment;
     }
-
 }
 
 export function buildEmptyContainerMap(containerMap: Assignment[] | null, room: Room) {
@@ -35,15 +36,14 @@ export function buildEmptyContainerMap(containerMap: Assignment[] | null, room: 
 
 function findContainers(room: Room): StructureContainer[] {
     const allContainers: StructureContainer[] | null = room.find<StructureContainer>(FIND_STRUCTURES, {
-        filter: (structure) => {
-            return (structure.structureType === STRUCTURE_CONTAINER)
+        filter: structure => {
+            return structure.structureType === STRUCTURE_CONTAINER;
         }
     });
     if (allContainers) {
         // Need to figure out which containers are source containers.
-        return _.filter(allContainers, (c) => checkForSource(c));
-    }
-    else {
+        return _.filter(allContainers, c => checkForSource(c));
+    } else {
         return [];
     }
 }
@@ -51,11 +51,9 @@ function findContainers(room: Room): StructureContainer[] {
 function checkForSource(container: StructureContainer): boolean {
     if (container.pos.findInRange(FIND_SOURCES, 3)?.length > 0) {
         return true;
-    }
-    else {
+    } else {
         return false;
     }
-
 }
 
 function checkIfAssigned(containerMap: Assignment[], assignee: string): string | null {
@@ -71,8 +69,11 @@ function getAssignment(containerMap: Assignment[], role: number) {
     const containerRatings: ContainerRating[] = [];
     for (let i = 0; i < containerMap.length; i++) {
         containerRatings.push(
-            getRate(i,
-                _.filter(containerMap[i].assigned, (creepName) => Game.creeps[creepName].memory.role === role).length));
+            getRate(
+                i,
+                _.filter(containerMap[i].assigned, creepName => Game.creeps[creepName].memory.role === role).length
+            )
+        );
     }
     containerRatings.sort((a, b) => a.rate - b.rate);
     return containerRatings[0].index;
@@ -99,9 +100,13 @@ function cleanTree(containerMap: Assignment[]): Assignment[] {
 
 export function refreshTree(room: Room, missingContainer: string) {
     if (room.memory.containerMap) {
-        _.remove(room.memory.containerMap, (cm) => { return cm.id === missingContainer; });
+        _.remove(room.memory.containerMap, cm => {
+            return cm.id === missingContainer;
+        });
 
-        const spawn = _.find(_.values(Game.spawns), (s) => { return s.room.name == room.name; });
+        const spawn = _.find(_.values(Game.spawns), s => {
+            return s.room.name == room.name;
+        });
         if (spawn) {
             spawn.memory.sourcesUtilized = false;
         }

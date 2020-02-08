@@ -3,6 +3,7 @@ import { Visualizer } from "./building.visualizer";
 import { BuildProjectEnum } from "./interfaces/building.enum";
 import { buildProjectCreator } from "./building.buildProjectCreator";
 
+// TODO RENAME LOCAL EXPANSION
 export class ContainerExpansion {
     private spawn!: StructureSpawn;
     private room!: Room;
@@ -14,6 +15,47 @@ export class ContainerExpansion {
         this.room = room;
         this.originPos = originPos;
         this.visualizeOnly = visualizeOnly;
+    }
+
+    public routeToSources() {
+        const sources = this.room.find(FIND_SOURCES);
+        for (const source of sources) {
+            let pathFinderResults: PathFinderPath = PathFinder.search(
+                this.spawn.pos,
+                { pos: source.pos, range: 1 },
+                { swampCost: 1.001 }
+            );
+            this.createRoadBuildProjectAndReservations(pathFinderResults);
+        }
+    }
+
+    public routeToController() {
+        const controller = this.room.controller;
+        let pathFinderResults: PathFinderPath = PathFinder.search(
+            this.spawn.pos,
+            { pos: controller!.pos, range: 1 },
+            { swampCost: 1.001 }
+        );
+        this.createRoadBuildProjectAndReservations(pathFinderResults);
+    }
+
+    private createRoadBuildProjectAndReservations(path: PathFinderPath) {
+        const rt = Game.map.getRoomTerrain(this.room.name);
+        if (!this.room.memory.reservedBuilds) {
+            this.room.memory.reservedBuilds = [];
+        }
+        let builds: BuildOrder[] = [];
+        for (const pos of path.path) {
+            if (rt.get(pos.x, pos.y) === TERRAIN_MASK_SWAMP) {
+                builds.push({ x: pos.x, y: pos.y, type: STRUCTURE_ROAD });
+            } else {
+                this.room.memory.reservedBuilds.push({ x: pos.x, y: pos.y, type: STRUCTURE_ROAD });
+            }
+        }
+        if (builds.length > 0) {
+            const bpc: buildProjectCreator = new buildProjectCreator(this.room, this.spawn);
+            bpc.passThroughCreate(builds);
+        }
     }
 
     public checkForSourceExpansion(sources: Source[]): void {
@@ -36,12 +78,14 @@ export class ContainerExpansion {
         if (this.room.memory.containerMap) {
             if (this.room.memory.containerMap.length > 1) {
                 for (const containerAssignment of this.room.memory.containerMap) {
-                    const container: StructureContainer | null = Game.getObjectById(containerAssignment.id);
-                    if (container) {
-                        const nearbySources: Source[] | null = container.pos.findInRange(sources, 3);
-                        if (nearbySources) {
-                            if (nearbySources.length > 0) {
-                                sources = _.difference(sources, nearbySources);
+                    if (containerAssignment.id) {
+                        const container: StructureContainer | null = Game.getObjectById(containerAssignment.id);
+                        if (container) {
+                            const nearbySources: Source[] | null = container.pos.findInRange(sources, 3);
+                            if (nearbySources) {
+                                if (nearbySources.length > 0) {
+                                    sources = _.difference(sources, nearbySources);
+                                }
                             }
                         }
                     }

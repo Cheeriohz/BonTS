@@ -4,7 +4,7 @@ import { ExpansionCosting } from "./expansion.expansionCosting";
 import { buildProjectCreator } from "building/building.buildProjectCreator";
 import { BuildProjectEnum } from "building/interfaces/building.enum";
 import { ErrorMapper } from "utils/ErrorMapper";
-import { CreepRequester } from "cycle/manager.creepRequester";
+import { CreepRequester } from "spawning/manager.creepRequester";
 
 export class remoteMineExpeditionHandler extends ExpeditionResultsHandler {
     targets: ExpeditionFoundTarget[];
@@ -65,7 +65,7 @@ export class remoteMineExpeditionHandler extends ExpeditionResultsHandler {
                     });
                 } else {
                     // Clear the spawn memory as we don't just need a single build snapshot that will then sit in memory.
-                    spawn.memory.buildProjects = new Array<BuildProject>();
+                    spawn.room.memory.buildProjects = new Array<BuildProject>();
                 }
             } else {
                 const cr: CreepRequester = new CreepRequester(spawn);

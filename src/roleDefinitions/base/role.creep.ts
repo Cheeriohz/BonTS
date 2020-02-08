@@ -4,9 +4,44 @@ import { harvestSourceSmart } from "caching/manager.sourceSelector";
 import { profile } from "Profiler";
 import { ControllerCacher } from "caching/manager.controllerCacher";
 import { ConstructionSiteCacher } from "caching/manager.constructionSiteCacher";
+import { CreepRole } from "enums/enum.roles";
 
 @profile
 export class RoleCreep {
+    //* Low RCL Boosting (Pre Containers)
+    protected idSpawnForWithdrawal(creep: Creep): boolean {
+        if (!creep.room.memory.spawns) {
+            creep.room.memory.spawns = [];
+            for (const spawn of _.values(Game.spawns)) {
+                if (spawn.room.name === creep.room.name) {
+                    creep.room.memory.spawns.push(spawn.id);
+                }
+            }
+        }
+        for (const spawnId of creep.room.memory.spawns) {
+            const spawn: StructureSpawn | null = Game.getObjectById(spawnId);
+            if (spawn && spawn.store.getUsedCapacity(RESOURCE_ENERGY) > 200) {
+                creep.memory.precious = spawn.id;
+                return true;
+            }
+        }
+        return false;
+    }
+
+    protected safeSpawnWithdrawal(creep: Creep): boolean {
+        if (creep.memory.precious) {
+            const spawn: StructureSpawn | null = Game.getObjectById(creep.memory.precious);
+            if (spawn && spawn.store.getUsedCapacity(RESOURCE_ENERGY) > 150) {
+                this.withdrawMove(creep, spawn);
+                return true;
+            } else {
+                creep.memory.precious = null;
+            }
+        }
+        return false;
+    }
+
+    //* Recharge Logic
     protected fillUp(creep: Creep) {
         const link = this.checkForNearbyLink(creep);
         if (link) {
@@ -17,54 +52,15 @@ export class RoleCreep {
             return this.withdrawMove(creep, storage);
         }
         const containerId = getContainer(creep);
-        const container = Game.getObjectById<StructureContainer>(containerId);
-        if (container) {
-            return this.withdrawMove(creep, container);
-        } else {
-            refreshTree(creep.room, containerId);
+        if (containerId) {
+            const container = Game.getObjectById<StructureContainer>(containerId);
+            if (container) {
+                return this.withdrawMove(creep, container);
+            } else {
+                refreshTree(creep.room, containerId);
+            }
         }
         return harvestSourceSmart(creep);
-    }
-
-    protected leaveBorder(creep: Creep) {
-        if (creep.pos.y === 0) {
-            creep.moveTo(creep.pos.x, creep.pos.y + 2);
-        } else if (creep.pos.y === 49) {
-            creep.moveTo(creep.pos.x, creep.pos.y + -2);
-        } else if (creep.pos.x === 0) {
-            creep.moveTo(creep.pos.x + 2, creep.pos.y);
-        } else if (creep.pos.x === 49) {
-            creep.moveTo(creep.pos.x - 2, creep.pos.y);
-        }
-    }
-
-    protected oppositeDirection(direction: DirectionConstant): DirectionConstant {
-        switch (direction) {
-            case TOP: {
-                return BOTTOM;
-            }
-            case TOP_RIGHT: {
-                return BOTTOM_LEFT;
-            }
-            case TOP_LEFT: {
-                return BOTTOM_RIGHT;
-            }
-            case RIGHT: {
-                return LEFT;
-            }
-            case LEFT: {
-                return RIGHT;
-            }
-            case BOTTOM: {
-                return TOP;
-            }
-            case BOTTOM_LEFT: {
-                return TOP_RIGHT;
-            }
-            case BOTTOM_RIGHT: {
-                return TOP_LEFT;
-            }
-        }
     }
 
     protected fillClosest(creep: Creep, ignoreLinks: boolean): boolean {
@@ -99,6 +95,23 @@ export class RoleCreep {
         const storage = this.checkStorageForDeposit(creep.room);
         if (storage) {
             this.depositMove(creep, storage);
+            return true;
+        }
+        if (this.refillUpgraders(creep)) {
+            return true;
+        }
+        return false;
+    }
+
+    private refillUpgraders(creep: Creep): boolean {
+        const upgraders = creep.room.find(FIND_MY_CREEPS, {
+            filter: c => {
+                return c.memory.role === CreepRole.upgrader && c.store.getFreeCapacity() > 5;
+            }
+        });
+        if (upgraders && upgraders.length > 0) {
+            const transferTarget = _.first(upgraders);
+            this.transferMove(creep, transferTarget!);
             return true;
         }
         return false;
@@ -138,31 +151,18 @@ export class RoleCreep {
             return;
         }
     }
-    protected repairMove(creep: Creep, structure: Structure) {
-        if (creep.pos.isNearTo(structure)) {
-            creep.repair(structure);
+
+    protected withdrawPickup(creep: Creep, pos: { x: number; y: number }) {
+        if (creep.pos.isNearTo(pos.x, pos.y)) {
+            this.grabAdjacentDroppedEnergy(creep, new RoomPosition(pos.x, pos.y, creep.room.name));
             return;
         } else {
-            creep.moveTo(structure, { reusePath: 15, ignoreCreeps: false });
+            creep.moveTo(pos.x, pos.y);
             return;
         }
     }
 
-    protected grabAdjacentDroppedEnergy(creep: Creep, adjacentPos: RoomPosition): void {
-        const droppedResources = adjacentPos.findInRange(FIND_DROPPED_RESOURCES, 0);
-        if (droppedResources && droppedResources.length > 0) {
-            creep.pickup(droppedResources[0]);
-        }
-    }
-
-    // Quite inefficient, but might be able to find an application where it is valueable.
-    protected checkForDroppedEnergyWhileTraveling(creep: Creep): void {
-        const droppedResources = creep.pos.findInRange(FIND_DROPPED_RESOURCES, 1);
-        if (droppedResources && droppedResources.length > 0) {
-            creep.pickup(droppedResources[0]);
-        }
-    }
-
+    //* Resource Deposit Logic
     protected depositMoveSpecified(creep: Creep, structure: Structure, resourceType: ResourceConstant) {
         // console.log(JSON.stringify(structure));
         if (creep.pos.isNearTo(structure)) {
@@ -181,6 +181,16 @@ export class RoleCreep {
             return;
         } else {
             creep.moveTo(structure, { reusePath: 1000, ignoreCreeps: false });
+            return;
+        }
+    }
+
+    protected transferMove(creep: Creep, target: Creep) {
+        if (creep.pos.isNearTo(target)) {
+            creep.transfer(target, RESOURCE_ENERGY);
+            return;
+        } else {
+            creep.moveTo(target, { reusePath: 1000, ignoreCreeps: false });
             return;
         }
     }
@@ -337,6 +347,158 @@ export class RoleCreep {
         return null;
     }
 
+    //* Adjacency Logic
+    protected grabAdjacentDroppedEnergy(creep: Creep, adjacentPos: RoomPosition): void {
+        const droppedResources = adjacentPos.findInRange(FIND_DROPPED_RESOURCES, 0);
+        if (droppedResources && droppedResources.length > 0) {
+            creep.pickup(droppedResources[0]);
+        }
+    }
+
+    // Quite inefficient, but might be able to find an application where it is valueable.
+    protected checkForAdjacentDroppedEnergy(creep: Creep): void {
+        const droppedResources = creep.pos.findInRange(FIND_DROPPED_RESOURCES, 1);
+        if (droppedResources && droppedResources.length > 0) {
+            creep.pickup(droppedResources[0]);
+        }
+    }
+
+    protected repairRoad(creep: Creep) {
+        const road = creep.pos.lookFor(LOOK_STRUCTURES).find(object => object.structureType === STRUCTURE_ROAD);
+        const repairPower: number = creep.getActiveBodyparts(WORK) * 100;
+        if (road && road.hits + repairPower <= road.hitsMax) {
+            creep.repair(road);
+        }
+    }
+
+    //* Movement
+    protected repairMove(creep: Creep, structure: Structure) {
+        if (creep.pos.isNearTo(structure)) {
+            creep.repair(structure);
+            return;
+        } else {
+            creep.moveTo(structure, { reusePath: 15, ignoreCreeps: false });
+            return;
+        }
+    }
+
+    protected leaveBorder(creep: Creep) {
+        if (creep.pos.y === 0) {
+            creep.moveTo(creep.pos.x, creep.pos.y + 2);
+        } else if (creep.pos.y === 49) {
+            creep.moveTo(creep.pos.x, creep.pos.y + -2);
+        } else if (creep.pos.x === 0) {
+            creep.moveTo(creep.pos.x + 2, creep.pos.y);
+        } else if (creep.pos.x === 49) {
+            creep.moveTo(creep.pos.x - 2, creep.pos.y);
+        }
+    }
+
+    protected oppositeDirection(direction: DirectionConstant): DirectionConstant {
+        switch (direction) {
+            case TOP: {
+                return BOTTOM;
+            }
+            case TOP_RIGHT: {
+                return BOTTOM_LEFT;
+            }
+            case TOP_LEFT: {
+                return BOTTOM_RIGHT;
+            }
+            case RIGHT: {
+                return LEFT;
+            }
+            case LEFT: {
+                return RIGHT;
+            }
+            case BOTTOM: {
+                return TOP;
+            }
+            case BOTTOM_LEFT: {
+                return TOP_RIGHT;
+            }
+            case BOTTOM_RIGHT: {
+                return TOP_LEFT;
+            }
+        }
+    }
+
+    //* Path Cache Handling
+    public pathHandling(creep: Creep): boolean {
+        if (creep.fatigue) {
+            return false;
+        }
+        if (creep.memory.path && creep.memory.path?.length > 0) {
+            if (this.stuckHandler(creep)) {
+                // Arrived condition
+                if (creep.memory.path.length === 1) {
+                    creep.move(creep.memory.path[0].direction);
+                    creep.memory.path = null;
+                    creep.memory.repairWhileMove = null;
+                    return true;
+                } else {
+                    // We still have traveling to do.
+                    creep.move(creep.memory.path[0].direction);
+                    if (creep.memory.repairWhileMove) {
+                        this.repairRoad(creep);
+                    }
+                    return false;
+                }
+            }
+        }
+        return true;
+    }
+
+    private stuckHandler(creep: Creep): boolean {
+        const lastPos = _.first(creep.memory.path);
+        if (lastPos!.x != creep.pos.x || lastPos!.y != creep.pos.y) {
+            if (creep.memory.stuckCount) creep.memory.stuckCount += 1;
+            else creep.memory.stuckCount = 1;
+            if (creep.memory.stuckCount === 2) {
+                if (this.fixStuck(creep)) {
+                    return true;
+                } else {
+                    return false;
+                }
+            } else if (creep.memory.stuckCount > 2) {
+                delete creep.memory.path;
+                creep.memory.stuckCount = 0;
+                return false;
+            }
+        } else {
+            creep.memory.stuckCount = 0;
+            creep.memory.path = _.tail(creep.memory.path);
+        }
+        return true;
+    }
+
+    private fixStuck(creep: Creep): boolean {
+        const currentPathStep = _.first(creep.memory.path);
+        if (currentPathStep) {
+            const blockers = creep.room.lookForAt(LOOK_CREEPS, currentPathStep.x, currentPathStep.y);
+            if (blockers.length > 0) {
+                const blocker = _.first(blockers);
+                if (blocker) {
+                    blocker.moveTo(creep.pos.x, creep.pos.y);
+                    if (blocker.memory) {
+                        blocker.memory.moved = true;
+                        return true;
+                    } else {
+                        delete creep.memory.path;
+                        creep.memory.stuckCount = 0;
+                        return false;
+                    }
+                } else {
+                    delete creep.memory.path;
+                    creep.memory.stuckCount = 0;
+                    return false;
+                }
+            }
+        }
+        return false;
+    }
+
+    //* Work Tasks
     // This intentionally tries to upgrade first. Upgrading is generally done by upgraders, and they are usually in range.
     protected upgradeController(creep: Creep): boolean {
         const target = ControllerCacher.getcontrollerRoom(creep.room);

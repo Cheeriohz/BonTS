@@ -1,31 +1,64 @@
 interface CreepMemory {
+    //* Required
     role: number;
     working: boolean;
+
     orders?: CreepOrder | null;
-    ignoreLinks?: boolean | null;
+
+    // * Id Caching
     dedication?: string | null;
     precious?: string | null;
+    preciousPosition?: { x: number; y: number } | null;
     home?: string | null;
+
+    //* Path Caching
     path?: PathStep[] | null;
     stuckCount?: number | null;
     moved?: boolean | null;
+
+    //* Efficiency Processing Trade Off Modifiers
+    ignoreLinks?: boolean | null;
     repairWhileMove?: boolean | null;
+
+    //* Combat
     hitsLast?: number | null;
     mrf?: boolean;
 }
 
 interface RoomMemory {
-    spawns: string[] | null;
+    // TODO remove obsolete
     era: number;
+
+    //* Object Caching
     sourceMap: Assignment[];
     containerMap: Assignment[] | null;
+    dropMap: AssignmentPosition[] | null;
+
+    //* Id Caching
     constructionSites: Id<ConstructionSite<BuildableStructureConstant>>[];
     controller: Id<StructureController> | null;
     sourceLinks: Id<StructureLink>[] | null;
     dumpLinks: Id<StructureLink>[] | null;
+    spawns: Id<StructureSpawn>[] | null;
+
+    //* Deployment Structures
     mine: Mine | null;
+
+    //* Building
     reservedBuilds?: BuildOrder[] | null;
+    buildProjects?: BuildProject[] | null;
+
+    //* Combat
     target?: string | null;
+
+    //* Spawn Management
+    templates?: RoomSpawnTemplates;
+    roleTargets?: number[];
+
+    //* RCL Management
+    rcl: number | null;
+    rclUpgrades: RCLUpgradeEvent[] | null;
+    lowRCLBoost: boolean;
 }
 
 interface SpawnMemory {
@@ -35,10 +68,7 @@ interface SpawnMemory {
     remoteMineExpansionInProgress: boolean | null;
     remoteMines: RemoteMine[] | null;
     expeditionResults: IExpeditionResults[] | null;
-    rcl: number | null;
-    rclUpgrades: RCLUpgradeEvent[] | null;
     sourcesUtilized: boolean;
-    buildProjects: BuildProject[] | null;
     remoteHarvests: RemoteHarvest[] | null;
     remoteReservations: RemoteReservation[] | null;
     roomHarass: RoomHarrass[] | null;
@@ -51,7 +81,7 @@ interface Memory {
     cycle: number;
     roleRoomMap: Dictionary<number[]>;
     expeditions: Expedition[];
-    killswitch: boolean;
+    showReserved: boolean;
 }
 
 interface Dictionary<T> {

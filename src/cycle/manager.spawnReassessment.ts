@@ -14,16 +14,16 @@ export class SpawnReassment {
     }
 
     private reassessRCLNeeds() {
-        if (!this.spawn.memory.rcl) {
-            this.spawn.memory.rcl = 0;
+        if (!this.spawn.room.memory.rcl) {
+            this.spawn.room.memory.rcl = 0;
         }
         if (this.spawn.room.controller) {
-            if (this.spawn.memory.rcl !== this.spawn.room.controller.level) {
-                this.spawn.memory.rcl = this.spawn.room.controller.level;
-                if (!this.spawn.memory.rclUpgrades) {
-                    this.spawn.memory.rclUpgrades = [];
+            if (this.spawn.room.memory.rcl !== this.spawn.room.controller.level) {
+                this.spawn.room.memory.rcl = this.spawn.room.controller.level;
+                if (!this.spawn.room.memory.rclUpgrades) {
+                    this.spawn.room.memory.rclUpgrades = [];
                 }
-                this.spawn.memory.rclUpgrades.push({ newRclLevel: this.spawn.memory.rcl });
+                this.spawn.room.memory.rclUpgrades.push({ newRclLevel: this.spawn.room.memory.rcl });
             }
         }
     }

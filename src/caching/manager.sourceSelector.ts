@@ -1,15 +1,18 @@
 import _ from "lodash";
 
 export function harvestSourceSmart(creep: Creep) {
-    const source: Source | null = Game.getObjectById(getSource(creep));
-    if (source) {
-        if (creep.harvest(source) === ERR_NOT_IN_RANGE) {
-            creep.moveTo(source, { reusePath: 5, visualizePathStyle: { stroke: "#ffaa00" } });
+    const sourceName = getSource(creep);
+    if (sourceName) {
+        const source: Source | null = Game.getObjectById(sourceName);
+        if (source) {
+            if (creep.harvest(source) === ERR_NOT_IN_RANGE) {
+                creep.moveTo(source, { reusePath: 5, visualizePathStyle: { stroke: "#ffaa00" } });
+            }
         }
     }
 }
 
-export function getSource(creep: Creep): string {
+export function getSource(creep: Creep): string | null {
     let sourceMap = creep.room.memory.sourceMap;
     // Check to see if our sourceMap has been initialized
     if (!sourceMap?.length) {

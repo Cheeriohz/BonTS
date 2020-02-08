@@ -12,17 +12,19 @@ export class Expander {
 
     public mineExpansion() {
         // If we have an untapped local container location, first expand to it.
-        if (!this.buildInProgress() && (this.spawn.memory.sourcesUtilized || !this.localSourceExpansion())) {
-            // start a remote mine expansion request.
-            if (!this.spawn.memory.remoteMineExpansionInProgress) {
-                this.remoteMineExpansion();
+        if (this.spawn.room.controller!.level > 2) {
+            if (!this.buildInProgress() && (this.spawn.memory.sourcesUtilized || !this.localSourceExpansion())) {
+                // start a remote mine expansion request.
+                if (!this.spawn.memory.remoteMineExpansionInProgress) {
+                    this.remoteMineExpansion();
+                }
             }
         }
     }
 
     private buildInProgress(): boolean {
-        if (this.spawn.memory.buildProjects) {
-            if (this.spawn.memory.buildProjects.length > 0) {
+        if (this.spawn.room.memory.buildProjects) {
+            if (this.spawn.room.memory.buildProjects.length > 0) {
                 return true;
             }
         }
@@ -65,7 +67,7 @@ export class Expander {
                 if (sourceIds) {
                     if (sourceIds.length > 0) {
                         return _.compact(
-                            _.map(sourceIds, id => {
+                            _.map(_.compact(sourceIds), id => {
                                 return Game.getObjectById(id);
                             })
                         );

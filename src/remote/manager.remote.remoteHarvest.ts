@@ -1,5 +1,5 @@
 import { CreepRole } from "enums/enum.roles";
-import { DedicatedCreepRequester } from "../cycle/manager.dedicatedCreepRequester";
+import { DedicatedCreepRequester } from "../spawning/manager.dedicatedCreepRequester";
 import _ from "lodash";
 
 export class RemoteHarvestManager {
@@ -96,7 +96,7 @@ export class RemoteHarvestManager {
             const dcr: DedicatedCreepRequester = new DedicatedCreepRequester(this.spawn);
             const orders: CreepOrder = {
                 target: this.harvest.roomName,
-                independentOperator: false
+				independentOperator: false
             };
             dcr.createdDedicatedCreepRequest({
                 dedication: this.harvest.vein,

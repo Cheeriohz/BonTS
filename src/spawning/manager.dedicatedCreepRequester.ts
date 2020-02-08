@@ -15,7 +15,8 @@ export class DedicatedCreepRequester {
         precious,
         isRemote,
         orders,
-        reserved
+        reserved,
+        body
     }: {
         dedication: string;
         role: CreepRole;
@@ -24,6 +25,7 @@ export class DedicatedCreepRequester {
         isRemote?: boolean;
         orders?: CreepOrder;
         reserved?: boolean;
+        body?: BodyPartConstant[];
     }) {
         if (!this.spawn.memory.dedicatedCreepRequest) {
             this.spawn.memory.dedicatedCreepRequest = [];
@@ -78,19 +80,33 @@ export class DedicatedCreepRequester {
             }
             case CreepRole.reserver: {
                 if (isRemote) {
-                    this.spawn.memory.dedicatedCreepRequest.push(
-                        this.createDedicatedRemoteReserver(dedication, specifiedName)
-                    );
+                    if (body) {
+                        this.spawn.memory.dedicatedCreepRequest.push(
+                            this.createSpecificDedicatedRemoteReserver(dedication, specifiedName, body)
+                        );
+                    } else {
+                        this.spawn.memory.dedicatedCreepRequest.push(
+                            this.createDedicatedRemoteReserver(dedication, specifiedName)
+                        );
+                    }
+
                     break;
                 }
                 break;
             }
             case CreepRole.knight: {
                 if (isRemote) {
-                    this.spawn.memory.dedicatedCreepRequest.push(
-                        this.createDedicatedRemoteKnight(dedication, specifiedName, precious, orders)
-                    );
-                    break;
+                    if (body) {
+                        this.spawn.memory.dedicatedCreepRequest.push(
+                            this.createSpecificDedicatedRemoteKnight(dedication, specifiedName, body, precious, orders)
+                        );
+                        break;
+                    } else {
+                        this.spawn.memory.dedicatedCreepRequest.push(
+                            this.createDedicatedRemoteKnight(dedication, specifiedName, precious, orders)
+                        );
+                        break;
+                    }
                 }
                 this.spawn.memory.dedicatedCreepRequest.push(
                     this.createDedicatedKnight(dedication, specifiedName, precious, orders)
@@ -99,10 +115,17 @@ export class DedicatedCreepRequester {
             }
             case CreepRole.archer: {
                 if (isRemote) {
-                    this.spawn.memory.dedicatedCreepRequest.push(
-                        this.createDedicatedRemoteArcher(dedication, specifiedName, precious, orders)
-                    );
-                    break;
+                    if (body) {
+                        this.spawn.memory.dedicatedCreepRequest.push(
+                            this.createSpecificDedicatedRemoteArcher(dedication, specifiedName, body, precious, orders)
+                        );
+                        break;
+                    } else {
+                        this.spawn.memory.dedicatedCreepRequest.push(
+                            this.createDedicatedRemoteArcher(dedication, specifiedName, precious, orders)
+                        );
+                        break;
+                    }
                 }
                 break;
             }
@@ -120,7 +143,7 @@ export class DedicatedCreepRequester {
     ): DedicatedCreepRequest {
         return {
             role: CreepRole.harvester,
-            body: [WORK, WORK, WORK, CARRY, CARRY, CARRY, CARRY, CARRY, MOVE, MOVE, MOVE],
+            body: this.spawn.room.memory.templates![CreepRole.harvester],
             dedication: dedication,
             specifiedName: specifiedName,
             precious: precious,
@@ -148,6 +171,24 @@ export class DedicatedCreepRequester {
         return {
             role: CreepRole.dropper,
             body: [WORK, WORK, WORK, WORK, CARRY, MOVE, MOVE],
+            dedication: dedication,
+            specifiedName: specifiedName,
+            precious: precious,
+            home: this.spawn.room.name,
+            orders: orders
+        };
+    }
+
+    private createSpecificDedicatedRemoteKnight(
+        dedication: string,
+        specifiedName: string,
+        body: BodyPartConstant[],
+        precious?: string,
+        orders?: CreepOrder
+    ): DedicatedCreepRequest {
+        return {
+            role: CreepRole.knight,
+            body: body,
             dedication: dedication,
             specifiedName: specifiedName,
             precious: precious,
@@ -232,6 +273,24 @@ export class DedicatedCreepRequester {
         };
     }
 
+    private createSpecificDedicatedRemoteArcher(
+        dedication: string,
+        specifiedName: string,
+        body: BodyPartConstant[],
+        precious?: string,
+        orders?: CreepOrder
+    ): DedicatedCreepRequest {
+        return {
+            role: CreepRole.archer,
+            body: body,
+            dedication: dedication,
+            specifiedName: specifiedName,
+            precious: precious,
+            home: this.spawn.room.name,
+            orders: orders
+        };
+    }
+
     private createDedicatedRemoteArcher(
         dedication: string,
         specifiedName: string,
@@ -240,7 +299,27 @@ export class DedicatedCreepRequester {
     ): DedicatedCreepRequest {
         return {
             role: CreepRole.archer,
-            body: [MOVE, MOVE, MOVE, MOVE, MOVE, RANGED_ATTACK, RANGED_ATTACK, RANGED_ATTACK, RANGED_ATTACK, HEAL],
+            body: [
+                MOVE,
+                MOVE,
+                MOVE,
+                MOVE,
+                MOVE,
+                MOVE,
+                MOVE,
+                MOVE,
+                MOVE,
+                MOVE,
+                RANGED_ATTACK,
+                RANGED_ATTACK,
+                RANGED_ATTACK,
+                RANGED_ATTACK,
+                RANGED_ATTACK,
+                RANGED_ATTACK,
+                RANGED_ATTACK,
+                RANGED_ATTACK,
+                HEAL
+            ],
             dedication: dedication,
             specifiedName: specifiedName,
             precious: precious,
@@ -287,6 +366,22 @@ export class DedicatedCreepRequester {
         return {
             role: CreepRole.reserver,
             body: [MOVE, CLAIM, CLAIM],
+            dedication: dedication,
+            specifiedName: specifiedName,
+            precious: null,
+            home: this.spawn.room.name,
+            orders: undefined
+        };
+    }
+
+    private createSpecificDedicatedRemoteReserver(
+        dedication: string,
+        specifiedName: string,
+        body: BodyPartConstant[]
+    ): DedicatedCreepRequest {
+        return {
+            role: CreepRole.reserver,
+            body: body,
             dedication: dedication,
             specifiedName: specifiedName,
             precious: null,

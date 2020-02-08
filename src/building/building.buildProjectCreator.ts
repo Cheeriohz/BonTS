@@ -56,10 +56,10 @@ export class buildProjectCreator {
             activeSites: 0,
             projectType: projectType
         };
-        if (!this.spawn.memory.buildProjects) {
-            this.spawn.memory.buildProjects = [buildProject];
+        if (!this.spawn.room.memory.buildProjects) {
+            this.spawn.room.memory.buildProjects = [buildProject];
         } else {
-            this.spawn.memory.buildProjects.push(buildProject);
+            this.spawn.room.memory.buildProjects.push(buildProject);
         }
     }
 

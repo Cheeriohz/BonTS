@@ -2,17 +2,18 @@ import { ConstructionSiteCacher } from "../caching/manager.constructionSiteCache
 import { pruneContainerTree } from "../caching/manager.containerSelector";
 import { ControllerCacher } from "../caching/manager.controllerCacher";
 import { pruneSourceTree } from "../caching/manager.sourceSelector";
-import { Spawn } from "../managers/manager.spawn";
+import { Spawn } from "../spawning/manager.spawn";
 import { Expander } from "../expansion/manager.expander";
 import { LinkManager } from "../managers/structures/manager.links";
 import { SpawnReassment } from "./manager.spawnReassessment";
-import { CreepRequester } from "./manager.creepRequester";
+import { CreepRequester } from "../spawning/manager.creepRequester";
 import { ContainerExpansion } from "building/building.containerExpansion";
 import { BuildProjectManager } from "building/building.buildProject";
 import _ from "lodash";
 import { ExpeditionResultsHandlerMapper } from "expansion/expansion.expeditionResultsHandlerMap";
 import { RCLUpgradeHandler } from "./manager.handleRCLUpgrades";
 import { ExtensionAddition } from "building/building.extensionAddition";
+import { Visualizer } from "building/building.visualizer";
 
 export class CycleManager {
     public static check() {
@@ -45,8 +46,20 @@ export class CycleManager {
     }
 
     private static everyCycle() {
+        CycleManager.drawReservedConstruction();
         ConstructionSiteCacher.dispose();
         ControllerCacher.dispose();
+    }
+
+    private static drawReservedConstruction() {
+        if (Memory.showReserved) {
+            const vis = new Visualizer();
+            for (const room of _.values(Game.rooms)) {
+                if (room.memory.reservedBuilds) {
+                    vis.drawBuildOrders(room.memory.reservedBuilds, room.name);
+                }
+            }
+        }
     }
 
     private static updateSpawnConstructionSiteMaps() {
@@ -62,9 +75,7 @@ export class CycleManager {
     }
 
     private static spawnLevelTasksLongTerm() {
-        for (const spawnName in Game.spawns) {
-            const spawn = Game.spawns[spawnName];
-
+        for (const spawn of _.values(Game.spawns)) {
             const expander: Expander = new Expander(spawn);
             expander.mineExpansion();
 
@@ -82,7 +93,7 @@ export class CycleManager {
         if (spawn.memory.expeditionResults) {
             if (spawn.memory.expeditionResults.length > 0) {
                 // If we are already building, don't create another expedition build project.
-                if (spawn.memory.buildProjects && spawn.memory.buildProjects.length > 0) {
+                if (spawn.room.memory.buildProjects && spawn.room.memory.buildProjects.length > 0) {
                     return;
                 }
                 // Only ever going to process one expedition result at a time. They are very costly operations
@@ -112,18 +123,16 @@ export class CycleManager {
     }
 
     private static handleSpawnReassess(spawn: StructureSpawn) {
-        if (spawn.memory?.reassess) {
-            const reassessment: SpawnReassment = new SpawnReassment(spawn);
-            reassessment.reassess();
-        }
+        const reassessment: SpawnReassment = new SpawnReassment(spawn);
+        reassessment.reassess();
     }
 
     private static spawnLevelTasksMediumTerm() {
         for (const spawnName in Game.spawns) {
             const spawn: StructureSpawn = Game.spawns[spawnName];
             if (spawn) {
-                if (spawn.memory.rcl) {
-                    if (spawn.memory.rcl >= 4) {
+                if (spawn.room.memory.rcl) {
+                    if (spawn.room.memory.rcl >= 4) {
                         const creepRequester: CreepRequester = new CreepRequester(spawn);
                         creepRequester.CheckForRepairNeed();
                     }
@@ -137,17 +146,17 @@ export class CycleManager {
         for (const spawnName in Game.spawns) {
             const spawn = Game.spawns[spawnName];
             linkManager.balanceEnergyForSpawn(spawn);
-            if (spawn.memory.buildProjects) {
-                if (spawn.memory.buildProjects.length > 0) {
+            if (spawn.room.memory.buildProjects) {
+                if (spawn.room.memory.buildProjects.length > 0) {
                     if (spawn.room.storage && spawn.room.storage.store.getUsedCapacity(RESOURCE_ENERGY) > 50000) {
-                        for (const bp of spawn.memory.buildProjects) {
+                        for (const bp of spawn.room.memory.buildProjects) {
                             const projectManager: BuildProjectManager = new BuildProjectManager(spawn, bp);
                             projectManager.manageProject();
                         }
                     } else {
                         const projectManager: BuildProjectManager = new BuildProjectManager(
                             spawn,
-                            spawn.memory.buildProjects[0]
+                            spawn.room.memory.buildProjects[0]
                         );
                         projectManager.manageProject();
                     }

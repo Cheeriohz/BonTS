@@ -1,6 +1,6 @@
 import _ from "lodash";
 import { CreepRole } from "enums/enum.roles";
-import { DedicatedCreepRequester } from "cycle/manager.dedicatedCreepRequester";
+import { DedicatedCreepRequester } from "spawning/manager.dedicatedCreepRequester";
 
 export class RemotePatrolManager {
     spawn!: StructureSpawn;

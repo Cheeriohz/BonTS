@@ -62,6 +62,9 @@ export class RoleRemoteArcher extends RoleRemote {
             });
             if (nearCreep) {
                 creep.heal(nearCreep[0]);
+            } else if (creep.memory.dedication) {
+                // preheal
+                creep.heal(creep);
             }
         }
     }
@@ -112,13 +115,12 @@ export class RoleRemoteArcher extends RoleRemote {
             this.attackTarget(creep, wall);
             return;
         }
-        this.leaveBorder(creep);
+        creep.moveTo(25, 25);
     }
 
     private attackTarget(creep: Creep, victim: Creep | Structure) {
         if (victim) {
             const rangeToVictim = creep.pos.getRangeTo(victim);
-            console.log(rangeToVictim);
             if (creep.memory.mrf && rangeToVictim < 4) {
                 // Move away
                 creep.move(this.oppositeDirection(creep.pos.getDirectionTo(victim)));

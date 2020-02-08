@@ -1,12 +1,11 @@
 import { CreepRole } from "enums/enum.roles";
-import { DedicatedCreepRequester } from "../cycle/manager.dedicatedCreepRequester";
+import { DedicatedCreepRequester } from "../spawning/manager.dedicatedCreepRequester";
 import _ from "lodash";
-import { CreepRequester } from "../cycle/manager.creepRequester";
+import { CreepRequester } from "../spawning/manager.creepRequester";
 
 export class MineManager {
     room!: Room;
-    spawn!: StructureSpawn
-
+    spawn!: StructureSpawn;
 
     constructor(room: Room, spawn: StructureSpawn) {
         this.room = room;
@@ -30,23 +29,22 @@ export class MineManager {
                 const miner = Game.creeps[this.room.memory.mine.miner];
                 if (!miner) {
                     if (!this.creepNotInQueue(this.room.memory.mine.miner)) {
-                        const container: StructureContainer | null = Game.getObjectById(this.room.memory.mine!.containerId);
+                        const container: StructureContainer | null = Game.getObjectById(
+                            this.room.memory.mine!.containerId
+                        );
                         if (container) {
                             if (this.minerNeeded()) {
                                 this.requestMiner(this.room.memory.mine);
                             }
-                        }
-                        else {
+                        } else {
                             if (!this.reassignContainer()) {
                                 this.rebuildContainer();
                             }
                             return;
                         }
-
                     }
                 }
-            }
-            else {
+            } else {
                 this.requestMiner(this.room.memory.mine);
             }
             if (this.room.memory.mine.hauler !== "") {
@@ -58,8 +56,7 @@ export class MineManager {
                         }
                     }
                 }
-            }
-            else {
+            } else {
                 this.requestHauler(this.room.memory.mine);
             }
         }
@@ -68,10 +65,10 @@ export class MineManager {
     private minerNeeded(): boolean {
         if (this.room.memory.mine) {
             const vein: Mineral | Deposit | null = Game.getObjectById<Mineral | Deposit>(this.room.memory.mine.vein);
-            const mineralAmount = _.get(vein, 'mineralAmount', null);
+            const mineralAmount = _.get(vein, "mineralAmount", null);
             if (mineralAmount) {
                 // TODO Make this more robust
-                if (mineralAmount > 4000) {
+                if (mineralAmount > 0) {
                     return true;
                 }
             }
@@ -85,8 +82,7 @@ export class MineManager {
             if (container.store.getFreeCapacity() < 400) {
                 return true;
             }
-        }
-        else {
+        } else {
             // Container has been destroyed, need to rebuild
             if (!this.reassignContainer()) {
                 this.rebuildContainer();
@@ -98,9 +94,15 @@ export class MineManager {
     private reassignContainer(): boolean {
         const vein: Mineral | Deposit | null = Game.getObjectById(this.room.memory.mine!.vein);
         if (vein) {
-            const newContainers: StructureContainer[] | null = vein.pos.findInRange<StructureContainer>(FIND_STRUCTURES, 1, {
-                filter: (s) => { return s.structureType === STRUCTURE_CONTAINER; }
-            });
+            const newContainers: StructureContainer[] | null = vein.pos.findInRange<StructureContainer>(
+                FIND_STRUCTURES,
+                1,
+                {
+                    filter: s => {
+                        return s.structureType === STRUCTURE_CONTAINER;
+                    }
+                }
+            );
             if (newContainers.length > 0) {
                 this.room.memory.mine!.containerId = newContainers[0].id;
                 return true;
@@ -113,7 +115,9 @@ export class MineManager {
         const vein: Mineral | Deposit | null = Game.getObjectById(this.room.memory.mine!.vein);
         if (vein) {
             const nearestRoad: Structure | null = vein.pos.findClosestByRange(FIND_STRUCTURES, {
-                filter: (s) => { return s.structureType === STRUCTURE_ROAD; }
+                filter: s => {
+                    return s.structureType === STRUCTURE_ROAD;
+                }
             });
             if (nearestRoad) {
                 this.room.createConstructionSite(nearestRoad.pos.x, nearestRoad.pos.y, STRUCTURE_CONTAINER);
@@ -124,21 +128,30 @@ export class MineManager {
     }
 
     private creepNotInQueue(creepName: string) {
-        return _.find(this.spawn.memory.dedicatedCreepRequest, (dc) => { return dc.specifiedName === creepName; });
+        return _.find(this.spawn.memory.dedicatedCreepRequest, dc => {
+            return dc.specifiedName === creepName;
+        });
     }
 
     private requestMiner(mine: Mine) {
         const minerName: string = `dMiner${this.room.name}${Game.time}`;
         const dcr: DedicatedCreepRequester = new DedicatedCreepRequester(this.spawn);
-        dcr.createdDedicatedCreepRequest({ dedication: mine.containerId, role: CreepRole.dropper, specifiedName: minerName });
+        dcr.createdDedicatedCreepRequest({
+            dedication: mine.containerId,
+            role: CreepRole.dropper,
+            specifiedName: minerName
+        });
         mine.miner = minerName;
     }
 
     private requestHauler(mine: Mine) {
         const haulerName: string = `dHauler${this.room.name}${Game.time}`;
         const dcr: DedicatedCreepRequester = new DedicatedCreepRequester(this.spawn);
-        dcr.createdDedicatedCreepRequest({ dedication: mine.containerId, role: CreepRole.hauler, specifiedName: haulerName });
+        dcr.createdDedicatedCreepRequest({
+            dedication: mine.containerId,
+            role: CreepRole.hauler,
+            specifiedName: haulerName
+        });
         mine.hauler = haulerName;
     }
-
 }

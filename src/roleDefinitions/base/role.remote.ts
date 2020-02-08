@@ -4,82 +4,8 @@ import { profile } from "Profiler";
 
 @profile
 export class RoleRemote extends RoleCreep {
-    public run(creep: Creep): boolean {
-        if (creep.fatigue) {
-            return false;
-        }
-        if (creep.memory.path && creep.memory.path?.length > 0) {
-            if (this.stuckHandler(creep)) {
-                // Arrived condition
-                if (creep.memory.path.length === 1) {
-                    creep.move(creep.memory.path[0].direction);
-                    creep.memory.path = null;
-                    creep.memory.repairWhileMove = null;
-                    return true;
-                } else {
-                    // We still have traveling to do.
-                    creep.move(creep.memory.path[0].direction);
-                    if (creep.memory.repairWhileMove) {
-                        this.repairRoad(creep);
-                    }
-                    return false;
-                }
-            }
-        }
-        return true;
-    }
-
     private serializePosition(pos: RoomPosition): string {
         return `${pos.x}${pos.y}`;
-    }
-
-    private stuckHandler(creep: Creep): boolean {
-        const lastPos = _.first(creep.memory.path);
-        if (lastPos!.x != creep.pos.x || lastPos!.y != creep.pos.y) {
-            if (creep.memory.stuckCount) creep.memory.stuckCount += 1;
-            else creep.memory.stuckCount = 1;
-            if (creep.memory.stuckCount === 2) {
-                if (this.fixStuck(creep)) {
-                    return true;
-                } else {
-                    return false;
-                }
-            } else if (creep.memory.stuckCount > 2) {
-                delete creep.memory.path;
-                creep.memory.stuckCount = 0;
-                return false;
-            }
-        } else {
-            creep.memory.stuckCount = 0;
-            creep.memory.path = _.tail(creep.memory.path);
-        }
-        return true;
-    }
-
-    private fixStuck(creep: Creep): boolean {
-        const currentPathStep = _.first(creep.memory.path);
-        if (currentPathStep) {
-            const blockers = creep.room.lookForAt(LOOK_CREEPS, currentPathStep.x, currentPathStep.y);
-            if (blockers.length > 0) {
-                const blocker = _.first(blockers);
-                if (blocker) {
-                    blocker.moveTo(creep.pos.x, creep.pos.y);
-                    if (blocker.memory) {
-                        blocker.memory.moved = true;
-                        return true;
-                    } else {
-                        delete creep.memory.path;
-                        creep.memory.stuckCount = 0;
-                        return false;
-                    }
-                } else {
-                    delete creep.memory.path;
-                    creep.memory.stuckCount = 0;
-                    return false;
-                }
-            }
-        }
-        return false;
     }
 
     protected cachedTravel(destination: RoomPosition, creep: Creep, repairWhileMove: boolean) {
@@ -95,7 +21,7 @@ export class RoleRemote extends RoleCreep {
         }
         creep.memory.path = path;
         creep.memory.stuckCount = 0;
-        this.run(creep);
+        this.pathHandling(creep);
     }
 
     protected travelToRoom(creep: Creep, roomName: string, repairWhileMove: boolean) {
@@ -105,14 +31,6 @@ export class RoleRemote extends RoleCreep {
             if (destination) {
                 this.cachedTravel(destination, creep, repairWhileMove);
             }
-        }
-    }
-
-    protected repairRoad(creep: Creep) {
-        const road = creep.pos.lookFor(LOOK_STRUCTURES).find(object => object.structureType === STRUCTURE_ROAD);
-        const repairPower: number = creep.getActiveBodyparts(WORK) * 100;
-        if (road && road.hits + repairPower <= road.hitsMax) {
-            creep.repair(road);
         }
     }
 

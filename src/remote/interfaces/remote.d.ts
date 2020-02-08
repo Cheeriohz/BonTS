@@ -24,11 +24,23 @@ interface RemoteHarvest extends PathingLookup {
 
 interface RoomHarrass extends PathingLookup {
     roomName: string;
-    knights: string[] | null;
+	pauseToTime: number;
+	distance: number;
+
+	knights: string[] | null;
     knightCap: number;
-    archers: string[] | null;
+	kStrength: number;
+	kHeal:number
+
+	archers: string[] | null;
     archerCap: number;
-    pauseToTime: number;
+	aStrength: number;
+	aHeal: number;
+
+	downgrader: string | null;
+	dgStrength: number;
+	reassign: boolean;
+
 }
 
 interface RemotePatrol extends PathingLookup {

@@ -4,23 +4,30 @@ import _ from "lodash";
 import { LabAddition } from "building/building.labAddtition";
 import { RemoteHarvestHandler } from "remote/remote.remoteHarvestHandler";
 import { ExtensionAddition } from "building/building.extensionAddition";
+import { SpawnTemplate } from "spawning/spawning.templating";
 
 export class RCLUpgradeHandler {
     public static handleRCLUpgrades(spawn: StructureSpawn) {
         // TODO This requires us moving our RCLUpgrade to be room level or global rather than just spawn level... eventually
-        if (spawn.memory?.rclUpgrades) {
-            const rclUpgradeEvent: RCLUpgradeEvent = spawn.memory.rclUpgrades[0];
+        if (spawn.room.memory?.rclUpgrades) {
+            const rclUpgradeEvent: RCLUpgradeEvent = spawn.room.memory.rclUpgrades[0];
             if (rclUpgradeEvent) {
                 switch (rclUpgradeEvent.newRclLevel) {
+                    case 2: {
+                        if (this.handleRCLUpgradeTo2(spawn)) {
+                            _.remove(spawn.room.memory.rclUpgrades, rclUpgradeEvent);
+                        }
+                        break;
+                    }
                     case 6: {
                         if (this.handleRCLUpgradeTo6(spawn)) {
-                            _.remove(spawn.memory.rclUpgrades, rclUpgradeEvent);
+                            _.remove(spawn.room.memory.rclUpgrades, rclUpgradeEvent);
                         }
                         break;
                     }
                     case 7: {
                         if (this.handleRCLUpgradeTo7(spawn)) {
-                            _.remove(spawn.memory.rclUpgrades, rclUpgradeEvent);
+                            _.remove(spawn.room.memory.rclUpgrades, rclUpgradeEvent);
                         }
                         break;
                     }
@@ -30,6 +37,13 @@ export class RCLUpgradeHandler {
                 }
             }
         }
+    }
+
+    private static handleRCLUpgradeTo2(spawn: StructureSpawn): boolean {
+        const containerExpansion: ContainerExpansion = new ContainerExpansion(spawn, spawn.room, spawn.pos, false);
+        containerExpansion.routeToSources();
+        containerExpansion.routeToController();
+        return true;
     }
 
     private static handleRCLUpgradeTo6(spawn: StructureSpawn): boolean {

@@ -1,5 +1,5 @@
 import { CreepRole } from "enums/enum.roles";
-import { DedicatedCreepRequester } from "../cycle/manager.dedicatedCreepRequester";
+import { DedicatedCreepRequester } from "../spawning/manager.dedicatedCreepRequester";
 import _ from "lodash";
 
 export class RemoteMineManager {
