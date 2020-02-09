@@ -10,6 +10,7 @@ export function getContainer(creep: Creep): string | null {
         return "";
     }
     if (containerMap.length === 1) {
+        containerMap[0].assigned.push(creep.name);
         creep.room.memory.containerMap = containerMap;
         return containerMap[0].id;
     }

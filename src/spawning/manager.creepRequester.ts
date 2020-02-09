@@ -103,9 +103,6 @@ export class CreepRequester {
     }
 
     private RequestRepairBot() {
-        console.log(
-            `Body template for builder: ${JSON.stringify(this.spawn.room.memory.templates![CreepRole.builder])}`
-        );
         const builderRequest: CreepRequest = {
             role: CreepRole.builder,
             body: this.spawn.room.memory.templates![CreepRole.builder]

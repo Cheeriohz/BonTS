@@ -60,14 +60,12 @@ export class Spawn {
 
     public static populateCreepCounts() {
         const roomCreepMap: Dictionary<number[]> = {};
-        const roleArray: number[] = this.createCreepRoleArray();
         for (const creep of _.values(Game.creeps)) {
-            if (!creep.memory.dedication) {
+            if (!creep.memory.dedication && !creep.memory.home) {
                 if (roomCreepMap[creep.room.name]) {
                     _.update(roomCreepMap, `${creep.room.name}[${creep.memory.role}]`, n => n + 1);
                 } else {
-                    // If we see multi room miscounts, check here
-                    _.assign(roomCreepMap, this.createCreepRoleMap(creep, roleArray));
+                    _.assign(roomCreepMap, this.createCreepRoleMap(creep, this.createCreepRoleArray()));
                 }
             }
         }

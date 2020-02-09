@@ -52,13 +52,31 @@ export class RoleCreep {
         if (storage) {
             return this.withdrawMove(creep, storage);
         }
-        const containerId = getContainer(creep);
-        if (containerId) {
-            const container = Game.getObjectById<StructureContainer>(containerId);
+        if (creep.memory.precious) {
+            const container = Game.getObjectById<StructureContainer>(creep.memory.precious);
             if (container) {
                 return this.withdrawMove(creep, container);
             } else {
-                refreshTree(creep.room, containerId);
+                refreshTree(creep.room, creep.memory.precious);
+                creep.memory.precious = null;
+            }
+        } else if (creep.memory.preciousPosition) {
+            this.withdrawPickup(creep, creep.memory.preciousPosition);
+            return true;
+        }
+        const containerId = getContainer(creep);
+        if (containerId) {
+            if (creep.room.memory.lowRCLBoost) {
+                this.lowRCLDropContainerTransition(creep);
+                return true;
+            } else {
+                const container = Game.getObjectById<StructureContainer>(containerId);
+                if (container) {
+                    creep.memory.precious = container.id;
+                    return this.withdrawMove(creep, container);
+                } else {
+                    refreshTree(creep.room, containerId);
+                }
             }
         }
         if (creep.room.memory.lowRCLBoost) {
@@ -66,11 +84,66 @@ export class RoleCreep {
             if (preciousPosition) {
                 creep.memory.preciousPosition = preciousPosition;
                 this.withdrawPickup(creep, creep.memory.preciousPosition);
+                return true;
             }
         }
         return harvestSourceSmart(creep);
     }
 
+    protected lowRCLDropContainerTransition(creep: Creep) {
+        if (creep.room.memory.dropMap![0].assigned.length < creep.room.memory.containerMap![0].assigned.length) {
+            const preciousPosition = getdropMapPosition(creep);
+            if (preciousPosition) {
+                creep.memory.preciousPosition = preciousPosition;
+                this.withdrawPickup(creep, creep.memory.preciousPosition);
+            }
+        } else {
+            const containerId = getContainer(creep);
+            if (containerId) {
+                const container = Game.getObjectById<StructureContainer>(containerId);
+                if (container) {
+                    return this.withdrawMove(creep, container);
+                } else {
+                    refreshTree(creep.room, containerId);
+                }
+            }
+        }
+    }
+
+    protected withdrawMoveSpecified(creep: Creep, structure: Structure, resourceType: ResourceConstant) {
+        if (creep.pos.isNearTo(structure)) {
+            creep.withdraw(structure, resourceType);
+            return;
+        } else {
+            creep.moveTo(structure, { reusePath: 10, ignoreCreeps: false });
+            return;
+        }
+    }
+
+    protected withdrawMove(creep: Creep, structure: Structure) {
+        if (creep.pos.isNearTo(structure)) {
+            creep.withdraw(structure, RESOURCE_ENERGY);
+            if (creep.store.getFreeCapacity() > 25) {
+                this.grabAdjacentDroppedEnergy(creep, structure.pos);
+            }
+            return;
+        } else {
+            creep.moveTo(structure, { reusePath: 10, ignoreCreeps: false });
+            return;
+        }
+    }
+
+    protected withdrawPickup(creep: Creep, pos: { x: number; y: number }) {
+        if (creep.pos.isNearTo(pos.x, pos.y)) {
+            this.grabAdjacentDroppedEnergy(creep, new RoomPosition(pos.x, pos.y, creep.room.name));
+            return;
+        } else {
+            creep.moveTo(pos.x, pos.y);
+            return;
+        }
+    }
+
+    //* Resource Deposit Logic
     protected fillClosest(creep: Creep, ignoreLinks: boolean, fillUpgraders?: boolean): boolean {
         if (creep.room.memory.target) {
             const tower = this.findClosestTower(creep);
@@ -123,7 +196,7 @@ export class RoleCreep {
             const transferTarget = creep.pos.findClosestByPath(upgraders);
             if (transferTarget) {
                 if (creep.pos.getRangeTo(transferTarget) > 5) {
-                    creep.memory.path = creep.pos.findPathTo(transferTarget, { ignoreCreeps: true });
+                    creep.memory.path = creep.pos.findPathTo(transferTarget, { ignoreCreeps: false });
                     this.pathHandling(creep);
                 } else {
                     this.transferMove(creep, transferTarget!);
@@ -149,37 +222,6 @@ export class RoleCreep {
         }
     }
 
-    protected withdrawMoveSpecified(creep: Creep, structure: Structure, resourceType: ResourceConstant) {
-        if (creep.pos.isNearTo(structure)) {
-            creep.withdraw(structure, resourceType);
-            return;
-        } else {
-            creep.moveTo(structure, { reusePath: 10, ignoreCreeps: false });
-            return;
-        }
-    }
-
-    protected withdrawMove(creep: Creep, structure: Structure) {
-        if (creep.pos.isNearTo(structure)) {
-            creep.withdraw(structure, RESOURCE_ENERGY);
-            return;
-        } else {
-            creep.moveTo(structure, { reusePath: 1000, ignoreCreeps: false });
-            return;
-        }
-    }
-
-    protected withdrawPickup(creep: Creep, pos: { x: number; y: number }) {
-        if (creep.pos.isNearTo(pos.x, pos.y)) {
-            this.grabAdjacentDroppedEnergy(creep, new RoomPosition(pos.x, pos.y, creep.room.name));
-            return;
-        } else {
-            creep.moveTo(pos.x, pos.y);
-            return;
-        }
-    }
-
-    //* Resource Deposit Logic
     protected depositMoveSpecified(creep: Creep, structure: Structure, resourceType: ResourceConstant) {
         // console.log(JSON.stringify(structure));
         if (creep.pos.isNearTo(structure)) {
@@ -197,7 +239,7 @@ export class RoleCreep {
             creep.transfer(structure, RESOURCE_ENERGY);
             return;
         } else {
-            creep.moveTo(structure, { reusePath: 1000, ignoreCreeps: false });
+            creep.moveTo(structure, { reusePath: 10, ignoreCreeps: false });
             return;
         }
     }
@@ -207,7 +249,7 @@ export class RoleCreep {
             creep.transfer(target, RESOURCE_ENERGY);
             return;
         } else {
-            creep.moveTo(target, { reusePath: 1000, ignoreCreeps: false });
+            creep.moveTo(target, { reusePath: 10, ignoreCreeps: false });
             return;
         }
     }
@@ -394,7 +436,7 @@ export class RoleCreep {
             creep.repair(structure);
             return;
         } else {
-            creep.moveTo(structure, { reusePath: 15, ignoreCreeps: false });
+            creep.moveTo(structure, { reusePath: 10, ignoreCreeps: false });
             return;
         }
     }
@@ -493,7 +535,7 @@ export class RoleCreep {
         return true;
     }
 
-    private cleanUpPath(creep: Creep) {
+    protected cleanUpPath(creep: Creep) {
         delete creep.memory.path;
         creep.memory.stuckCount = 0;
         if (creep.memory.role === CreepRole.scout && creep.memory.orders && creep.memory.orders.independentOperator) {
@@ -567,7 +609,7 @@ export class RoleCreep {
                 creep.build(target);
                 return true;
             } else {
-                creep.moveTo(target, { reusePath: 1000, ignoreCreeps: false });
+                creep.moveTo(target, { reusePath: 10, ignoreCreeps: false });
                 return true;
             }
         }

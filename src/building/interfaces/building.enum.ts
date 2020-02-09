@@ -4,5 +4,6 @@ export enum BuildProjectEnum {
     RemoteContainerExpansion = 2,
     SingleConstructionSiteNoFollowUp = 4,
     PassThroughCreate = 5,
-    ExtensionBootstrap = 6
+    ExtensionBootstrap = 6,
+    SpawnRemoteAddition = 7
 }

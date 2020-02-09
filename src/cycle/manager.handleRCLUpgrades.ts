@@ -14,6 +14,12 @@ export class RCLUpgradeHandler {
             const rclUpgradeEvent: RCLUpgradeEvent = spawn.room.memory.rclUpgrades[0];
             if (rclUpgradeEvent) {
                 switch (rclUpgradeEvent.newRclLevel) {
+                    case 1: {
+                        if (this.handleRCLUpgradeTo1(spawn)) {
+                            _.remove(spawn.room.memory.rclUpgrades, rclUpgradeEvent);
+                        }
+                        break;
+                    }
                     case 2: {
                         if (this.handleRCLUpgradeTo2(spawn)) {
                             _.remove(spawn.room.memory.rclUpgrades, rclUpgradeEvent);
@@ -44,6 +50,9 @@ export class RCLUpgradeHandler {
                 }
             }
         }
+    }
+    private static handleRCLUpgradeTo1(spawn: StructureSpawn): boolean {
+        return true;
     }
 
     private static handleRCLUpgradeTo2(spawn: StructureSpawn): boolean {

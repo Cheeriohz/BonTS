@@ -25,6 +25,7 @@ import { RoleTopper } from "roleDefinitions/role.topper";
 import { RoleDedicatedKnight } from "roleDefinitions/dedicated/role.dedicated.knight";
 import { RoleRemoteArcher } from "roleDefinitions/remote/role.remote.archer";
 import { RoleCreep } from "roleDefinitions/base/role.creep";
+import { RoleTaxi } from "roleDefinitions/role.taxi";
 
 export class RolesManager {
     private mRC!: RoleCreep;
@@ -37,6 +38,7 @@ export class RolesManager {
     private mScout!: RoleScout;
     private mExpeditionManager: ExpeditionManager | undefined;
     private mTopper!: RoleTopper;
+    private mTaxi!: RoleTaxi;
 
     private mDDropper!: RoleDedicatedDropper;
     private mDHauler!: RoleDedicatedHauler;
@@ -60,6 +62,7 @@ export class RolesManager {
         this.mDrone = new RoleDrone();
         this.mScout = new RoleScout();
         this.mTopper = new RoleTopper();
+        this.mTaxi = new RoleTaxi();
 
         this.mDDropper = new RoleDedicatedDropper();
         this.mDHauler = new RoleDedicatedHauler();
@@ -94,6 +97,8 @@ export class RolesManager {
     private manageRoles(creep: Creep) {
         if (creep.memory.moved) {
             creep.memory.moved = null;
+            return;
+        } else if (creep.memory.activeTaxi) {
             return;
         } else if (this.mRC.pathHandling(creep)) {
             if (creep.memory.home) {
@@ -132,6 +137,9 @@ export class RolesManager {
                     }
                     case CreepRole.topper: {
                         this.manageTopper(creep);
+                    }
+                    case CreepRole.taxi: {
+                        this.manageTaxi(creep);
                     }
                 }
             }
@@ -222,5 +230,9 @@ export class RolesManager {
     }
     private manageTopper(creep: Creep) {
         this.mTopper.run(creep);
+    }
+
+    private manageTaxi(creep: Creep) {
+        this.mTaxi.run(creep);
     }
 }

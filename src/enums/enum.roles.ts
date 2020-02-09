@@ -1,13 +1,14 @@
 export enum CreepRole {
     harvester = 0,
-    upgrader,
-    builder,
     dropper,
     hauler,
+    builder,
+    upgrader,
     drone,
     scout,
     reserver,
     knight,
     topper,
-    archer
+    archer,
+    taxi
 }

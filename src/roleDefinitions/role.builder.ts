@@ -5,27 +5,26 @@ export class RoleBuilder extends RoleCreep {
     public run(creep: Creep) {
         const currentEnergy = creep.store[RESOURCE_ENERGY];
 
-        if (creep.memory.working && currentEnergy === 0) {
+        if (creep.memory.working && creep.store.getUsedCapacity(RESOURCE_ENERGY) === 0) {
             creep.memory.working = false;
             creep.say("🔋 recharge");
         }
         if (!creep.memory.working && creep.store.getFreeCapacity() === 0) {
             creep.memory.working = true;
+            creep.memory.precious = null;
             creep.say("🔧 Repair");
         }
 
         if (creep.memory.working) {
-            if (!this.construct(creep)) {
-                this.repair(creep);
-            }
+            this.repair(creep);
         } else {
             this.fillUp(creep);
         }
     }
 
     private repair(creep: Creep) {
-        if (creep.memory.precious) {
-            const repairTarget: Structure | null = Game.getObjectById(creep.memory.precious);
+        if (creep.memory.repair) {
+            const repairTarget: Structure | null = Game.getObjectById(creep.memory.repair);
             if (
                 repairTarget &&
                 repairTarget.hits !== this.maxRepairThreshold &&
@@ -33,7 +32,7 @@ export class RoleBuilder extends RoleCreep {
             ) {
                 this.repairMove(creep, repairTarget);
             } else {
-                creep.memory.precious = null;
+                creep.memory.repair = null;
                 this.repair(creep);
                 return;
             }
@@ -54,7 +53,7 @@ export class RoleBuilder extends RoleCreep {
             }
         });
         if (targets.length > 0) {
-            creep.memory.precious = targets[0].id;
+            creep.memory.repair = targets[0].id;
             this.repair(creep);
             return;
         } else {
@@ -69,11 +68,13 @@ export class RoleBuilder extends RoleCreep {
             }
         });
         if (targets.length > 0) {
-            creep.memory.precious = targets[0].id;
+            creep.memory.repair = targets[0].id;
             this.repair(creep);
             return;
         } else {
-            this.checkForWallsThatCouldUsePatching(creep);
+            if (!this.construct(creep)) {
+                this.checkForWallsThatCouldUsePatching(creep);
+            }
         }
     }
 
@@ -84,7 +85,7 @@ export class RoleBuilder extends RoleCreep {
             }
         });
         if (targets.length > 0) {
-            creep.memory.precious = targets[0].id;
+            creep.memory.repair = targets[0].id;
             this.repair(creep);
             return;
         } else {

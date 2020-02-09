@@ -11,7 +11,7 @@ export class SpawnTemplate {
             case 1: {
                 room.memory.templates = {};
                 const sourceCount = room.find(FIND_SOURCES).length;
-                room.memory.roleTargets = [2 * sourceCount, 1, 0, 0, 0, 0, 0, 0, 0, 0];
+                room.memory.roleTargets = [1 * sourceCount, 2, 0, 0, 2, 0, 0, 0, 0, 0];
                 room.memory.lowRCLBoost = true;
                 for (let i = 0; i < _.values(CreepRole).length / 2; i++) {
                     _.set(room.memory.templates, i, this.getDefaultForRole(i));

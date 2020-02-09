@@ -12,11 +12,13 @@ interface CreepMemory {
     precious?: string | null;
     preciousPosition?: { x: number; y: number } | null;
     home?: string | null;
+    repair?: string | null;
 
     //* Path Caching
     path?: PathStep[] | null;
     stuckCount?: number | null;
     moved?: boolean | null;
+    activeTaxi?: boolean;
 
     //* Efficiency Processing Trade Off Modifiers
     ignoreLinks?: boolean | null;
@@ -102,6 +104,7 @@ interface Taxi {
     destination: RoomPosition;
     priority: number;
     originalRole: number;
+    taxiRoute: PathStep[] | null;
 }
 
 // `global` extension samples

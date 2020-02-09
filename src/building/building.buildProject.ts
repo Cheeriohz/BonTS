@@ -104,7 +104,8 @@ export class BuildProjectManager {
                     role: CreepRole.builder,
                     specifiedName: `${this.spawn.name}_BPR_${this.project.roomName}`,
                     precious: undefined,
-                    isRemote: true
+                    isRemote: true,
+                    body: this.spawn.room.memory.templates![CreepRole.builder]
                 });
             }
         }
@@ -133,20 +134,34 @@ export class BuildProjectManager {
         switch (this.project.projectType) {
             case BuildProjectEnum.LocalMineralExpansion: {
                 this.handOffLocalMineralExpansion();
+                break;
             }
             case BuildProjectEnum.LocalContainerExpansion: {
                 this.handOffLocalContainerExpansion();
+                break;
             }
             case BuildProjectEnum.RemoteContainerExpansion: {
                 // TODO Need to ensure if we are running multi project execution that we don't hand off the end point project
                 this.attemptRemoteContainerExpansionHandOff(remote);
+                break;
             }
             case BuildProjectEnum.SingleConstructionSiteNoFollowUp:
             case BuildProjectEnum.PassThroughCreate: {
                 _.remove(this.spawn.room.memory.buildProjects!, p => p === this.project);
+                break;
             }
             case BuildProjectEnum.ExtensionBootstrap: {
                 SpawnTemplate.migrateToDropHauling(this.spawn.room);
+                _.remove(this.spawn.room.memory.buildProjects!, p => p === this.project);
+                break;
+            }
+            case BuildProjectEnum.SpawnRemoteAddition: {
+                this.handOfSpawnRemoteAddition();
+                const room = Game.rooms[this.project.roomName];
+                if (room) {
+                    // This isn't critical to do here, but it doesn't hurt.
+                    SpawnTemplate.configureRoomSpawnTemplates(room);
+                }
                 _.remove(this.spawn.room.memory.buildProjects!, p => p === this.project);
             }
         }
@@ -266,15 +281,26 @@ export class BuildProjectManager {
             this.spawn.room.memory.containerMap = null;
         }
         buildEmptyContainerMap([], this.spawn.room);
-        this.clearHaulerContainerSelection(this.spawn.room);
+        this.clearHaulerContainerAndDropSelection(this.spawn.room);
+        delete this.spawn.room.memory.dropMap;
+        this.spawn.room.memory.lowRCLBoost = false;
         _.remove(this.spawn.room.memory.buildProjects!, this.project);
     }
 
-    private clearHaulerContainerSelection(room: Room) {
+    private clearHaulerContainerAndDropSelection(room: Room) {
         for (const creep of _.filter(_.values(Game.creeps), c => {
             return c.room.name === room.name && c.memory.role === CreepRole.hauler && !c.memory.dedication;
         })) {
             creep.memory.precious = null;
+            creep.memory.preciousPosition = null;
+        }
+    }
+
+    private handOfSpawnRemoteAddition() {
+        if (this.spawn.memory.remoteHarvests) {
+            _.remove(this.spawn.memory.remoteHarvests, rh => {
+                return rh.roomName === this.project.roomName;
+            });
         }
     }
 

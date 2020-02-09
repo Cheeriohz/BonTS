@@ -168,7 +168,7 @@ export class GeneralBuilding {
         rv.drawBuildOrders(buildOrders, roomName);
     }
 
-    protected distanceTransformRaw(roomName: string, logTransform: boolean) {
+    public distanceTransformRaw(roomName: string, logTransform: boolean) {
         let vis = new RoomVisual(roomName);
         const roomTerrain = Game.map.getRoomTerrain(roomName);
 

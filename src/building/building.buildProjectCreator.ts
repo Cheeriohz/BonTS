@@ -1,4 +1,5 @@
 import { BuildProjectEnum } from "./interfaces/building.enum";
+import _ from "lodash";
 
 export class buildProjectCreator {
     private spawn!: StructureSpawn;
@@ -36,6 +37,35 @@ export class buildProjectCreator {
         this.pushBuildProjectToSpawn(buildOrders, BuildProjectEnum.LocalContainerExpansion);
     }
 
+    public createSpawnBuildProject(pos: RoomPosition, scoutInfo: RoomScout) {
+        const spawnBuildOrder: BuildOrder[] = [{ x: pos.x, y: pos.y, type: STRUCTURE_SPAWN }];
+        if (!this.spawn.memory.remoteHarvests) {
+            this.spawn.memory.remoteHarvests = [];
+        }
+        const newRemoteHarvests: RemoteHarvest[] = [
+            {
+                vein: scoutInfo.sourceA!,
+                harvesters: [],
+                roomName: scoutInfo.roomName,
+                type: RESOURCE_ENERGY,
+                pathingLookup: {},
+                reserved: false
+            },
+            {
+                vein: scoutInfo.sourceB!,
+                harvesters: [],
+                roomName: scoutInfo.roomName,
+                type: RESOURCE_ENERGY,
+                pathingLookup: {},
+                reserved: false
+            }
+        ];
+
+        this.spawn.memory.remoteHarvests = _.concat(this.spawn.memory.remoteHarvests, newRemoteHarvests);
+        this.pushBuildProjectToSpawn(spawnBuildOrder, BuildProjectEnum.SpawnRemoteAddition);
+    }
+
+    //* LEGACY CODE
     // ? Obsolete
     // Last pathstep will become a container. Remaining pathsteps will become roads.
     public createBuildProjectContainerExpansionLegacy(path: PathStep[], projectType: BuildProjectEnum) {

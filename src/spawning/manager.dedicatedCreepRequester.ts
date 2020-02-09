@@ -42,9 +42,15 @@ export class DedicatedCreepRequester {
             }
             case CreepRole.builder: {
                 if (isRemote) {
-                    this.spawn.memory.dedicatedCreepRequest.push(
-                        this.createDedicatedRemoteBuilder(dedication, specifiedName)
-                    );
+                    if (body) {
+                        this.spawn.memory.dedicatedCreepRequest.push(
+                            this.createSpecificDedicatedRemoteBuilder(dedication, specifiedName, body)
+                        );
+                    } else {
+                        this.spawn.memory.dedicatedCreepRequest.push(
+                            this.createDedicatedRemoteBuilder(dedication, specifiedName)
+                        );
+                    }
                     break;
                 }
                 break;
@@ -82,11 +88,11 @@ export class DedicatedCreepRequester {
                 if (isRemote) {
                     if (body) {
                         this.spawn.memory.dedicatedCreepRequest.push(
-                            this.createSpecificDedicatedRemoteReserver(dedication, specifiedName, body)
+                            this.createSpecificDedicatedRemoteReserver(dedication, specifiedName, body, orders)
                         );
                     } else {
                         this.spawn.memory.dedicatedCreepRequest.push(
-                            this.createDedicatedRemoteReserver(dedication, specifiedName)
+                            this.createDedicatedRemoteReserver(dedication, specifiedName, orders)
                         );
                     }
 
@@ -156,6 +162,20 @@ export class DedicatedCreepRequester {
         return {
             role: CreepRole.builder,
             body: [WORK, WORK, WORK, CARRY, CARRY, CARRY, CARRY, CARRY, MOVE, MOVE, MOVE, MOVE],
+            dedication: dedication,
+            specifiedName: specifiedName,
+            home: this.spawn.room.name
+        };
+    }
+
+    private createSpecificDedicatedRemoteBuilder(
+        dedication: string,
+        specifiedName: string,
+        body: BodyPartConstant[]
+    ): DedicatedCreepRequest {
+        return {
+            role: CreepRole.builder,
+            body: body,
             dedication: dedication,
             specifiedName: specifiedName,
             home: this.spawn.room.name
@@ -362,7 +382,11 @@ export class DedicatedCreepRequester {
         };
     }
 
-    private createDedicatedRemoteReserver(dedication: string, specifiedName: string): DedicatedCreepRequest {
+    private createDedicatedRemoteReserver(
+        dedication: string,
+        specifiedName: string,
+        orders?: CreepOrder
+    ): DedicatedCreepRequest {
         return {
             role: CreepRole.reserver,
             body: [MOVE, CLAIM, CLAIM],
@@ -370,14 +394,15 @@ export class DedicatedCreepRequester {
             specifiedName: specifiedName,
             precious: null,
             home: this.spawn.room.name,
-            orders: undefined
+            orders: orders
         };
     }
 
     private createSpecificDedicatedRemoteReserver(
         dedication: string,
         specifiedName: string,
-        body: BodyPartConstant[]
+        body: BodyPartConstant[],
+        orders?: CreepOrder
     ): DedicatedCreepRequest {
         return {
             role: CreepRole.reserver,
@@ -386,7 +411,7 @@ export class DedicatedCreepRequester {
             specifiedName: specifiedName,
             precious: null,
             home: this.spawn.room.name,
-            orders: undefined
+            orders: orders
         };
     }
 

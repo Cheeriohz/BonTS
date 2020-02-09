@@ -15,6 +15,8 @@ import { RCLUpgradeHandler } from "./manager.handleRCLUpgrades";
 import { ExtensionAddition } from "building/building.extensionAddition";
 import { Visualizer } from "building/building.visualizer";
 import { BorderAggression } from "military/military.borderAggression";
+import { GeneralBuilding } from "building/building.general";
+import { buildProjectCreator } from "building/building.buildProjectCreator";
 
 export class CycleManager {
     public static check() {
@@ -47,13 +49,13 @@ export class CycleManager {
     }
 
     private static everyCycle() {
-        CycleManager.drawReservedConstruction();
+        this.drawReservedConstruction();
         ConstructionSiteCacher.dispose();
         ControllerCacher.dispose();
     }
 
     private static drawReservedConstruction() {
-        if (Memory.showReserved) {
+        if (Memory.showReserved === true) {
             const vis = new Visualizer();
             for (const room of _.values(Game.rooms)) {
                 if (room.memory.reservedBuilds) {
@@ -175,5 +177,16 @@ export class CycleManager {
 
     private static storeControllerIds(room: Room) {
         ControllerCacher.checkForController(room);
+    }
+
+    //* Helpers
+    private static distanceTransformRoom(roomName: string) {
+        const bg: GeneralBuilding = new GeneralBuilding();
+        bg.distanceTransformRaw(roomName, false);
+    }
+
+    private static createRemoteSpawnBuildProjectHelper(x: number, y: number, roomName: string, spawnName: string) {
+        const bpc: buildProjectCreator = new buildProjectCreator(Game.rooms[roomName]!, Game.spawns[spawnName]);
+        bpc.createSpawnBuildProject(new RoomPosition(x, y, roomName), Memory.scouting.roomScouts[roomName]);
     }
 }
