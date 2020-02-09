@@ -24,6 +24,7 @@ export class SpawnTemplate {
         const sourceCount = room.memory.sourceMap.length;
         room.memory.templates![CreepRole.upgrader] = [WORK, WORK, WORK, WORK, CARRY, CARRY, MOVE];
         room.memory.templates![CreepRole.harvester] = [WORK, WORK, WORK, CARRY, CARRY, MOVE, MOVE, MOVE];
+        room.memory.templates![CreepRole.builder] = [WORK, WORK, WORK, CARRY, CARRY, MOVE, MOVE, MOVE];
         room.memory.roleTargets![CreepRole.dropper] = sourceCount;
         room.memory.roleTargets![CreepRole.hauler] = 2 * sourceCount;
         room.memory.roleTargets![CreepRole.upgrader] = 2 * sourceCount;

@@ -31,6 +31,21 @@ export class BuildProjectManager {
         if (this.project.activeSites === 0 && this.project.buildOrders.length === 0) {
             this.handOffProject(false);
         }
+        switch (this.project.projectType) {
+            case BuildProjectEnum.LocalContainerExpansion: {
+                if (this.spawn.room.memory.containerMap && this.spawn.room.memory.containerMap.length > 0) {
+                    for (const containerMapping of this.spawn.room.memory.containerMap) {
+                        const container: StructureContainer | null = Game.getObjectById(containerMapping.id!);
+                        if (container) {
+                            _.remove(this.spawn.room.memory.dropMap!, dm => {
+                                return dm.x === container.pos.x && dm.y === container.pos.y;
+                            });
+                        }
+                    }
+                }
+                break;
+            }
+        }
     }
 
     private manageRemoteProject() {

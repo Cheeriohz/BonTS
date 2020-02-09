@@ -14,6 +14,7 @@ import { ExpeditionResultsHandlerMapper } from "expansion/expansion.expeditionRe
 import { RCLUpgradeHandler } from "./manager.handleRCLUpgrades";
 import { ExtensionAddition } from "building/building.extensionAddition";
 import { Visualizer } from "building/building.visualizer";
+import { BorderAggression } from "military/military.borderAggression";
 
 export class CycleManager {
     public static check() {
@@ -84,6 +85,11 @@ export class CycleManager {
 
             this.handleExpeditionResultsAction(spawn);
         }
+    }
+
+    private static borderAgressionTest() {
+        const ba: BorderAggression = new BorderAggression(Game.spawns["A"]);
+        ba.HandleTrivialNeighbors();
     }
 
     private static handleExpeditionResultsAction(spawn: StructureSpawn) {

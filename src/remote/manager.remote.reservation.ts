@@ -27,6 +27,13 @@ export class ReservationManager {
 
     private requestReserver(gameTime: number) {
         const reserverName: string = `reserver${this.reservation.roomName}${Game.time.toPrecision(8)}`;
+        const orders: ReserverOrder = {
+            target: this.reservation.roomName,
+            independentOperator: false,
+            reserving: true,
+            claiming: false,
+            downgrading: false
+        };
         const dcr: DedicatedCreepRequester = new DedicatedCreepRequester(this.spawn);
         dcr.createdDedicatedCreepRequest({
             dedication: this.reservation.roomName,
@@ -34,7 +41,7 @@ export class ReservationManager {
             specifiedName: reserverName,
             precious: undefined,
             isRemote: true,
-            orders: undefined
+            orders: orders
         });
         this.reservation.spawnTime = gameTime;
     }

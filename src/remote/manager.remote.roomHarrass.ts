@@ -162,7 +162,7 @@ export class RoomHarassManager {
 
     private requestArcher() {
         let body = null;
-        if (this.harass.kStrength + this.harass.kHeal > 0) {
+        if (this.harass.aStrength + this.harass.aHeal > 0) {
             body = BodyBuilder.FillDualType(RANGED_ATTACK, this.harass.aStrength, HEAL, this.harass.aHeal);
         }
         if (!this.creepInQueue(CreepRole.archer)) {
@@ -193,9 +193,12 @@ export class RoomHarassManager {
         if (!this.creepInQueue(CreepRole.reserver)) {
             const claimer: string = `claimer${Game.time.toPrecision(8)}`;
             const dcr: DedicatedCreepRequester = new DedicatedCreepRequester(this.spawn);
-            const orders: CreepOrder = {
+            const orders: ReserverOrder = {
                 target: this.harass.roomName,
-                independentOperator: false
+                independentOperator: false,
+                reserving: false,
+                claiming: false,
+                downgrading: true
             };
             dcr.createdDedicatedCreepRequest({
                 dedication: "",

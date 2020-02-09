@@ -59,7 +59,7 @@ export class LocalExpansion {
 
     public checkForContainerExpansion(): void {
         if (this.spawn.room.memory.reservedBuilds) {
-            const containers = _.filter(this.spawn.room.memory.reservedBuilds, b => b.type === STRUCTURE_CONTAINER);
+            const containers = _.remove(this.spawn.room.memory.reservedBuilds, b => b.type === STRUCTURE_CONTAINER);
             if (containers && containers.length > 0) {
                 const bpc: buildProjectCreator = new buildProjectCreator(this.spawn.room, this.spawn);
                 bpc.createBuildProjectContainerExpansion(containers);

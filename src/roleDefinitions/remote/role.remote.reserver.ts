@@ -5,9 +5,22 @@ import { profile } from "Profiler";
 export class RoleRemoteReserver extends RoleRemote {
     public runRemote(creep: Creep) {
         if (creep.memory.working) {
-            creep.reserveController(creep.room.controller!);
+            this.manageControllerWork(creep, <ReserverOrder>creep.memory.orders);
         } else {
             this.Pilgrimage(creep);
+        }
+    }
+
+    private manageControllerWork(creep: Creep, orders: ReserverOrder) {
+        if (orders.reserving) {
+            creep.reserveController(creep.room.controller!);
+        } else if (orders.downgrading) {
+            creep.attackController(creep.room.controller!);
+        } else if (orders.claiming) {
+            creep.claimController(creep.room.controller!);
+        } else {
+            console.log("Missed a specific assignment for a reserver");
+            creep.reserveController(creep.room.controller!);
         }
     }
 

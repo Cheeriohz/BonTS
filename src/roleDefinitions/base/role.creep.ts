@@ -5,6 +5,7 @@ import { profile } from "Profiler";
 import { ControllerCacher } from "caching/manager.controllerCacher";
 import { ConstructionSiteCacher } from "caching/manager.constructionSiteCacher";
 import { CreepRole } from "enums/enum.roles";
+import { getdropMapPosition } from "caching/caching.dropPickupCacher";
 
 @profile
 export class RoleCreep {
@@ -60,6 +61,13 @@ export class RoleCreep {
                 refreshTree(creep.room, containerId);
             }
         }
+        if (creep.room.memory.lowRCLBoost) {
+            const preciousPosition = getdropMapPosition(creep);
+            if (preciousPosition) {
+                creep.memory.preciousPosition = preciousPosition;
+                this.withdrawPickup(creep, creep.memory.preciousPosition);
+            }
+        }
         return harvestSourceSmart(creep);
     }
 
@@ -113,8 +121,15 @@ export class RoleCreep {
         });
         if (upgraders && upgraders.length > 0) {
             const transferTarget = creep.pos.findClosestByPath(upgraders);
-            this.transferMove(creep, transferTarget!);
-            return true;
+            if (transferTarget) {
+                if (creep.pos.getRangeTo(transferTarget) > 5) {
+                    creep.memory.path = creep.pos.findPathTo(transferTarget, { ignoreCreeps: true });
+                    this.pathHandling(creep);
+                } else {
+                    this.transferMove(creep, transferTarget!);
+                }
+                return true;
+            }
         }
         return false;
     }

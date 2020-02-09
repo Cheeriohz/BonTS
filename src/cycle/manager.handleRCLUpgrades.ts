@@ -20,6 +20,12 @@ export class RCLUpgradeHandler {
                         }
                         break;
                     }
+                    case 3: {
+                        if (this.handleRCLUpgradeTo3(spawn)) {
+                            _.remove(spawn.room.memory.rclUpgrades, rclUpgradeEvent);
+                        }
+                        break;
+                    }
                     case 6: {
                         if (this.handleRCLUpgradeTo6(spawn)) {
                             _.remove(spawn.room.memory.rclUpgrades, rclUpgradeEvent);

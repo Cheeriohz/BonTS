@@ -92,11 +92,11 @@ export class RemoteHarvestManager {
 
     private requestharvester() {
         if (!this.creepInQueue(CreepRole.harvester)) {
-            const harvestName: string = `dharvest${this.harvest.vein}${Game.time.toPrecision(8)}`;
+            const harvestName: string = `rharv${this.harvest.vein}${Game.time.toPrecision(8)}`;
             const dcr: DedicatedCreepRequester = new DedicatedCreepRequester(this.spawn);
             const orders: CreepOrder = {
                 target: this.harvest.roomName,
-				independentOperator: false
+                independentOperator: false
             };
             dcr.createdDedicatedCreepRequest({
                 dedication: this.harvest.vein,
