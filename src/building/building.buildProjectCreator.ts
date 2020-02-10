@@ -10,6 +10,10 @@ export class buildProjectCreator {
         this.spawn = spawn;
     }
 
+    public passThroughCreateMasked(buildOrders: BuildOrder[], bpcEnum: BuildProjectEnum) {
+        this.pushBuildProjectToSpawn(buildOrders, BuildProjectEnum.PassThroughCreate);
+    }
+
     public passThroughCreate(buildOrders: BuildOrder[]) {
         this.pushBuildProjectToSpawn(buildOrders, BuildProjectEnum.PassThroughCreate);
     }
@@ -17,6 +21,15 @@ export class buildProjectCreator {
     public createBuildProjectSingleSite(pos: RoomPosition, structureType: BuildableStructureConstant) {
         const buildOrder = [{ x: pos.x, y: pos.y, type: structureType }];
         this.pushBuildProjectToSpawn(buildOrder, BuildProjectEnum.SingleConstructionSiteNoFollowUp);
+    }
+
+    public createReservedRoads() {
+        if (this.room.memory.reservedBuilds) {
+            const buildOrders = _.uniq(_.remove(this.room.memory.reservedBuilds, rb => rb.type === STRUCTURE_ROAD));
+            if (buildOrders.length > 0) {
+                this.pushBuildProjectToSpawn(buildOrders, BuildProjectEnum.PassThroughCreate);
+            }
+        }
     }
 
     // Last Pathstep will become an extractor. Next to last pathstep will become a container. Remaining will become roads'

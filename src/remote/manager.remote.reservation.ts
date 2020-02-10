@@ -26,7 +26,8 @@ export class ReservationManager {
     }
 
     private requestReserver(gameTime: number) {
-        const reserverName: string = `reserver${this.reservation.roomName}${Game.time.toPrecision(8)}`;
+        const reserverName: string = `reserver${this.reservation.roomName}${Memory.creepTicker}`;
+        Memory.creepTicker++;
         const orders: ReserverOrder = {
             target: this.reservation.roomName,
             independentOperator: false,

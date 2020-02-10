@@ -26,6 +26,7 @@ import { RoleDedicatedKnight } from "roleDefinitions/dedicated/role.dedicated.kn
 import { RoleRemoteArcher } from "roleDefinitions/remote/role.remote.archer";
 import { RoleCreep } from "roleDefinitions/base/role.creep";
 import { RoleTaxi } from "roleDefinitions/role.taxi";
+import { TaxiServiceManager } from "./manager.taxiService";
 
 export class RolesManager {
     private mRC!: RoleCreep;
@@ -99,6 +100,7 @@ export class RolesManager {
             creep.memory.moved = null;
             return;
         } else if (creep.memory.activeTaxi) {
+			TaxiServiceManager.checkRequest(creep);
             return;
         } else if (this.mRC.pathHandling(creep)) {
             if (creep.memory.home) {

@@ -168,6 +168,61 @@ export class GeneralBuilding {
         rv.drawBuildOrders(buildOrders, roomName);
     }
 
+    protected traverseDistanceTransformWithCheck(
+        t: RoomPosition,
+        serializedTransform: number[],
+        threshold: number,
+        serializedTransformCheck: number[],
+        transformCheckThreshold: number
+    ): RoomPosition | null {
+        const transform: CostMatrix = PathFinder.CostMatrix.deserialize(serializedTransform);
+        const transformCheck: CostMatrix = PathFinder.CostMatrix.deserialize(serializedTransformCheck);
+        let m = 0;
+        while (m < 25) {
+            console.log(`attempting m:${m}`);
+            if (transform.get(t.x + m, t.y + m) >= threshold) {
+                if (transformCheck.get(t.x + m, t.y + m) >= transformCheckThreshold) {
+                    return new RoomPosition(t.x + m, t.y + m, t.roomName);
+                }
+            } else if (transform.get(t.x - m, t.y + m) >= threshold) {
+                if (transformCheck.get(t.x - m, t.y + m) >= transformCheckThreshold) {
+                    return new RoomPosition(t.x - m, t.y + m, t.roomName);
+                }
+            } else if (transform.get(t.x + m, t.y - m) >= threshold) {
+                if (transformCheck.get(t.x + m, t.y - m) >= transformCheckThreshold) {
+                    return new RoomPosition(t.x + m, t.y - m, t.roomName);
+                }
+            } else if (transform.get(t.x - m, t.y - m) >= threshold) {
+                if (transformCheck.get(t.x - m, t.y - m) >= transformCheckThreshold) {
+                    return new RoomPosition(t.x - m, t.y - m, t.roomName);
+                }
+            }
+            m += 1;
+        }
+        return null;
+    }
+
+    protected traverseDistanceTransform(
+        t: RoomPosition,
+        transform: CostMatrix,
+        threshold: number
+    ): RoomPosition | null {
+        let m = 0;
+        while (m < 25) {
+            if (transform.get(t.x + m, t.y + m) >= threshold) {
+                return new RoomPosition(t.x + m, t.y + m, t.roomName);
+            } else if (transform.get(t.x - m, t.y + m) >= threshold) {
+                return new RoomPosition(t.x - m, t.y + m, t.roomName);
+            } else if (transform.get(t.x + m, t.y - m) >= threshold) {
+                return new RoomPosition(t.x + m, t.y - m, t.roomName);
+            } else if (transform.get(t.x - m, t.y - m) >= threshold) {
+                return new RoomPosition(t.x - m, t.y - m, t.roomName);
+            }
+            m += 1;
+        }
+        return null;
+    }
+
     public distanceTransformRaw(roomName: string, logTransform: boolean) {
         let vis = new RoomVisual(roomName);
         const roomTerrain = Game.map.getRoomTerrain(roomName);

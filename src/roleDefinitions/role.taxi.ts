@@ -1,6 +1,7 @@
 import { RoleCreep } from "./base/role.creep";
 import _ from "lodash";
 import { TaxiServiceManager } from "managers/manager.taxiService";
+import { CreepRole } from "enums/enum.roles";
 
 export class RoleTaxi extends RoleCreep {
     public run(creep: Creep) {
@@ -30,27 +31,40 @@ export class RoleTaxi extends RoleCreep {
                 const lastPos = _.first(taxi.memory.taxi!.taxiRoute);
                 if (lastPos!.x === taxi.pos.x && lastPos!.y === taxi.pos.y) {
                     taxi.memory.taxi!.taxiRoute = _.tail(taxi.memory.taxi!.taxiRoute);
+                } else {
+                    if (taxi.memory.taxi!.arrivalDistance) {
+                        if (taxi.pos.inRangeTo(taxi.memory.taxi!.destination, taxi.memory.taxi!.arrivalDistance)) {
+                            this.concludeTaxi(taxi, client);
+                            return;
+                        } else {
+                            taxi.memory.taxi!.taxiRoute = taxi.pos.findPathTo(taxi.memory.taxi!.destination, {
+                                ignoreCreeps: false
+                            });
+                            return;
+                        }
+                    }
                 }
                 if (taxi.memory.taxi!.taxiRoute.length === 0) {
-                    this.terminateTaxi(taxi, client);
+                    this.concludeTaxi(taxi, client);
+                    return;
                 } else {
                     const currentDestination = _.first(taxi.memory.taxi!.taxiRoute);
                     if (currentDestination) {
                         this.relocatePedestrian(
                             taxi,
                             new RoomPosition(currentDestination.x, currentDestination.y, taxi.room.name),
-                            client.pos
+                            client
                         );
                         this.pullMove(taxi, client);
                     }
                 }
             } else {
-                console.log(`Taxi code FAILURE. Fix this`);
+                this.concludeTaxi(taxi, client);
             }
         }
     }
 
-    private relocatePedestrian(taxi: Creep, pos: RoomPosition, relocationPos: RoomPosition): boolean {
+    private relocatePedestrian(taxi: Creep, pos: RoomPosition, client: Creep): boolean {
         const blockers = pos.lookFor(LOOK_CREEPS);
         if (blockers.length > 0) {
             const blocker = _.first(blockers);
@@ -59,9 +73,12 @@ export class RoleTaxi extends RoleCreep {
                     taxi.say("🚨");
                     return false;
                 } else if (!blocker.my) {
-                    // TODO Handle enemies
+                    // TODO Handle enemies better
+                    this.taxiOvertake(taxi, client);
                 } else {
-                    this.movePedestrian(blocker, relocationPos);
+                    if (!this.movePedestrian(blocker, client.pos)) {
+                        this.taxiOvertake(taxi, client);
+                    }
                 }
             }
         } else {
@@ -72,8 +89,29 @@ export class RoleTaxi extends RoleCreep {
 
     // TODO fix slight edge case around pedestrian already having moved.
     private movePedestrian(ped: Creep, relocationPos: RoomPosition): boolean {
-        ped.moveTo(relocationPos, { ignoreCreeps: false });
-        ped.memory.moved = true;
+        if (ped.memory.role !== CreepRole.taxi) {
+            ped.moveTo(relocationPos, { ignoreCreeps: false });
+            ped.memory.moved = true;
+            return true;
+        }
+        return false;
+    }
+
+    private taxiOvertake(taxi: Creep, client: Creep): boolean {
+        if (taxi.memory.taxi!.taxiRoute && taxi.memory.taxi!.taxiRoute.length >= 2) {
+            const routeToPathStep = taxi.memory.taxi!.taxiRoute[2];
+            if (routeToPathStep) {
+                const routeToPos = new RoomPosition(routeToPathStep.x, routeToPathStep.y, taxi.room.name);
+                const bypassPath = taxi.pos.findPathTo(routeToPos, { ignoreCreeps: false });
+                if (bypassPath) {
+                    taxi.memory.taxi!.taxiRoute = _.concat(bypassPath, _.drop(taxi.memory.taxi!.taxiRoute, 2));
+                    return true;
+                }
+            }
+        } else {
+            this.concludeTaxi(taxi, client);
+            return false;
+        }
         return false;
     }
 
@@ -99,13 +137,14 @@ export class RoleTaxi extends RoleCreep {
         client.move(taxi);
     }
 
-    private terminateTaxi(taxi: Creep, client: Creep) {
+    private concludeTaxi(taxi: Creep, client: Creep) {
         taxi.pull(client);
         taxi.move(taxi.pos.getDirectionTo(client));
         client.move(taxi);
         taxi.say("💳");
         client.say("💳");
         taxi.memory.role = taxi.memory.taxi!.originalRole;
+        client.memory.moved = true;
         delete client.memory.activeTaxi;
     }
 }

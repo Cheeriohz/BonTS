@@ -1,8 +1,6 @@
 import { getContainer, refreshTree } from "../caching/manager.containerSelector";
-
 import { profile } from "Profiler";
 import { RoleCreep } from "./base/role.creep";
-import { getSource } from "caching/manager.sourceSelector";
 import { getdropMapPosition } from "caching/caching.dropPickupCacher";
 import { TaxiServiceManager } from "managers/manager.taxiService";
 @profile
@@ -10,7 +8,11 @@ export class RoleDropper extends RoleCreep {
     public run(creep: Creep) {
         // Check if in range to harvest
         if (creep.memory.working) {
-            super.harvestPrecious(creep);
+            if (super.harvestPrecious(creep) === ERR_NOT_IN_RANGE) {
+                creep.memory.working = false;
+                creep.memory.preciousPosition = null;
+                creep.memory.precious = null;
+            }
         } else {
             this.relocate(creep);
         }
@@ -25,16 +27,7 @@ export class RoleDropper extends RoleCreep {
                 const container = Game.getObjectById<StructureContainer>(containerId);
                 if (container) {
                     creep.memory.preciousPosition = container.pos;
-                    // this.checkInPosition(creep, container.pos);
-                    TaxiServiceManager.requestTaxi(
-                        creep,
-                        new RoomPosition(
-                            creep.memory.preciousPosition.x,
-                            creep.memory.preciousPosition.y,
-                            creep.room.name
-                        ),
-                        0
-                    );
+                    this.taxiToDestination(creep);
                     return;
                 } else {
                     refreshTree(creep.room, containerId);
@@ -49,22 +42,26 @@ export class RoleDropper extends RoleCreep {
         const dropLocation = getdropMapPosition(creep);
         if (dropLocation) {
             creep.memory.preciousPosition = { x: dropLocation.x, y: dropLocation.y };
-            TaxiServiceManager.requestTaxi(
-                creep,
-                new RoomPosition(creep.memory.preciousPosition.x, creep.memory.preciousPosition.y, creep.room.name),
-                0
-            );
-            //creep.memory.path = creep.pos.findPathTo(dropLocation.x, dropLocation.y, { ignoreCreeps: true });
-            //this.pathHandling(creep);
+            this.taxiToDestination(creep);
         }
     }
 
-    private checkInPosition(creep: Creep, pos: { x: number; y: number }) {
+    private taxiToDestination(creep: Creep) {
+        TaxiServiceManager.requestTaxi(
+            creep,
+            new RoomPosition(creep.memory.preciousPosition!.x, creep.memory.preciousPosition!.y, creep.room.name),
+            0
+        );
+    }
+
+    private checkInPosition(creep: Creep, pos: { x: number; y: number }): boolean {
         if (creep.pos.x === pos.x && creep.pos.y === pos.y) {
             this.updatePrecious(creep);
             creep.memory.working = true;
+            return true;
         } else {
-            creep.moveTo(pos.x, pos.y);
+            this.taxiToDestination(creep);
+            return false;
         }
     }
 

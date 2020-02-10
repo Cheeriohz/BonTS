@@ -3,6 +3,7 @@ import { CreepRole } from "enums/enum.roles";
 import { DedicatedCreepRequester } from "spawning/manager.dedicatedCreepRequester";
 import { BodyBuilder } from "spawning/spawning.bodyBuilder";
 import { RemoteShared } from "./remote.shared";
+import { SpawnPlanting } from "building/building.spawnPlanting";
 
 export class RoomHarassManager {
     spawn!: StructureSpawn;
@@ -17,10 +18,12 @@ export class RoomHarassManager {
         const room = Game.rooms[this.harass.roomName];
         if (room) {
             if (room.controller!.my) {
-                _.remove(this.spawn.memory.roomHarass!, rh => {
-                    return rh.roomName === this.harass.roomName;
-                });
-                // TODO Add an automatic base creation here.
+                const spawnPlant: SpawnPlanting = new SpawnPlanting(room, this.spawn);
+                if (spawnPlant.plant()) {
+                    _.remove(this.spawn.memory.roomHarass!, rh => {
+                        return rh.roomName === this.harass.roomName;
+                    });
+                }
                 return;
             }
         }
@@ -41,6 +44,7 @@ export class RoomHarassManager {
         if (this.harass.reassign) {
             this.handleReassignment();
         }
+        this.manageDgStrength();
     }
 
     private handleReassignment() {
@@ -146,7 +150,8 @@ export class RoomHarassManager {
             body = BodyBuilder.FillDualType(ATTACK, this.harass.kStrength, HEAL, this.harass.kHeal, true);
         }
         if (!this.creepInQueue(CreepRole.knight)) {
-            const knightName: string = `knight${this.harass.roomName}${Game.time.toPrecision(8)}`;
+            const knightName: string = `knight${this.harass.roomName}${Memory.creepTicker}`;
+            Memory.creepTicker++;
             const dcr: DedicatedCreepRequester = new DedicatedCreepRequester(this.spawn);
             const orders: CreepOrder = {
                 target: this.harass.roomName,
@@ -175,7 +180,8 @@ export class RoomHarassManager {
             body = BodyBuilder.FillDualType(RANGED_ATTACK, this.harass.aStrength, HEAL, this.harass.aHeal);
         }
         if (!this.creepInQueue(CreepRole.archer)) {
-            const archerName: string = `archer${this.harass.roomName}${Game.time.toPrecision(8)}`;
+            const archerName: string = `archer${this.harass.roomName}${Memory.creepTicker}`;
+            Memory.creepTicker++;
             const dcr: DedicatedCreepRequester = new DedicatedCreepRequester(this.spawn);
             const orders: CreepOrder = {
                 target: this.harass.roomName,
@@ -200,14 +206,15 @@ export class RoomHarassManager {
 
     private requestDowngrader(size: number) {
         if (!this.creepInQueue(CreepRole.reserver)) {
-            const claimer: string = `claimer${this.harass.roomName}${Game.time.toPrecision(8)}`;
+            const claimer: string = `claimer${this.harass.roomName}${Memory.creepTicker}`;
+            Memory.creepTicker++;
             const dcr: DedicatedCreepRequester = new DedicatedCreepRequester(this.spawn);
             const orders: ReserverOrder = {
                 target: this.harass.roomName,
                 independentOperator: false,
                 reserving: false,
-                claiming: false,
-                downgrading: true
+                claiming: this.harass.dgClaim!,
+                downgrading: !this.harass.dgClaim
             };
             dcr.createdDedicatedCreepRequest({
                 dedication: this.harass.roomName,
@@ -230,6 +237,28 @@ export class RoomHarassManager {
             return false;
         } else {
             return true;
+        }
+    }
+
+    private manageDgStrength() {
+        const room = Game.rooms[this.harass.roomName];
+        if (room) {
+            // Check if the room is clear.
+            if (room.find(FIND_HOSTILE_CREEPS).length === 0 && room.find(FIND_HOSTILE_STRUCTURES).length === 0) {
+                // Check if the controller needs DG or Claim
+                if (Memory.readyForExpansion && !room.controller!.my && room.controller!.level === 0) {
+                    this.harass.dgClaim = true;
+                } else {
+                    this.harass.dgClaim = false;
+                }
+                if (this.spawn.room.energyCapacityAvailable >= 1300 && !this.harass.dgClaim) {
+                    this.harass.dgStrength = 2;
+                } else if (this.spawn.room.energyCapacityAvailable >= 650) {
+                    this.harass.dgStrength = 1;
+                } else {
+                    this.harass.dgStrength = 0;
+                }
+            }
         }
     }
 }

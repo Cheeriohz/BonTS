@@ -23,6 +23,9 @@ export class SpawnReassment {
                 if (!this.spawn.room.memory.rclUpgrades) {
                     this.spawn.room.memory.rclUpgrades = [];
                 }
+                delete this.spawn.room.memory.structureDistanceTransform;
+                delete this.spawn.room.memory.roadAgnosticDistanceTransform;
+                delete this.spawn.room.memory.extensionAgnosticDistanceTransform;
                 this.spawn.room.memory.rclUpgrades.push({ newRclLevel: this.spawn.room.memory.rcl });
             }
         }

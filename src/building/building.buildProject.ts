@@ -151,7 +151,7 @@ export class BuildProjectManager {
                 break;
             }
             case BuildProjectEnum.ExtensionBootstrap: {
-                SpawnTemplate.migrateToDropHauling(this.spawn.room);
+                this.ExtensionProjectRCLSwitch();
                 _.remove(this.spawn.room.memory.buildProjects!, p => p === this.project);
                 break;
             }
@@ -163,6 +163,33 @@ export class BuildProjectManager {
                     SpawnTemplate.configureRoomSpawnTemplates(room);
                 }
                 _.remove(this.spawn.room.memory.buildProjects!, p => p === this.project);
+                break;
+            }
+        }
+    }
+
+    private ExtensionProjectRCLSwitch() {
+        switch (this.spawn.room.controller!.level) {
+            case 2: {
+                SpawnTemplate.RCL2Improvements(this.spawn.room);
+            }
+            case 3: {
+                SpawnTemplate.RCL3Improvements(this.spawn.room);
+            }
+            case 4: {
+                SpawnTemplate.RCL4Improvements(this.spawn.room);
+            }
+            case 5: {
+                SpawnTemplate.RCL5Improvements(this.spawn.room);
+            }
+            case 6: {
+                SpawnTemplate.RCL6Improvements(this.spawn.room);
+            }
+            case 7: {
+                SpawnTemplate.RCL7Improvements(this.spawn.room);
+            }
+            case 8: {
+                SpawnTemplate.RCL8Improvements(this.spawn.room);
             }
         }
     }

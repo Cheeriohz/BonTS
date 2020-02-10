@@ -99,13 +99,11 @@ export class RoleScout extends RoleRemote {
 
     private reportIndependentRoomScouting(creep: Creep) {
         creep.memory.orders!.target = "";
-        console.log();
         // TODO HACK, this needs fixing
         const spawn = _.first(_.values(Game.spawns));
         const distance = Game.map.getRoomLinearDistance(creep.room.name, spawn!.room.name);
         let roomScout: RoomScout = { roomName: creep.room.name, distance: distance };
         this.roomScoutAddSources(creep.room, roomScout);
-        console.log(`Source Scout Exit method scope: ${roomScout}`);
         this.roomScoutAddDeposit(creep.room, roomScout);
         this.roomScoutAddMineral(creep.room, roomScout);
         ThreatAssessing.ScoutAssessThreat(creep.room, roomScout);
@@ -114,27 +112,22 @@ export class RoleScout extends RoleRemote {
     }
 
     private logRoomScout(roomScout: RoomScout) {
-        console.log(`	RoomScout: ${JSON.stringify(roomScout)}`);
         Memory.scouting.roomScouts[roomScout.roomName] = roomScout;
     }
 
     private roomScoutAddSources(room: Room, roomScout: RoomScout) {
-        console.log(`Source Scout Entry: ${roomScout}`);
         const sources = room.find(FIND_SOURCES);
         switch (sources.length) {
             case 0: {
-                console.log(`No Sources`);
                 return;
             }
             case 1: {
                 roomScout.sourceA = _.first(sources)!.id;
-                console.log(`Source Scout Exit 1: ${roomScout}`);
                 return;
             }
             case 2: {
                 roomScout.sourceA = _.first(sources)!.id;
                 roomScout.sourceB = _.last(sources)!.id;
-                console.log(`Source Scout Exit 2: ${roomScout}`);
                 return;
             }
         }

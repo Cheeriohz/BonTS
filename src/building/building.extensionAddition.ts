@@ -4,6 +4,9 @@ import { buildProjectCreator } from "./building.buildProjectCreator";
 import { GeneralBuilding } from "./building.general";
 import { GetSources } from "caching/manager.sourceSelector";
 import { Visualizer } from "./building.visualizer";
+import { buildEmptydropMap } from "caching/caching.dropPickupCacher";
+import { BuildProjectEnum } from "./interfaces/building.enum";
+import { BindOptions } from "dgram";
 
 export class ExtensionAddition extends GeneralBuilding {
     private spawns!: StructureSpawn[];
@@ -25,6 +28,7 @@ export class ExtensionAddition extends GeneralBuilding {
         this.buildRoads = buildRoads;
     }
 
+    //* Re-Run support
     public alreadyProcessedSuccessfully(extensionCountTarget: number): number {
         for (const spawn of this.spawns) {
             if (spawn.room.memory.buildProjects && spawn.room.memory.buildProjects.length > 0) {
@@ -60,6 +64,36 @@ export class ExtensionAddition extends GeneralBuilding {
         return 1;
     }
 
+    //* Entry Points
+    public enqueExtensionsBootstrapProject(): boolean {
+        if (!this.room.memory.dropMap) {
+            this.room.memory.dropMap = [];
+            buildEmptydropMap(this.room.memory.dropMap, this.room);
+        }
+
+        // Because these processes are kind of slow, this should be carried out scarcely.
+        if (!this.room.memory.structureDistanceTransform) {
+            this.populateAllStructures();
+            this.room.memory.structureDistanceTransform = this.distanceTransformOccupied(
+                this.room.name,
+                this.allStructurePositions,
+                false
+            ).serialize();
+            return false;
+        }
+        // Because these processes are kind of slow, this should be carried out scarcely.
+        if (!this.room.memory.roadAgnosticDistanceTransform) {
+            this.populateAllStructuresExceptRoads();
+            this.room.memory.roadAgnosticDistanceTransform = this.distanceTransformOccupied(
+                this.room.name,
+                this.allStructurePositions,
+                false
+            ).serialize();
+            return false;
+        }
+        return this.tryPlaceBootstrap();
+    }
+
     public enqueueExtensionsProject(): boolean {
         this.pullSources();
         if (this.sources.length > 0) {
@@ -79,35 +113,241 @@ export class ExtensionAddition extends GeneralBuilding {
         }
     }
 
+    //* Handoff Logic
     private createBuildProject(buildOrders: BuildOrder[]) {
         if (this.buildRoads) {
             // TODO  Balance workload.
             const bpc: buildProjectCreator = new buildProjectCreator(this.room, this.spawns[0]);
-            bpc.passThroughCreate(buildOrders);
+            bpc.passThroughCreateMasked(buildOrders, BuildProjectEnum.ExtensionBootstrap);
         } else {
             let cacheOrders: BuildOrder[] = _.uniq(_.remove(buildOrders, bo => bo.type === STRUCTURE_ROAD));
             const bpc: buildProjectCreator = new buildProjectCreator(this.room, this.spawns[0]);
-            bpc.passThroughCreate(buildOrders);
+            bpc.passThroughCreateMasked(buildOrders, BuildProjectEnum.ExtensionBootstrap);
             this.cacheRoads(cacheOrders);
         }
     }
 
+    //* Specific Placement Determination Logic Entries
+    private tryPlaceBootstrap(): boolean {
+        const dropA: AssignmentPosition | undefined = _.first(this.room.memory.dropMap!);
+        const dropB: AssignmentPosition | undefined = _.last(this.room.memory.dropMap!);
+        if (dropA && dropB) {
+            const dPosA = new RoomPosition(dropA.x, dropA.y, this.room.name);
+            const dPosB = new RoomPosition(dropB.x, dropB.y, this.room.name);
+            const cPos: RoomPosition = this.room.controller!.pos;
+            const closest = cPos.findClosestByPath([dPosA, dPosB]);
+            let buildOrders: BuildOrder[] = [];
+            if (dPosA === closest) {
+                if (this.bootStrapPlace(dPosA, 3, buildOrders)) {
+                    if (this.bootStrapPlace(dPosB, 2, buildOrders)) {
+                        this.createBuildProject(buildOrders);
+                        return true;
+                    }
+                }
+            } else {
+                if (this.bootStrapPlace(dPosB, 3, buildOrders)) {
+                    if (this.bootStrapPlace(dPosA, 2, buildOrders)) {
+                        this.createBuildProject(buildOrders);
+                        return true;
+                    }
+                }
+            }
+        }
+        return false;
+    }
+
+    private bootStrapPlace(pos: RoomPosition, count: Number, builds: BuildOrder[]): boolean {
+        const center: RoomPosition | null = this.traverseDistanceTransformWithCheck(
+            pos,
+            this.room.memory.structureDistanceTransform!,
+            2,
+            this.room.memory.roadAgnosticDistanceTransform!,
+            3
+        );
+        if (center) {
+            if (count === 3) {
+                builds.push(this.createExtensionBuildOrder(center.x, center.y));
+            }
+            if (pos.x > center.x) {
+                builds.push(this.createExtensionBuildOrder(center.x + 1, center.y));
+            } else {
+                builds.push(this.createExtensionBuildOrder(center.x - 1, center.y));
+            }
+            if (pos.y > center.y) {
+                builds.push(this.createExtensionBuildOrder(center.x, center.y + 1));
+            } else {
+                builds.push(this.createExtensionBuildOrder(center.x, center.y - 1));
+            }
+            // Not using concat because I believe it loses scope. Might be wrong;
+            for (const bo of this.buildRoadDiamond(center.x, center.y - 2)) {
+                builds.push(bo);
+            }
+            // console.log(`buildOrders: ${JSON.stringify(builds)}`);
+            return true;
+        }
+        return false;
+    }
+
     private determineBuildPositions(): BuildOrder[] {
-        //let buildOrders: BuildOrder[] = [];
         while (this.extensionsToPlan > 0 && Game.cpu.limit - Game.cpu.getUsed() > 4) {
             if (this.noPartials) {
+                const GreenfieldBuildOrders = this.determineGreenFieldSite();
+                if (GreenfieldBuildOrders.length > 0) {
+                    return GreenfieldBuildOrders;
+                }
             } else {
                 const partialBuildOrders = this.determinePartials();
                 if (partialBuildOrders.length > 0) {
                     return partialBuildOrders;
-                    //this.updateStructureArrays(partialBuildOrders);
-                    //this.visualizeBuild(partialBuildOrders, this.room.name);
                 }
             }
         }
         return [];
     }
 
+    private determineGreenFieldSite(): BuildOrder[] {
+        // Because these processes are kind of slow, return early so we can check our time.
+        if (!this.room.memory.structureDistanceTransform) {
+            this.populateAllStructures();
+            this.room.memory.structureDistanceTransform = this.distanceTransformOccupied(
+                this.room.name,
+                this.allStructurePositions,
+                false
+            ).serialize();
+            return [];
+        }
+        // Because these processes are kind of slow, return early so we can check our time.
+        if (!this.room.memory.roadAgnosticDistanceTransform) {
+            this.populateAllStructuresExceptRoads();
+            this.room.memory.roadAgnosticDistanceTransform = this.distanceTransformOccupied(
+                this.room.name,
+                this.allStructurePositions,
+                false
+            ).serialize();
+            return [];
+        }
+        // In theory, this shouldn't be hit before RCL4, at which time both containers should exist.
+        const containerAMap = _.first(this.room.memory.containerMap);
+        const containerBMap = _.last(this.room.memory.containerMap);
+        if (containerAMap?.id && containerBMap?.id) {
+            const containerA: Structure | null = Game.getObjectById(containerAMap.id);
+            const containerB: Structure | null = Game.getObjectById(containerBMap.id);
+            if (containerA && containerB) {
+                const aPos = containerA.pos;
+                const bPos = containerB.pos;
+                const centerA: RoomPosition | null = this.traverseDistanceTransformWithCheck(
+                    aPos,
+                    this.room.memory.structureDistanceTransform!,
+                    2,
+                    this.room.memory.roadAgnosticDistanceTransform!,
+                    3
+                );
+                const centerB: RoomPosition | null = this.traverseDistanceTransformWithCheck(
+                    aPos,
+                    this.room.memory.structureDistanceTransform!,
+                    2,
+                    this.room.memory.roadAgnosticDistanceTransform!,
+                    3
+                );
+                if (centerA && centerB) {
+                    if (this.extensionsToPlan > 5) {
+                        return _.concat(this.PlotFromCenter(centerA, []), this.PlotFromCenter(centerB, []));
+                    }
+                    if (aPos.getRangeTo(centerA) < bPos.getRangeTo(centerB)) {
+                        // Do A first
+                        return this.PlotFromCenter(centerA, []);
+                    } else {
+                        // Do B first
+                        return this.PlotFromCenter(centerB, []);
+                    }
+                } else if (centerA) {
+                    return this.PlotFromCenter(centerA, []);
+                } else if (centerB) {
+                    return this.PlotFromCenter(centerB, []);
+                } else {
+                    console.log("Could not determine a position for greenfield.");
+                    return [];
+                }
+            }
+        }
+        return [];
+    }
+
+    //* General Pre Handoff Testing
+    private checkCenterIsCenterForGivenProspects(center: RoomPosition, prospects: RoomPosition[]): boolean {
+        for (const p of prospects) {
+            if (this.calculateOrthogonalDistance(center, p) > 1) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    private testCenterPlot(center: RoomPosition, prospects: RoomPosition[]): BuildOrder[] {
+        const deserializedExtensionAgnosticDistanceTransform: CostMatrix = PathFinder.CostMatrix.deserialize(
+            this.room.memory.extensionAgnosticDistanceTransform!
+        );
+        if (this.checkCenterIsCenterForGivenProspects(center, prospects)) {
+            const dtValue = deserializedExtensionAgnosticDistanceTransform.get(center.x, center.y);
+            // console.log(`dtValue: ${dtValue} for center: ${center}`);
+            // TODO Break this out into different testers.
+            if (dtValue >= 1) {
+                // Just dump the entire project in then filter on the end.
+                return this.PlotFromCenter(center, prospects);
+            }
+        }
+        return [];
+    }
+
+    private PlotFromCenter(center: RoomPosition, prospects: RoomPosition[]) {
+        let buildOrders: BuildOrder[] = [this.createExtensionBuildOrder(center.x, center.y)];
+        for (const cardinal of this.cardinals) {
+            buildOrders.push(this.createExtensionBuildOrder(center.x + cardinal[0], center.y + cardinal[1]));
+        }
+        for (const prospect of prospects) {
+            _.remove(buildOrders, bo => {
+                return bo.x === prospect.x && bo.y === prospect.y;
+            });
+        }
+        return _.concat(buildOrders, this.buildRoadDiamond(center.x, center.y - 2));
+    }
+
+    private _testCenterPlot(center: RoomPosition, prospects: RoomPosition[]): BuildOrder[] {
+        // console.log(`DEBUG center: ${JSON.stringify(center)}`);
+        let potentialFailures = center.findInRange(this.allStructurePositions, 2);
+
+        for (const potentialFailure of potentialFailures) {
+            const orthogonalDistance = this.calculateOrthogonalDistance(center, potentialFailure);
+            if (orthogonalDistance < 3) {
+                if (
+                    !_.find(prospects, s => {
+                        return s.x === potentialFailure.x && s.y === potentialFailure.y;
+                    }) &&
+                    !_.find(this.allRoads, r => {
+                        return r.x === potentialFailure.x && r.y === potentialFailure.y;
+                    })
+                ) {
+                    // console.log(`DEBUG disqualified by: ${JSON.stringify(potentialFailure)}`);
+                    // this is a disqualifying position
+                    return [];
+                }
+            }
+        }
+        // Just dump the entire project in then filter on the end.
+        let buildOrders: BuildOrder[] = [this.createExtensionBuildOrder(center.x, center.y)];
+        for (const cardinal of this.cardinals) {
+            buildOrders.push(this.createExtensionBuildOrder(center.x + cardinal[0], center.y + cardinal[1]));
+        }
+        for (const prospect of prospects) {
+            _.remove(buildOrders, bo => {
+                return bo.x === prospect.x && bo.y === prospect.y;
+            });
+        }
+
+        return _.concat(buildOrders, this.buildRoadDiamond(center.x, center.y - 2));
+    }
+
+    //* Generic Assistive Methods
     private cacheRoads(buildOrders: BuildOrder[]) {
         if (!this.room.memory.reservedBuilds) {
             this.room.memory.reservedBuilds = buildOrders;
@@ -170,16 +410,26 @@ export class ExtensionAddition extends GeneralBuilding {
         });
 
         if (filteredNeighborMaps.length > 0) {
-            // We have unsatisfied extensions.
+            // We have unsatisfied extensions, we need the extension agnostic distance transform. Do an early return so we can check that it isn't pushing us over.
+            if (!this.room.memory.extensionAgnosticDistanceTransform) {
+                this.populateAllStructuresExceptExtensions();
+                this.room.memory.extensionAgnosticDistanceTransform = this.distanceTransformOccupied(
+                    this.room.name,
+                    this.allStructurePositions,
+                    true
+                ).serialize();
+                return [];
+            }
             let unsatisfiedExtensions = _.map(filteredNeighborMaps, nm => nm.pos);
             while (unsatisfiedExtensions.length > 0) {
-                // console.log(`buildOrdersToAdd: ${JSON.stringify(buildOrdersToAdd)}`);
                 const plotResults = this.attemptPlotExisting(unsatisfiedExtensions, filteredNeighborMaps);
                 for (const rp of plotResults.removals) {
                     _.remove(unsatisfiedExtensions, ue => ue.x === rp.x && ue.y === rp.y);
                     _.remove(filteredNeighborMaps, fnm => fnm.pos.x === rp.x && fnm.pos.y === rp.y);
                 }
+                console.log(`buildOrdersToAdd: ${JSON.stringify(plotResults.buildOrders)}`);
                 buildOrdersToAdd = _.concat(buildOrdersToAdd, plotResults.buildOrders);
+                console.log(`buildOrdersToAdd: ${JSON.stringify(buildOrdersToAdd)}`);
             }
         }
         if (buildOrdersToAdd.length > 0) {
@@ -196,8 +446,10 @@ export class ExtensionAddition extends GeneralBuilding {
     ): { removals: RoomPosition[]; buildOrders: BuildOrder[] } {
         // console.log(`DEBUG for attemptPlotExisting ${JSON.stringify(unsatifiedExtensions)}`);
         const prospect = _.first(neighboringPositions);
+        console.log(`Prospect: ${JSON.stringify(prospect)}`);
         if (prospect) {
             const prospects = _.concat([prospect.pos], _.intersection(unsatifiedExtensions, prospect.neighbors));
+            console.log(`Prospects: ${JSON.stringify(prospects)}`);
             const attemptResults = this.attemptIdCenterPosition(prospects);
             // console.log(`DEBUG attemptResults: ${JSON.stringify(attemptResults)}`);
             if (!attemptResults) {
@@ -219,6 +471,38 @@ export class ExtensionAddition extends GeneralBuilding {
     }
 
     private attemptIdCenterPosition(prospects: RoomPosition[]): BuildOrder[] | null {
+        if (prospects.length >= 3) {
+            // With three or more, we have only one possible center position.
+            let x = -1;
+            let y = -1;
+            for (let i = 0; i < prospects.length; i++) {
+                const prospect = prospects[i];
+                if (
+                    _.filter(prospects, p => {
+                        return p.x === prospect.x && p.y !== prospect.y;
+                    }).length > 0
+                ) {
+                    x = prospect.x;
+                }
+                if (
+                    _.filter(prospects, p => {
+                        return p.x !== prospect.x && p.y === prospect.y;
+                    }).length > 0
+                ) {
+                    y = prospect.y;
+                }
+                if (x !== -1 && y !== -1) {
+                    // We have identified the center
+                    const buildOrders = this.testCenterPlot(new RoomPosition(x, y, this.room.name), prospects);
+                    if (buildOrders.length > 0) {
+                        return buildOrders;
+                    } else {
+                        return null;
+                    }
+                }
+            }
+        }
+
         let r1Roads: RoomPosition[] = [];
         for (const prospect of prospects) {
             r1Roads = _.concat(r1Roads, prospect.findInRange(this.allRoads, 1));
@@ -254,41 +538,6 @@ export class ExtensionAddition extends GeneralBuilding {
             return null;
         }
         return [];
-    }
-
-    private testCenterPlot(center: RoomPosition, prospects: RoomPosition[]): BuildOrder[] {
-        // console.log(`DEBUG center: ${JSON.stringify(center)}`);
-        let potentialFailures = center.findInRange(this.allStructurePositions, 2);
-
-        for (const potentialFailure of potentialFailures) {
-            const orthogonalDistance = this.calculateOrthogonalDistance(center, potentialFailure);
-            if (orthogonalDistance < 3) {
-                if (
-                    !_.find(prospects, s => {
-                        return s.x === potentialFailure.x && s.y === potentialFailure.y;
-                    }) &&
-                    !_.find(this.allRoads, r => {
-                        return r.x === potentialFailure.x && r.y === potentialFailure.y;
-                    })
-                ) {
-                    // console.log(`DEBUG disqualified by: ${JSON.stringify(potentialFailure)}`);
-                    // this is a disqualifying position
-                    return [];
-                }
-            }
-        }
-        // Just dump the entire project in then filter on the end.
-        let buildOrders: BuildOrder[] = [this.createExtensionBuildOrder(center.x, center.y)];
-        for (const cardinal of this.cardinals) {
-            buildOrders.push(this.createExtensionBuildOrder(center.x + cardinal[0], center.y + cardinal[1]));
-        }
-        for (const prospect of prospects) {
-            _.remove(buildOrders, bo => {
-                return bo.x === prospect.x && bo.y === prospect.y;
-            });
-        }
-
-        return _.concat(buildOrders, this.buildRoadDiamond(center.x, center.y - 2));
     }
 
     private createNeighboringPositionsForExtension(ext: RoomPosition): NeighboringPositions {
@@ -337,6 +586,48 @@ export class ExtensionAddition extends GeneralBuilding {
         const reservedBuildPositions = _.map(this.room.memory.reservedBuilds, rb => {
             return new RoomPosition(rb.x, rb.y, this.room.name);
         });
+        this.allStructurePositions = _.concat(this.allStructurePositions, reservedBuildPositions);
+    }
+
+    private populateAllStructuresExceptRoads() {
+        this.allStructurePositions = _.map(
+            this.room.find(FIND_STRUCTURES, {
+                filter: s => {
+                    return s.structureType !== STRUCTURE_ROAD;
+                }
+            }),
+            s => s.pos
+        );
+        const reservedBuildPositions = _.map(
+            _.filter(this.room.memory.reservedBuilds, s => {
+                return s.type !== STRUCTURE_ROAD;
+            }),
+            rb => {
+                return new RoomPosition(rb.x, rb.y, this.room.name);
+            }
+        );
+        this.allStructurePositions = _.concat(this.allStructurePositions, reservedBuildPositions);
+    }
+
+    private populateAllStructuresExceptExtensions() {
+        this.allStructurePositions = _.map(
+            this.room.find(FIND_STRUCTURES, {
+                filter: s => {
+                    return s.structureType !== STRUCTURE_EXTENSION;
+                }
+            }),
+            s => s.pos
+        );
+        const reservedBuildPositions = _.map(
+            _.filter(this.room.memory.reservedBuilds, s => {
+                {
+                    return s.type !== STRUCTURE_EXTENSION;
+                }
+            }),
+            rb => {
+                return new RoomPosition(rb.x, rb.y, this.room.name);
+            }
+        );
         this.allStructurePositions = _.concat(this.allStructurePositions, reservedBuildPositions);
     }
 }

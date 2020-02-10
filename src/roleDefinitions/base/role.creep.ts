@@ -550,7 +550,7 @@ export class RoleCreep {
             if (blockers.length > 0) {
                 const blocker = _.first(blockers);
                 if (blocker) {
-                    if (blocker.fatigue) {
+                    if (blocker.fatigue || blocker.memory.role === CreepRole.dropper) {
                         return this.pathingOvertake(creep);
                     } else {
                         blocker.moveTo(creep.pos.x, creep.pos.y);
@@ -582,6 +582,8 @@ export class RoleCreep {
                     return true;
                 }
             }
+        } else {
+            this.cleanUpPath(creep);
         }
         // TODO Add other overtake options
         return false;

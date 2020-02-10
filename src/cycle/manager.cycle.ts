@@ -17,6 +17,7 @@ import { Visualizer } from "building/building.visualizer";
 import { BorderAggression } from "military/military.borderAggression";
 import { GeneralBuilding } from "building/building.general";
 import { buildProjectCreator } from "building/building.buildProjectCreator";
+import { SpawnTemplate } from "spawning/spawning.templating";
 
 export class CycleManager {
     public static check() {
@@ -49,20 +50,11 @@ export class CycleManager {
     }
 
     private static everyCycle() {
-        this.drawReservedConstruction();
+        if (Memory.showReserved) {
+            this.drawReservedConstruction(Memory.showReserved);
+        }
         ConstructionSiteCacher.dispose();
         ControllerCacher.dispose();
-    }
-
-    private static drawReservedConstruction() {
-        if (Memory.showReserved === true) {
-            const vis = new Visualizer();
-            for (const room of _.values(Game.rooms)) {
-                if (room.memory.reservedBuilds) {
-                    vis.drawBuildOrders(room.memory.reservedBuilds, room.name);
-                }
-            }
-        }
     }
 
     private static updateSpawnConstructionSiteMaps() {
@@ -87,11 +79,6 @@ export class CycleManager {
 
             this.handleExpeditionResultsAction(spawn);
         }
-    }
-
-    private static borderAgressionTest() {
-        const ba: BorderAggression = new BorderAggression(Game.spawns["A"]);
-        ba.HandleTrivialNeighbors();
     }
 
     private static handleExpeditionResultsAction(spawn: StructureSpawn) {
@@ -188,5 +175,27 @@ export class CycleManager {
     private static createRemoteSpawnBuildProjectHelper(x: number, y: number, roomName: string, spawnName: string) {
         const bpc: buildProjectCreator = new buildProjectCreator(Game.rooms[roomName]!, Game.spawns[spawnName]);
         bpc.createSpawnBuildProject(new RoomPosition(x, y, roomName), Memory.scouting.roomScouts[roomName]);
+    }
+
+    private static borderAgressionTest() {
+        const ba: BorderAggression = new BorderAggression(Game.spawns["A"]);
+        ba.HandleTrivialNeighbors();
+    }
+
+    private static drawReservedConstruction(roomName: string) {
+        const vis = new Visualizer();
+        const room = Game.rooms[roomName];
+        if (room) {
+            let boAll: BuildOrder[] = [];
+            if (room.memory.reservedBuilds) {
+                boAll = _.concat(boAll, room.memory.reservedBuilds);
+            }
+            if (room.memory.buildProjects) {
+                for (const bp of room.memory.buildProjects) {
+                    boAll = _.concat(boAll, bp.buildOrders);
+                }
+            }
+            vis.drawBuildOrders(boAll, roomName);
+        }
     }
 }

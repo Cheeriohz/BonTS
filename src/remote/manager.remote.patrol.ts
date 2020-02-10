@@ -91,7 +91,8 @@ export class RemotePatrolManager {
 
     private requestKnight() {
         if (!this.creepInQueue(CreepRole.knight)) {
-            const knightName: string = `patrol${Game.time.toPrecision(8)}`;
+            const knightName: string = `patrol${Memory.creepTicker}`;
+            Memory.creepTicker++;
             const dcr: DedicatedCreepRequester = new DedicatedCreepRequester(this.spawn);
             const orders: CreepOrder = {
                 target: this.patrol.roomName,

@@ -13,7 +13,7 @@ export class ConstructionSiteCacher {
                 } else {
                     // See if we need to refresh our target.
                     const site = Game.getObjectById<ConstructionSite<BuildableStructureConstant>>(
-                        room.memory.constructionSites[room.memory.constructionSites.length - 1]
+                        _.first(room.memory.constructionSites)!
                     );
                     if (site) {
                         // Store object for local cycle memory and return it.
@@ -21,7 +21,7 @@ export class ConstructionSiteCacher {
                         return site;
                     } else {
                         // Refresh our object list.
-                        return this.popAndRefreshLazy(room);
+                        return this.dropAndRefreshLazy(room);
                     }
                 }
             } else {
@@ -38,16 +38,16 @@ export class ConstructionSiteCacher {
     }
 
     // Lazy method. Uses internal room memory to check for a new target, but will not seek out a data refresh.
-    private static popAndRefreshLazy(room: Room) {
+    private static dropAndRefreshLazy(room: Room) {
         if (room.memory.constructionSites.length > 1) {
-            room.memory.constructionSites.pop();
+            room.memory.constructionSites = _.drop(room.memory.constructionSites);
             const site = Game.getObjectById<ConstructionSite<BuildableStructureConstant>>(
-                room.memory.constructionSites[room.memory.constructionSites.length - 1]
+                _.first(room.memory.constructionSites)!
             );
             _.set(this.roomSiteMap, room.name, site);
             return site;
         } else {
-            room.memory.constructionSites.pop();
+            room.memory.constructionSites = _.drop(room.memory.constructionSites);
             return null;
         }
     }

@@ -14,6 +14,9 @@ interface CreepMemory {
     home?: string | null;
     repair?: string | null;
 
+    //* Edge Case Management
+    time?: number;
+
     //* Path Caching
     path?: PathStep[] | null;
     stuckCount?: number | null;
@@ -48,6 +51,10 @@ interface RoomMemory {
     //* Building
     reservedBuilds?: BuildOrder[] | null;
     buildProjects?: BuildProject[] | null;
+    naturalDistanceTransform?: number[] | null;
+    structureDistanceTransform?: number[] | null;
+    roadAgnosticDistanceTransform?: number[] | null;
+    extensionAgnosticDistanceTransform?: number[] | null;
 
     //* Combat
     target?: string | null;
@@ -61,6 +68,7 @@ interface RoomMemory {
     rclUpgrades: RCLUpgradeEvent[] | null;
     lowRCLBoost: boolean;
     staticUpgraders: boolean;
+    upgraderTaxi: boolean;
 }
 
 interface SpawnMemory {
@@ -79,11 +87,13 @@ interface SpawnMemory {
 
 interface Memory {
     //* Global Debug Tools
-    showReserved: boolean;
+    showReserved?: string;
     log: any;
+    readyForExpansion: boolean;
 
     //* Integral Game Memory
     cycle: number;
+    creepTicker: number;
 
     //* Creep Tracking
     roleRoomMap: Dictionary<number[]>;
@@ -105,6 +115,7 @@ interface Taxi {
     priority: number;
     originalRole: number;
     taxiRoute: PathStep[] | null;
+    arrivalDistance?: number;
 }
 
 // `global` extension samples

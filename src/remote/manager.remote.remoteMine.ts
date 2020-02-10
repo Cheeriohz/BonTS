@@ -148,7 +148,8 @@ export class RemoteMineManager {
     }
 
     private requestMiner() {
-        const minerName: string = `dMiner${this.room.name}${Game.time.toPrecision(8)}`;
+        const minerName: string = `dMiner${this.room.name}${Memory.creepTicker}`;
+        Memory.creepTicker++;
         const dcr: DedicatedCreepRequester = new DedicatedCreepRequester(this.spawn);
         dcr.createdDedicatedCreepRequest({
             dedication: this.mine.containerId!,
@@ -166,7 +167,8 @@ export class RemoteMineManager {
     }
 
     private requestHauler() {
-        const haulerName: string = `dHauler${this.room.name}${Game.time.toPrecision(8)}`;
+        const haulerName: string = `dHauler${this.room.name}${Memory.creepTicker}`;
+        Memory.creepTicker++;
         const dcr: DedicatedCreepRequester = new DedicatedCreepRequester(this.spawn);
         dcr.createdDedicatedCreepRequest({
             dedication: this.mine.containerId!,

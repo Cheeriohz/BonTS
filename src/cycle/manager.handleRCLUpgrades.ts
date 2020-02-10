@@ -6,6 +6,8 @@ import { RemoteHarvestHandler } from "remote/remote.remoteHarvestHandler";
 import { ExtensionAddition } from "building/building.extensionAddition";
 import { SpawnTemplate } from "spawning/spawning.templating";
 import { CreepRequester } from "spawning/manager.creepRequester";
+import { CreepRole } from "enums/enum.roles";
+import { buildProjectCreator } from "building/building.buildProjectCreator";
 
 export class RCLUpgradeHandler {
     public static handleRCLUpgrades(spawn: StructureSpawn) {
@@ -32,6 +34,12 @@ export class RCLUpgradeHandler {
                         }
                         break;
                     }
+                    case 4: {
+                        if (this.handleRCLUpgradeTo4(spawn)) {
+                            _.remove(spawn.room.memory.rclUpgrades, rclUpgradeEvent);
+                        }
+                        break;
+                    }
                     case 6: {
                         if (this.handleRCLUpgradeTo6(spawn)) {
                             _.remove(spawn.room.memory.rclUpgrades, rclUpgradeEvent);
@@ -52,22 +60,41 @@ export class RCLUpgradeHandler {
         }
     }
     private static handleRCLUpgradeTo1(spawn: StructureSpawn): boolean {
+        RCLUpgradeHandler.stealRemoteHarvesters(spawn);
         return true;
     }
 
     private static handleRCLUpgradeTo2(spawn: StructureSpawn): boolean {
-        const localExpansion: LocalExpansion = new LocalExpansion(spawn, spawn.room, spawn.pos, false);
-        localExpansion.routeToSources();
-        localExpansion.routeToController();
-        // TODO Create close local extension builder.
+        if (!spawn.room.memory.reservedBuilds || !(spawn.room.memory.reservedBuilds.length > 0)) {
+            const localExpansion: LocalExpansion = new LocalExpansion(spawn, spawn.room, spawn.pos, false);
+            localExpansion.routeToSources();
+            localExpansion.routeToController();
+        }
+        if (!this.handleRoomExtensionsBootstrap(spawn)) {
+            return false;
+        }
         const cr: CreepRequester = new CreepRequester(spawn);
         cr.RequestIndependentScout();
         return true;
     }
 
     private static handleRCLUpgradeTo3(spawn: StructureSpawn): boolean {
+        if (!this.handleRoomExtensionsEnqueue([spawn], true, 10)) {
+            return false;
+        }
         const localExpansion: LocalExpansion = new LocalExpansion(spawn, spawn.room, spawn.pos, false);
         localExpansion.checkForContainerExpansion();
+        // TODO Add tower
+        return true;
+    }
+
+    private static handleRCLUpgradeTo4(spawn: StructureSpawn): boolean {
+        // TODO Add storage
+        const bpc: buildProjectCreator = new buildProjectCreator(spawn.room, spawn);
+        bpc.createReservedRoads();
+        if (!this.handleRoomExtensionsEnqueue([spawn], true, 20)) {
+            return false;
+        }
         return true;
     }
 
@@ -126,6 +153,40 @@ export class RCLUpgradeHandler {
 		}
 		*/
         return true;
+    }
+
+    private static stealRemoteHarvesters(spawn: StructureSpawn) {
+        for (let c of _.values(Game.creeps)) {
+            if (c.memory.role === CreepRole.harvester && c.memory.home && c.memory.orders!.target === spawn.room.name) {
+                if (c.room.name === spawn.room.name) {
+                    delete c.memory.home;
+                    delete c.memory.orders;
+                    delete c.memory.dedication;
+                } else {
+                    c.memory.home = spawn.room.name;
+                }
+            }
+        }
+    }
+
+    private static handleRoomExtensionsBootstrap(spawn: StructureSpawn): boolean {
+        const ea: ExtensionAddition = new ExtensionAddition([spawn], false);
+        const returnCode = ea.alreadyProcessedSuccessfully(5);
+        switch (returnCode) {
+            case 0: {
+                return ea.enqueExtensionsBootstrapProject();
+            }
+            case 1: {
+                return true;
+            }
+            case 2: {
+                return false;
+            }
+            default: {
+                console.log("Unexpected return code in handleRoomExtensionsEnqueue");
+                return false;
+            }
+        }
     }
 
     private static handleRoomExtensionsEnqueue(
