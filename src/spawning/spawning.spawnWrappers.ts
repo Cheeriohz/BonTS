@@ -1,8 +1,23 @@
+import { CreepRole } from "enums/enum.roles";
 import _ from "lodash";
 
-export class ManagerHelperSpawner {
+export class SpawnWrapper {
+    public static spawnGeneric(room: Room, body: any[], cap: number, role: CreepRole): boolean {
+        const roomRoleTracker = _.get(Memory.roleRoomMap, `[${room.name}][${role}]`, 0);
+
+        if (roomRoleTracker < cap) {
+            const spawns = room.find(FIND_MY_SPAWNS);
+
+            if (spawns.length > 0) {
+                this.spawnACreep(spawns[0], body, CreepRole[role], role);
+                return false;
+            }
+        }
+        return true;
+    }
+
     public static spawnACreep(spawn: StructureSpawn, body: any[], name: string, assignedRole: number) {
-        const returnCode = spawn.spawnCreep(body, `${name}${Game.time.toString()}`, {
+        const returnCode = spawn.spawnCreep(body, `${name}${Memory.creepTicker}`, {
             memory: {
                 role: assignedRole,
                 working: false,
@@ -12,6 +27,7 @@ export class ManagerHelperSpawner {
                 precious: null
             }
         });
+        Memory.creepTicker++;
         if (returnCode === 0) {
             this.updateRoomRoleMap(spawn, assignedRole);
         }
@@ -25,7 +41,8 @@ export class ManagerHelperSpawner {
         assignedRole: number,
         memory: CreepMemory
     ) {
-        const returnCode = spawn.spawnCreep(body, `${name}${Game.time.toString()}`, { memory: memory });
+        const returnCode = spawn.spawnCreep(body, `${name}${Memory.creepTicker}`, { memory: memory });
+        Memory.creepTicker++;
         if (returnCode === 0) {
             this.updateRoomRoleMap(spawn, assignedRole);
         }

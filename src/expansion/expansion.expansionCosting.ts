@@ -1,5 +1,5 @@
 import _ from "lodash";
-import { GeneralBuilding } from "building/building.general";
+import { GeneralBuilding } from "building/base/building.general";
 import { SourceMapGenerator } from "source-map";
 
 export class ExpansionCosting extends GeneralBuilding {

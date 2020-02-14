@@ -1,8 +1,7 @@
 import { CreepRole } from "enums/enum.roles";
 import { RoleTaxi } from "roleDefinitions/role.taxi";
 import _ from "lodash";
-import { spawn } from "child_process";
-import { ManagerHelperSpawner } from "./shared/manager.shared.spawner";
+import { SpawnWrapper } from "spawning/spawning.spawnWrappers";
 
 export class TaxiServiceManager {
     public static requestTaxi(creep: Creep, destination: RoomPosition, priority: number, arrivalDistance?: number) {
@@ -21,11 +20,11 @@ export class TaxiServiceManager {
         if (creep.room.memory.spawns) {
             // TODO this doesn't account for spawn requests this turn;
             const energyAvailable = creep.room.energyAvailable;
-            if (energyAvailable > 50) {
-                for (const spawnName of creep.room.memory.spawns) {
-                    const spawn = Game.spawns[spawnName];
-                    if (spawn && !spawn.spawning) {
-                        ManagerHelperSpawner.spawnACreep(
+            if (energyAvailable > 100) {
+                for (const spawnId of creep.room.memory.spawns) {
+                    const spawn = Game.getObjectById(spawnId);
+                    if (spawn && spawn.spawning === null) {
+                        SpawnWrapper.spawnACreep(
                             spawn,
                             this.GetTaxiBody(creep.room),
                             `taxi${Memory.creepTicker}`,
@@ -40,7 +39,7 @@ export class TaxiServiceManager {
 
     private static GetTaxiBody(room: Room): BodyPartConstant[] {
         // TODO make ... better
-        return [MOVE];
+        return [CARRY, MOVE];
     }
 
     public static checkRequest(client: Creep) {

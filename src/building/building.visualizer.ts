@@ -47,6 +47,15 @@ export class Visualizer {
         }
     }
 
+    public visualizeCostMatrixDeserialized(roomName: string, matrix: CostMatrix) {
+        const visualizer: RoomVisual = new RoomVisual(roomName);
+        for (let x = 0; x <= 49; x++) {
+            for (let y = 0; y <= 49; y++) {
+                visualizer.text(matrix.get(x, y).toString(), x, y);
+            }
+        }
+    }
+
     public visualizeTargetCallout(roomName: string, startPoint: RoomPosition, endPoint: RoomPosition) {
         const visualizer: RoomVisual = new RoomVisual(roomName);
         if (visualizer) {

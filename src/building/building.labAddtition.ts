@@ -1,7 +1,7 @@
 //reservedBuilds
 import _ from "lodash";
 import { buildProjectCreator } from "./building.buildProjectCreator";
-import { GeneralBuilding } from "./building.general";
+import { GeneralBuilding } from "./base/building.general";
 import { Visualizer } from "./building.visualizer";
 
 export class LabAddition extends GeneralBuilding {

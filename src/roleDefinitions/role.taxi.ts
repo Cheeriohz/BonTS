@@ -1,25 +1,26 @@
-import { RoleCreep } from "./base/role.creep";
 import _ from "lodash";
-import { TaxiServiceManager } from "managers/manager.taxiService";
 import { CreepRole } from "enums/enum.roles";
+import { RoleHauler } from "./role.hauler";
 
-export class RoleTaxi extends RoleCreep {
+export class RoleTaxi extends RoleHauler {
     public run(creep: Creep) {
         if (creep.memory.taxi) {
             const client = Game.creeps[creep.memory.taxi.client];
-            if (client.spawning) {
-                if (!creep.pos.isNearTo(client)) {
-                    creep.moveTo(client.pos);
+            if (client) {
+                if (client.spawning) {
+                    if (!creep.pos.isNearTo(client)) {
+                        creep.moveTo(client.pos);
+                    }
+                    return;
                 }
-                return;
-            }
-            if (creep.memory.taxi.taxiRoute) {
-                this.drive(creep, client);
-            } else {
-                this.pickupClient(creep, client);
+                if (creep.memory.taxi.taxiRoute) {
+                    this.drive(creep, client);
+                } else {
+                    this.pickupClient(creep, client);
+                }
             }
         } else {
-            console.log(`Creep: ${creep.name} has been orphaned as a taxi driver.`);
+            super.run(creep);
         }
     }
 
@@ -87,9 +88,8 @@ export class RoleTaxi extends RoleCreep {
         return false;
     }
 
-    // TODO fix slight edge case around pedestrian already having moved.
     private movePedestrian(ped: Creep, relocationPos: RoomPosition): boolean {
-        if (ped.memory.role !== CreepRole.taxi) {
+        if ((ped.memory.role !== CreepRole.taxi || !ped.memory.taxi) && ped.getActiveBodyparts(MOVE)) {
             ped.moveTo(relocationPos, { ignoreCreeps: false });
             ped.memory.moved = true;
             return true;
@@ -132,9 +132,11 @@ export class RoleTaxi extends RoleCreep {
     }
 
     private pullMove(taxi: Creep, client: Creep) {
-        taxi.pull(client);
-        taxi.move(_.first(taxi.memory.taxi!.taxiRoute)!.direction);
-        client.move(taxi);
+        if (taxi.memory.taxi && taxi.memory.taxi.taxiRoute && taxi.memory.taxi.taxiRoute.length > 0) {
+            taxi.pull(client);
+            taxi.move(_.first(taxi.memory.taxi.taxiRoute)!.direction);
+            client.move(taxi);
+        }
     }
 
     private concludeTaxi(taxi: Creep, client: Creep) {
@@ -145,6 +147,7 @@ export class RoleTaxi extends RoleCreep {
         client.say("💳");
         taxi.memory.role = taxi.memory.taxi!.originalRole;
         client.memory.moved = true;
+        delete taxi.memory.taxi;
         delete client.memory.activeTaxi;
     }
 }

@@ -1,4 +1,4 @@
-import { LocalExpansion } from "building/building.LocalExpansion";
+import { LocalExpansion } from "building/building.localExpansion";
 import { TerminalExpansion } from "building/building.terminalExpansion";
 import _ from "lodash";
 import { LabAddition } from "building/building.labAddtition";
@@ -8,6 +8,8 @@ import { SpawnTemplate } from "spawning/spawning.templating";
 import { CreepRequester } from "spawning/manager.creepRequester";
 import { CreepRole } from "enums/enum.roles";
 import { buildProjectCreator } from "building/building.buildProjectCreator";
+import { StorageAddition } from "building/building.storageAddition";
+import { TowerAddition } from "building/building.towerAddition";
 
 export class RCLUpgradeHandler {
     public static handleRCLUpgrades(spawn: StructureSpawn) {
@@ -40,6 +42,12 @@ export class RCLUpgradeHandler {
                         }
                         break;
                     }
+                    case 5: {
+                        if (this.handleRCLUpgradeTo5(spawn)) {
+                            _.remove(spawn.room.memory.rclUpgrades, rclUpgradeEvent);
+                        }
+                        break;
+                    }
                     case 6: {
                         if (this.handleRCLUpgradeTo6(spawn)) {
                             _.remove(spawn.room.memory.rclUpgrades, rclUpgradeEvent);
@@ -53,7 +61,6 @@ export class RCLUpgradeHandler {
                         break;
                     }
                     default: {
-                        console.log(`No handling implemented for RCL Level ${rclUpgradeEvent.newRclLevel}`);
                     }
                 }
             }
@@ -82,17 +89,45 @@ export class RCLUpgradeHandler {
         if (!this.handleRoomExtensionsEnqueue([spawn], true, 10)) {
             return false;
         }
+
         const localExpansion: LocalExpansion = new LocalExpansion(spawn, spawn.room, spawn.pos, false);
         localExpansion.checkForContainerExpansion();
-        // TODO Add tower
+
+        const storageAddition: StorageAddition = new StorageAddition(spawn, spawn.room);
+        if (!storageAddition.reserveStorage()) {
+            return false;
+        }
+
+        const towerAddition: TowerAddition = new TowerAddition(spawn, spawn.room);
+        if (!towerAddition.addTower()) {
+            if (!towerAddition.addTower()) {
+                return false;
+            }
+        }
         return true;
     }
 
     private static handleRCLUpgradeTo4(spawn: StructureSpawn): boolean {
-        // TODO Add storage
         const bpc: buildProjectCreator = new buildProjectCreator(spawn.room, spawn);
         bpc.createReservedRoads();
         if (!this.handleRoomExtensionsEnqueue([spawn], true, 20)) {
+            return false;
+        }
+        const storageAddition: StorageAddition = new StorageAddition(spawn, spawn.room);
+        if (!storageAddition.buildStorageFromReservedMemory()) {
+            return false;
+        }
+        return true;
+    }
+
+    private static handleRCLUpgradeTo5(spawn: StructureSpawn): boolean {
+        const bpc: buildProjectCreator = new buildProjectCreator(spawn.room, spawn);
+        bpc.createReservedRoads();
+        if (!this.handleRoomExtensionsEnqueue([spawn], true, 30)) {
+            return false;
+        }
+        const towerAddition: TowerAddition = new TowerAddition(spawn, spawn.room);
+        if (!towerAddition.addTower()) {
             return false;
         }
         return true;
@@ -183,7 +218,6 @@ export class RCLUpgradeHandler {
                 return false;
             }
             default: {
-                console.log("Unexpected return code in handleRoomExtensionsEnqueue");
                 return false;
             }
         }
@@ -207,7 +241,6 @@ export class RCLUpgradeHandler {
                 return false;
             }
             default: {
-                console.log("Unexpected return code in handleRoomExtensionsEnqueue");
                 return false;
             }
         }

@@ -1,6 +1,7 @@
 import { CreepRole } from "enums/enum.roles";
 import _ from "lodash";
 import { buildProjectCreator } from "building/building.buildProjectCreator";
+import { CreepQualifiesAsActive } from "./caching.creepCaching";
 
 export function getdropMapPosition(creep: Creep): { x: number; y: number } | null {
     let dropMap = creep.room.memory.dropMap;
@@ -152,7 +153,7 @@ export function pruneDropTree(room: Room) {
 function cleanTree(dropMap: AssignmentPosition[]): AssignmentPosition[] {
     for (let i = 0; i < dropMap.length; i++) {
         for (let index = 0; index < dropMap[i].assigned?.length; index++) {
-            while (index < dropMap[i].assigned?.length && !(dropMap[i].assigned[index] in Game.creeps)) {
+            while (index < dropMap[i].assigned?.length && !CreepQualifiesAsActive(dropMap[i].assigned[index])) {
                 dropMap[i].assigned.splice(index, 1);
             }
         }

@@ -8,7 +8,7 @@ export class RoleDropper extends RoleCreep {
     public run(creep: Creep) {
         // Check if in range to harvest
         if (creep.memory.working) {
-            if (super.harvestPrecious(creep) === ERR_NOT_IN_RANGE) {
+            if (this.harvestPrecious(creep) === ERR_NOT_IN_RANGE) {
                 creep.memory.working = false;
                 creep.memory.preciousPosition = null;
                 creep.memory.precious = null;
@@ -19,20 +19,31 @@ export class RoleDropper extends RoleCreep {
     }
 
     private relocate(creep: Creep) {
+        //console.log(`Dropper Relocate for: ${creep.name}`);
         if (creep.memory.preciousPosition) {
+            //console.log(`Dropper A for: ${creep.name}`);
             this.checkInPosition(creep, creep.memory.preciousPosition);
         } else {
+            //console.log(`Dropper B for: ${creep.name}`);
             const containerId = getContainer(creep);
+            //console.log(`Dropper C for: ${creep.name}`);
             if (containerId) {
+                //console.log(`Dropper D for: ${creep.name}`);
                 const container = Game.getObjectById<StructureContainer>(containerId);
+                //console.log(`Dropper E for: ${creep.name}`);
                 if (container) {
+                    //console.log(`Dropper F for: ${creep.name}`);
                     creep.memory.preciousPosition = container.pos;
+                    //console.log(`Dropper G for: ${creep.name}`);
                     this.taxiToDestination(creep);
+                    //console.log(`Dropper H for: ${creep.name}`);
                     return;
                 } else {
+                    //console.log(`Dropper I for: ${creep.name}`);
                     refreshTree(creep.room, containerId);
                 }
             } else if (creep.room.memory.lowRCLBoost) {
+                //console.log(`Dropper J for: ${creep.name}`);
                 this.handleNoContainers(creep);
             }
         }

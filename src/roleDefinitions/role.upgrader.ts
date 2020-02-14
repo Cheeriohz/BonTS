@@ -1,13 +1,18 @@
 import { harvestSourceSmart } from "../caching/manager.sourceSelector";
 import { RoleCreep } from "./base/role.creep";
 import { TaxiServiceManager } from "managers/manager.taxiService";
-import { ControllerCacher } from "caching/manager.controllerCacher";
 export class RoleUpgrader extends RoleCreep {
     public run(creep: Creep) {
         const currentEnergy = creep.store[RESOURCE_ENERGY];
 
         if (creep.memory.working && currentEnergy === 0) {
             if (creep.room.memory.staticUpgraders) {
+                if (creep.room.memory.dumpLinks && creep.room.memory.dumpLinks.length > 0) {
+                    const link = this.checkForAdjacentLink(creep);
+                    if (link) {
+                        creep.withdraw(link, RESOURCE_ENERGY);
+                    }
+                }
                 return;
             }
             creep.memory.working = false;

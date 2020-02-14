@@ -2,7 +2,6 @@ import _ from "lodash";
 import { getContainer, refreshTree } from "caching/manager.containerSelector";
 import { harvestSourceSmart } from "caching/manager.sourceSelector";
 import { profile } from "Profiler";
-import { ControllerCacher } from "caching/manager.controllerCacher";
 import { ConstructionSiteCacher } from "caching/manager.constructionSiteCacher";
 import { CreepRole } from "enums/enum.roles";
 import { getdropMapPosition } from "caching/caching.dropPickupCacher";
@@ -46,7 +45,7 @@ export class RoleCreep {
     protected fillUp(creep: Creep) {
         const link = this.checkForNearbyLink(creep);
         if (link) {
-            return this.withdrawMove(creep, link);
+            return this.withdrawMoveCached(creep, link);
         }
         const storage = this.checkStorageForAvailableResource(creep.room, RESOURCE_ENERGY);
         if (storage) {
@@ -120,6 +119,20 @@ export class RoleCreep {
         }
     }
 
+    protected withdrawMoveCached(creep: Creep, structure: Structure) {
+        if (creep.pos.isNearTo(structure)) {
+            creep.withdraw(structure, RESOURCE_ENERGY);
+            if (creep.store.getFreeCapacity() > 25) {
+                this.grabAdjacentDroppedEnergy(creep, structure.pos);
+            }
+            return;
+        } else {
+            creep.memory.path = creep.pos.findPathTo(structure, { ignoreCreeps: false });
+            this.pathHandling(creep);
+            return;
+        }
+    }
+
     protected withdrawMove(creep: Creep, structure: Structure) {
         if (creep.pos.isNearTo(structure)) {
             creep.withdraw(structure, RESOURCE_ENERGY);
@@ -155,7 +168,7 @@ export class RoleCreep {
         if (!ignoreLinks) {
             const link = this.checkForLinktoFill(creep);
             if (link) {
-                this.depositMove(creep, link);
+                this.depositMoveCached(creep, link);
                 return true;
             }
         }
@@ -173,15 +186,15 @@ export class RoleCreep {
         if (terminal) {
             this.depositMove(creep, terminal);
         }
-        const storage = this.checkStorageForDeposit(creep.room);
-        if (storage) {
-            this.depositMove(creep, storage);
-            return true;
-        }
         if (fillUpgraders) {
             if (this.refillUpgraders(creep)) {
                 return true;
             }
+        }
+        const storage = this.checkStorageForDeposit(creep.room);
+        if (storage) {
+            this.depositMove(creep, storage);
+            return true;
         }
         return false;
     }
@@ -189,11 +202,11 @@ export class RoleCreep {
     private refillUpgraders(creep: Creep): boolean {
         const upgraders = creep.room.find(FIND_MY_CREEPS, {
             filter: c => {
-                return c.memory.role === CreepRole.upgrader && c.store.getFreeCapacity() > 5;
+                return c.memory.role === CreepRole.upgrader && c.store.getFreeCapacity() > 0;
             }
         });
         if (upgraders && upgraders.length > 0) {
-            const transferTarget = creep.pos.findClosestByPath(upgraders);
+            const transferTarget = _.first(_.sortBy(upgraders, u => u.store.getUsedCapacity(RESOURCE_ENERGY)));
             if (transferTarget) {
                 if (creep.pos.getRangeTo(transferTarget) > 5) {
                     creep.memory.path = creep.pos.findPathTo(transferTarget, { ignoreCreeps: false });
@@ -229,6 +242,18 @@ export class RoleCreep {
             return;
         } else {
             creep.moveTo(structure, { reusePath: 10, ignoreCreeps: false });
+            return;
+        }
+    }
+
+    protected depositMoveCached(creep: Creep, structure: Structure) {
+        // console.log(JSON.stringify(structure));
+        if (creep.pos.isNearTo(structure)) {
+            creep.transfer(structure, RESOURCE_ENERGY);
+            return;
+        } else {
+            creep.memory.path = creep.pos.findPathTo(structure, { ignoreCreeps: false });
+            this.pathHandling(creep);
             return;
         }
     }
@@ -358,6 +383,21 @@ export class RoleCreep {
         }
     }
 
+    protected checkForAdjacentLink(creep: Creep): StructureLink | null {
+        if (creep.room.memory.dumpLinks) {
+            const links: StructureLink[] = _.compact(
+                _.map(creep.room.memory?.dumpLinks, id => {
+                    return this.checkLinkForEnergy(id);
+                })
+            );
+            if (links.length > 0) {
+                const queryItem: StructureLink | null = creep.pos.findInRange<StructureLink>(links, 1)[0];
+                return queryItem;
+            }
+        }
+        return null;
+    }
+
     protected checkForNearbyLink(creep: Creep): StructureLink | null {
         if (creep.room.memory.dumpLinks) {
             const links: StructureLink[] = _.compact(
@@ -399,7 +439,7 @@ export class RoleCreep {
                 })
             );
             if (links.length > 0) {
-                const queryItem: StructureLink | null = creep.pos.findInRange<StructureLink>(links, 3)[0];
+                const queryItem: StructureLink | null = creep.pos.findInRange<StructureLink>(links, 3, {})[0];
                 return queryItem;
             }
         }
@@ -490,7 +530,11 @@ export class RoleCreep {
     //* Path Cache Handling
     public pathHandling(creep: Creep): boolean {
         if (creep.fatigue) {
-            return false;
+            if (creep.getActiveBodyparts(MOVE)) {
+                return false;
+            } else {
+                return true;
+            }
         }
         if (creep.memory.path && creep.memory.path?.length > 0) {
             if (this.stuckHandler(creep)) {
@@ -592,7 +636,7 @@ export class RoleCreep {
     //* Work Tasks
     // This intentionally tries to upgrade first. Upgrading is generally done by upgraders, and they are usually in range.
     protected upgradeController(creep: Creep): boolean {
-        const target = ControllerCacher.getcontrollerRoom(creep.room);
+        const target = creep.room.controller;
         if (target) {
             if (creep.upgradeController(target) === ERR_NOT_IN_RANGE) {
                 creep.moveTo(target, { visualizePathStyle: { stroke: "#AE02E6", strokeWidth: 0.15 } });

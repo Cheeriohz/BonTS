@@ -1,7 +1,7 @@
 import { CreepRole } from "enums/enum.roles";
 import { ExpeditionManager } from "./manager.expedition";
 import _ from "lodash";
-import { LocalExpansion } from "building/building.LocalExpansion";
+import { LocalExpansion } from "building/building.localExpansion";
 
 export class Expander {
     private spawn!: StructureSpawn;

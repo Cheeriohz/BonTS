@@ -1,6 +1,8 @@
 Most basic harvester spawn
 ---------------------------
 Game.spawns['A'].spawnCreep([WORK,CARRY,MOVE], "Harvester" + Game.time.toString(), {memory: {role: 0, working: false}});
+Game.spawns['A'].spawnCreep([WORK, WORK, WORK, WORK, WORK, WORK, WORK, CARRY, CARRY], "upg" + Game.time.toString(), {memory: {role: 1, working: false}});
+
 Game.spawns['A'].spawnCreep([WORK,WORK,CARRY,CARRY,MOVE,MOVE], "Builder" + Game.time.toString(), {memory: {role: 2, working: false}});
 
 Game.spawns['A'].spawnCreep([WORK,WORK,WORK,WORK,WORK,WORK,CARRY,CARRY,MOVE,MOVE,MOVE,MOVE], "Bld" + Game.time.toString(), {memory: {role: 2, working: false}});

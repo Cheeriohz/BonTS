@@ -1,4 +1,5 @@
 import _ from "lodash";
+import { CreepQualifiesAsActive } from "./caching.creepCaching";
 
 export function getContainer(creep: Creep): string | null {
     let containerMap = creep.room.memory.containerMap;
@@ -91,7 +92,10 @@ export function pruneContainerTree(room: Room) {
 function cleanTree(containerMap: Assignment[]): Assignment[] {
     for (let i = 0; i < containerMap.length; i++) {
         for (let index = 0; index < containerMap[i].assigned?.length; index++) {
-            while (index < containerMap[i].assigned?.length && !(containerMap[i].assigned[index] in Game.creeps)) {
+            while (
+                index < containerMap[i].assigned?.length &&
+                !CreepQualifiesAsActive(containerMap[i].assigned[index], __cycle_short_term__)
+            ) {
                 containerMap[i].assigned.splice(index, 1);
             }
         }

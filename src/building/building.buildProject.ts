@@ -2,10 +2,9 @@ import { ConstructionSiteCacher } from "caching/manager.constructionSiteCacher";
 import { CreepRequester } from "spawning/manager.creepRequester";
 import { BuildProjectEnum } from "./interfaces/building.enum";
 import _ from "lodash";
-import { buildEmptyContainerMap } from "caching/manager.containerSelector";
 import { CreepRole } from "enums/enum.roles";
 import { DedicatedCreepRequester } from "spawning/manager.dedicatedCreepRequester";
-import { SpawnTemplate } from "spawning/spawning.templating";
+import { BuildProjectHandoff } from "./building.buildProjectHandoff";
 
 export class BuildProjectManager {
     private spawn!: StructureSpawn;
@@ -29,7 +28,7 @@ export class BuildProjectManager {
         this.addConstructionSites(this.spawn.room);
         this.maintainActiveLocalBuilder();
         if (this.project.activeSites === 0 && this.project.buildOrders.length === 0) {
-            this.handOffProject(false);
+            BuildProjectHandoff.handOffProject(false, this.project, this.spawn);
         }
         switch (this.project.projectType) {
             case BuildProjectEnum.LocalContainerExpansion: {
@@ -56,7 +55,7 @@ export class BuildProjectManager {
         }
         this.maintainActiveRemoteBuilder();
         if (this.project.activeSites === 0 && this.project.buildOrders.length === 0) {
-            this.handOffProject(true);
+            BuildProjectHandoff.handOffProject(true, this.project, this.spawn);
         }
     }
 
@@ -96,7 +95,7 @@ export class BuildProjectManager {
     }
 
     private maintainActiveRemoteBuilder() {
-        if (!this.getActiveRemoteBuilder(this.project.roomName)) {
+        if (!BuildProjectHandoff.getActiveRemoteBuilder(this.project.roomName)) {
             if (!this.creepInQueue(CreepRole.builder)) {
                 const dcr: DedicatedCreepRequester = new DedicatedCreepRequester(this.spawn);
                 dcr.createdDedicatedCreepRequest({
@@ -111,256 +110,9 @@ export class BuildProjectManager {
         }
     }
 
-    private getActiveRemoteBuilder(roomName: string): Creep | null {
-        for (const creep of _.values(Game.creeps)) {
-            if (creep.memory.role === CreepRole.builder) {
-                if (creep.memory.dedication) {
-                    if (creep.memory.dedication === roomName) {
-                        return creep;
-                    }
-                }
-            }
-        }
-        return null;
-    }
-
     private creepInQueue(role: CreepRole) {
         return _.find(this.spawn.memory.dedicatedCreepRequest, dc => {
             return dc.dedication === this.project.roomName && dc.role === role;
         });
-    }
-
-    private handOffProject(remote: boolean) {
-        switch (this.project.projectType) {
-            case BuildProjectEnum.LocalMineralExpansion: {
-                this.handOffLocalMineralExpansion();
-                break;
-            }
-            case BuildProjectEnum.LocalContainerExpansion: {
-                this.handOffLocalContainerExpansion();
-                break;
-            }
-            case BuildProjectEnum.RemoteContainerExpansion: {
-                // TODO Need to ensure if we are running multi project execution that we don't hand off the end point project
-                this.attemptRemoteContainerExpansionHandOff(remote);
-                break;
-            }
-            case BuildProjectEnum.SingleConstructionSiteNoFollowUp:
-            case BuildProjectEnum.PassThroughCreate: {
-                _.remove(this.spawn.room.memory.buildProjects!, p => p === this.project);
-                break;
-            }
-            case BuildProjectEnum.ExtensionBootstrap: {
-                this.ExtensionProjectRCLSwitch();
-                _.remove(this.spawn.room.memory.buildProjects!, p => p === this.project);
-                break;
-            }
-            case BuildProjectEnum.SpawnRemoteAddition: {
-                this.handOfSpawnRemoteAddition();
-                const room = Game.rooms[this.project.roomName];
-                if (room) {
-                    // This isn't critical to do here, but it doesn't hurt.
-                    SpawnTemplate.configureRoomSpawnTemplates(room);
-                }
-                _.remove(this.spawn.room.memory.buildProjects!, p => p === this.project);
-                break;
-            }
-        }
-    }
-
-    private ExtensionProjectRCLSwitch() {
-        switch (this.spawn.room.controller!.level) {
-            case 2: {
-                SpawnTemplate.RCL2Improvements(this.spawn.room);
-            }
-            case 3: {
-                SpawnTemplate.RCL3Improvements(this.spawn.room);
-            }
-            case 4: {
-                SpawnTemplate.RCL4Improvements(this.spawn.room);
-            }
-            case 5: {
-                SpawnTemplate.RCL5Improvements(this.spawn.room);
-            }
-            case 6: {
-                SpawnTemplate.RCL6Improvements(this.spawn.room);
-            }
-            case 7: {
-                SpawnTemplate.RCL7Improvements(this.spawn.room);
-            }
-            case 8: {
-                SpawnTemplate.RCL8Improvements(this.spawn.room);
-            }
-        }
-    }
-
-    private attemptRemoteContainerExpansionHandOff(remote: boolean) {
-        if (this.spawn.room.memory.buildProjects!.length > 1) {
-            // There are more build Projects for this remote expansion, remove the current project and allow it to continue.
-            _.remove(this.spawn.room.memory.buildProjects!, this.project);
-            if (remote) {
-                // If we are already in the remote phase, reassign the remote builder.
-                const remoteBot = this.getActiveRemoteBuilder(this.project.roomName);
-                if (remoteBot) {
-                    remoteBot.memory.dedication = this.spawn.room.memory.buildProjects![0].roomName;
-                }
-            }
-            // kickoff the next build project immediately.
-            this.kickOffNextProject();
-        } else {
-            this.handOffRemoteContainerExpansion();
-        }
-    }
-
-    private handOffRemoteContainerExpansion() {
-        const remoteMine: RemoteMine | undefined = _.find(this.spawn.memory.remoteMines, rm => {
-            return (
-                rm.containerId === null &&
-                rm.haulers === null &&
-                rm.extractorId === null &&
-                rm.miner === null &&
-                rm.roomName === this.project.roomName
-            );
-        });
-        if (remoteMine) {
-            const endPath = _.last(remoteMine!.pathingLookup[this.project.roomName][0]);
-            if (endPath) {
-                const containerPos = new RoomPosition(endPath.x, endPath.y, this.project.roomName);
-                if (containerPos) {
-                    const container = containerPos
-                        .lookFor(LOOK_STRUCTURES)
-                        .find(s => s.structureType === STRUCTURE_CONTAINER);
-                    if (container) {
-                        const source = container.pos.findClosestByRange(FIND_SOURCES);
-                        if (source) {
-                            const reserved = this.shouldReserve(remoteMine, this.spawn);
-                            this.updateRemoteMineInMemoryForHandoff(
-                                source,
-                                <StructureContainer>container,
-                                remoteMine,
-                                reserved
-                            );
-                            this.spawn.room.createConstructionSite(container.pos.x, container.pos.y, STRUCTURE_ROAD);
-                            _.remove(this.spawn.room.memory.buildProjects!, this.project);
-                            if (this.spawn.memory.remoteHarvests) {
-                                _.remove(this.spawn.memory.remoteHarvests, rh => {
-                                    return rh.vein === source.id;
-                                });
-                            }
-                        }
-                    } else {
-                        console.log("Could not identify container");
-                    }
-                } else {
-                    console.log("Could not map container position for end of path");
-                }
-            } else {
-                console.log("Could not identify ending path");
-            }
-        } else {
-            console.log("Could not identify remote mine");
-        }
-    }
-
-    private shouldReserve(remoteMine: RemoteMine, spawn: StructureSpawn): boolean {
-        let travelDistance = 0;
-        for (const pathStep of _.values(remoteMine.pathingLookup)) {
-            travelDistance += pathStep[0].length;
-        }
-        if (travelDistance < 100) {
-            const remoteReservation: RemoteReservation = {
-                roomName: remoteMine.roomName,
-                spawnTime: Game.time,
-                leadTime: travelDistance + 20
-            };
-            if (spawn.memory.remoteReservations) {
-                spawn.memory.remoteReservations.push(remoteReservation);
-            } else {
-                spawn.memory.remoteReservations = [remoteReservation];
-            }
-            return true;
-        }
-        return false;
-    }
-
-    private updateRemoteMineInMemoryForHandoff(
-        source: Source,
-        container: StructureContainer,
-        remoteMine: RemoteMine,
-        reserved: boolean
-    ) {
-        remoteMine.vein = source.id;
-        remoteMine.containerId = container.id;
-        remoteMine.reserved = reserved;
-    }
-
-    private kickOffNextProject() {
-        const projectManager: BuildProjectManager = new BuildProjectManager(
-            this.spawn,
-            this.spawn.room.memory.buildProjects![0]
-        );
-        projectManager.manageProject();
-    }
-
-    private handOffLocalContainerExpansion() {
-        if (this.spawn.room.memory.containerMap) {
-            // empty the map, so it will reassess.
-            this.spawn.room.memory.containerMap = null;
-        }
-        buildEmptyContainerMap([], this.spawn.room);
-        this.clearHaulerContainerAndDropSelection(this.spawn.room);
-        delete this.spawn.room.memory.dropMap;
-        this.spawn.room.memory.lowRCLBoost = false;
-        _.remove(this.spawn.room.memory.buildProjects!, this.project);
-    }
-
-    private clearHaulerContainerAndDropSelection(room: Room) {
-        for (const creep of _.filter(_.values(Game.creeps), c => {
-            return c.room.name === room.name && c.memory.role === CreepRole.hauler && !c.memory.dedication;
-        })) {
-            creep.memory.precious = null;
-            creep.memory.preciousPosition = null;
-        }
-    }
-
-    private handOfSpawnRemoteAddition() {
-        if (this.spawn.memory.remoteHarvests) {
-            _.remove(this.spawn.memory.remoteHarvests, rh => {
-                return rh.roomName === this.project.roomName;
-            });
-        }
-    }
-
-    private handOffLocalMineralExpansion() {
-        const extractors: StructureExtractor[] = this.spawn.room.find<StructureExtractor>(FIND_STRUCTURES, {
-            filter: s => {
-                return s.structureType === STRUCTURE_EXTRACTOR;
-            }
-        });
-        if (extractors.length > 0) {
-            const container: StructureContainer | null = extractors[0].pos.findClosestByRange<StructureContainer>(
-                FIND_STRUCTURES,
-                {
-                    filter: s => {
-                        return s.structureType === STRUCTURE_CONTAINER;
-                    }
-                }
-            );
-            if (container) {
-                const minerals: Mineral[] = extractors[0].pos.lookFor(LOOK_MINERALS);
-                if (minerals.length > 0) {
-                    this.spawn.room.memory.mine = {
-                        extractorId: extractors[0].id,
-                        containerId: container.id,
-                        miner: "",
-                        hauler: "",
-                        type: minerals[0].mineralType,
-                        vein: minerals[0].id
-                    };
-                }
-                this.spawn.room.createConstructionSite(container.pos.x, container.pos.y, STRUCTURE_ROAD);
-                _.remove(this.spawn.room.memory.buildProjects!, this.project);
-            }
-        }
     }
 }

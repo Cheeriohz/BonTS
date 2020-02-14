@@ -1,21 +1,17 @@
 import { ConstructionSiteCacher } from "../caching/manager.constructionSiteCacher";
 import { pruneContainerTree } from "../caching/manager.containerSelector";
-import { ControllerCacher } from "../caching/manager.controllerCacher";
 import { pruneSourceTree } from "../caching/manager.sourceSelector";
 import { Spawn } from "../spawning/manager.spawn";
-import { Expander } from "../expansion/manager.expander";
 import { LinkManager } from "../managers/structures/manager.links";
 import { SpawnReassment } from "./manager.spawnReassessment";
 import { CreepRequester } from "../spawning/manager.creepRequester";
-import { LocalExpansion } from "building/building.LocalExpansion";
 import { BuildProjectManager } from "building/building.buildProject";
 import _ from "lodash";
 import { ExpeditionResultsHandlerMapper } from "expansion/expansion.expeditionResultsHandlerMap";
 import { RCLUpgradeHandler } from "./manager.handleRCLUpgrades";
-import { ExtensionAddition } from "building/building.extensionAddition";
 import { Visualizer } from "building/building.visualizer";
 import { BorderAggression } from "military/military.borderAggression";
-import { GeneralBuilding } from "building/building.general";
+import { GeneralBuilding } from "building/base/building.general";
 import { buildProjectCreator } from "building/building.buildProjectCreator";
 import { SpawnTemplate } from "spawning/spawning.templating";
 
@@ -23,9 +19,9 @@ export class CycleManager {
     public static check() {
         if (Memory.cycle === 0) {
             this.manageLongTermTasks();
-        } else if (Memory.cycle % 20 === 0) {
+        } else if (Memory.cycle % __cycle_medium_term__ === 0) {
             this.manageMediumTermTasks();
-        } else if (Memory.cycle % 5 === 0) {
+        } else if (Memory.cycle % __cycle_short_term__ === 0) {
             this.manageShortTermTasks();
         }
         this.everyCycle();
@@ -53,8 +49,15 @@ export class CycleManager {
         if (Memory.showReserved) {
             this.drawReservedConstruction(Memory.showReserved);
         }
+        if (Memory.structureDT) {
+            const gb: GeneralBuilding = new GeneralBuilding();
+            gb.visualizeCurrentStructureDistanceTransformManhattan(Memory.structureDT);
+        } else if (Memory.roadAgDT) {
+            const gb: GeneralBuilding = new GeneralBuilding();
+            gb.visualizeCurrentRoadAgnosticDistanceTransformManhattan(Memory.roadAgDT);
+        }
+
         ConstructionSiteCacher.dispose();
-        ControllerCacher.dispose();
     }
 
     private static updateSpawnConstructionSiteMaps() {
@@ -63,11 +66,7 @@ export class CycleManager {
         }
     }
 
-    private static roomLevelTasksLongTerm() {
-        for (const room in Game.rooms) {
-            this.storeControllerIds(Game.rooms[room]);
-        }
-    }
+    private static roomLevelTasksLongTerm() {}
 
     private static spawnLevelTasksLongTerm() {
         for (const spawn of _.values(Game.spawns)) {
@@ -160,10 +159,6 @@ export class CycleManager {
     private static cleanUpTrees(room: Room) {
         pruneSourceTree(room);
         pruneContainerTree(room);
-    }
-
-    private static storeControllerIds(room: Room) {
-        ControllerCacher.checkForController(room);
     }
 
     //* Helpers

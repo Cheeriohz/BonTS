@@ -28,6 +28,7 @@ export class RoleHauler extends RoleCreep {
 
     protected carryOutGeneralWork(creep: Creep, ignoreLinks: boolean) {
         if (creep.memory.working) {
+            // TODO Turn off when we are actually using links
             this.fillClosest(creep, ignoreLinks, true);
         } else {
             // energy full, time to find deposit location.

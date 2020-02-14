@@ -7,6 +7,8 @@ export class RoleBuilder extends RoleCreep {
 
         if (creep.memory.working && creep.store.getUsedCapacity(RESOURCE_ENERGY) === 0) {
             creep.memory.working = false;
+            //TODO remove
+            this.checkForAdjacentDroppedEnergy(creep);
             creep.say("🔋 recharge");
         }
         if (!creep.memory.working && creep.store.getFreeCapacity() === 0) {

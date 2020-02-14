@@ -88,6 +88,8 @@ interface SpawnMemory {
 interface Memory {
     //* Global Debug Tools
     showReserved?: string;
+    structureDT?: string;
+    roadAgDT?: string;
     log: any;
     readyForExpansion: boolean;
 

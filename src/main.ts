@@ -1,9 +1,16 @@
-import { GameManager } from "managers/manager.gameManager";
-import { ErrorMapper } from "utils/ErrorMapper";
+import "./configurable/constants";
 
+import { GameManager } from "managers/manager.gameManager";
 import "./prototypes/RoomVisual"; // Prototypes used in Visualizer class
 
+import { ErrorMapper } from "utils/ErrorMapper";
 import * as Profiler from "./Profiler/Profiler";
+import _ from "lodash";
+_.set(global, "__profiler_enabled__", false);
+_.set(global, "__spawn_buffer_ticks__", 10);
+_.set(global, "__cycle_long_term__", 100);
+_.set(global, "__cycle_medium_term__", 20);
+_.set(global, "__cycle_short_term__", 5);
 
 global.pr = Profiler.init();
 

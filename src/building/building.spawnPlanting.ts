@@ -1,5 +1,4 @@
-import { GeneralBuilding } from "./building.general";
-import { Spawn } from "spawning/manager.spawn";
+import { GeneralBuilding } from "./base/building.general";
 import { buildProjectCreator } from "./building.buildProjectCreator";
 
 export class SpawnPlanting extends GeneralBuilding {
@@ -27,7 +26,7 @@ export class SpawnPlanting extends GeneralBuilding {
                 );
             }
             if (this.calculateRoughCenterPoint()) {
-                const plantSpot = this.traverseDistanceTransform(
+                const plantSpot = this.traverseDistanceTransformDeserialized(
                     this.roughCenter!,
                     deserializedNaturalDistanceTransform,
                     5

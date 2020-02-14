@@ -81,6 +81,23 @@ export class SpawnTemplate {
     //* RCL4 -> 1300 Energy
     public static RCL4Improvements(room: Room) {
         // Improve Harvesters, Remote Mines will be implemented soon at which point they will be obsolete.
+        room.memory.templates![CreepRole.harvester] = [
+            WORK,
+            WORK,
+            WORK,
+            WORK,
+            WORK,
+            CARRY,
+            CARRY,
+            CARRY,
+            CARRY,
+            CARRY,
+            MOVE,
+            MOVE,
+            MOVE,
+            MOVE,
+            MOVE
+        ];
         room.memory.templates![CreepRole.builder] = [
             WORK,
             WORK,

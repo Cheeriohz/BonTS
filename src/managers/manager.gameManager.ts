@@ -14,7 +14,7 @@ import { RemotePatrolManager } from "remote/manager.remote.patrol";
 
 export class GameManager {
     public static run() {
-        if (Memory.cycle > 99) {
+        if (Memory.cycle >= __cycle_long_term__) {
             Memory.cycle = 0;
         } else {
             Memory.cycle++;
@@ -34,7 +34,7 @@ export class GameManager {
         rm.run();
 
         // Manage mines
-        if (Memory.cycle % 25 === 0) {
+        if (Memory.cycle % __cycle_medium_term__ === 0) {
             for (const spawn of _.values(Game.spawns)) {
                 if (spawn.room.memory.mine) {
                     const mm: MineManager = new MineManager(spawn.room, spawn);
