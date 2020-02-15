@@ -1,5 +1,6 @@
 import { CreepRole } from "enums/enum.roles";
 import _ from "lodash";
+import { RoomHarassManager } from "remote/manager.remote.roomHarrass";
 
 export class SpawnTemplate {
     public update(roomSpawnTemplates: RoomSpawnTemplates, role: CreepRole, body: BodyPartConstant[]) {
@@ -117,14 +118,42 @@ export class SpawnTemplate {
         ];
 
         // Roads will be finished, change Haulers for efficiency.
-        room.memory.templates![CreepRole.hauler] = [CARRY, CARRY, MOVE];
+        room.memory.templates![CreepRole.hauler] = [CARRY, CARRY, CARRY, CARRY, MOVE, MOVE];
 
         // TODO Probably should make builders taxi-able at this point.
     }
 
-    // TODO finish these
     //* RCL5 -> 1800 Energy
-    public static RCL5Improvements(room: Room) {}
+    public static RCL5Improvements(room: Room) {
+        // Droppers should now check for links
+        room.memory.templates![CreepRole.dropper] = [WORK, WORK, WORK, WORK, WORK, CARRY];
+        room.memory.linksActive = true;
+
+        //Beef builders
+        room.memory.templates![CreepRole.builder] = [
+            WORK,
+            WORK,
+            WORK,
+            WORK,
+            WORK,
+            WORK,
+            WORK,
+            CARRY,
+            CARRY,
+            CARRY,
+            CARRY,
+            CARRY,
+            CARRY,
+            CARRY,
+            MOVE,
+            MOVE,
+            MOVE,
+            MOVE,
+            MOVE,
+            MOVE,
+            MOVE
+        ];
+    }
 
     //* RCL6 -> 2300 Energy
     public static RCL6Improvements(room: Room) {}

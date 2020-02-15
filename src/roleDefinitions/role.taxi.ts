@@ -33,16 +33,26 @@ export class RoleTaxi extends RoleHauler {
                 if (lastPos!.x === taxi.pos.x && lastPos!.y === taxi.pos.y) {
                     taxi.memory.taxi!.taxiRoute = _.tail(taxi.memory.taxi!.taxiRoute);
                 } else {
+                    if (!taxi.memory.stuckCount) {
+                        taxi.memory.stuckCount = 1;
+                    } else {
+                        taxi.memory.stuckCount++;
+                    }
                     if (taxi.memory.taxi!.arrivalDistance) {
                         if (taxi.pos.inRangeTo(taxi.memory.taxi!.destination, taxi.memory.taxi!.arrivalDistance)) {
                             this.concludeTaxi(taxi, client);
                             return;
-                        } else {
-                            taxi.memory.taxi!.taxiRoute = taxi.pos.findPathTo(taxi.memory.taxi!.destination, {
-                                ignoreCreeps: false
-                            });
-                            return;
                         }
+                    }
+                    if (taxi.memory.stuckCount > 2) {
+                        console.log(`test for ${taxi.name}`);
+                        taxi.memory.taxi!.taxiRoute = taxi.pos.findPathTo(taxi.memory.taxi!.destination, {
+                            ignoreCreeps: false,
+                            range: taxi.memory.taxi!.arrivalDistance ?? 0
+                        });
+                        this.pullMove(taxi, client);
+                        taxi.memory.stuckCount = 0;
+                        return;
                     }
                 }
                 if (taxi.memory.taxi!.taxiRoute.length === 0) {
@@ -83,6 +93,11 @@ export class RoleTaxi extends RoleHauler {
                 }
             }
         } else {
+            const structures = pos.lookFor(LOOK_STRUCTURES);
+            if (structures.length > 0) {
+                // TODO really this shouldn't happen. Figure out why it does
+                this.taxiOvertake(taxi, client);
+            }
             return true;
         }
         return false;

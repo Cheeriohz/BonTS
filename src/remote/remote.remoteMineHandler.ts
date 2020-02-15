@@ -18,28 +18,25 @@ export class RemoteMineHandler extends RemoteDispatcher {
     }
 
     public getRemoteMine(creep: Creep): RemoteMine | null {
-        const spawns = _.filter(_.values(Game.spawns), s => {
-            return s.room.name === creep.memory.home;
-        });
-        if (spawns) {
-            for (const spawn of spawns) {
-                const remoteMine = _.find(spawn.memory.remoteMines, rm => {
-                    return rm.containerId === creep.memory.dedication;
-                });
-                if (remoteMine) {
-                    return remoteMine;
-                }
+        const room = Game.rooms[creep.memory.home!];
+        if (room) {
+            const remoteMine = _.find(room.memory.remoteMines, rm => {
+                return rm.containerId === creep.memory.dedication;
+            });
+            if (remoteMine) {
+                return remoteMine;
             }
         }
         return null;
     }
 
+    // TODO probably obsolete now
     public repathRemoteMineToStorage(spawn: StructureSpawn) {
         const room = spawn.room;
         const storage = room.storage?.pos;
         if (storage) {
-            if (spawn.memory.remoteMines) {
-                for (let mine of spawn.memory.remoteMines) {
+            if (spawn.room.memory.remoteMines) {
+                for (let mine of spawn.room.memory.remoteMines) {
                     // Determine the destination
                     const destinationF = _.last(mine.pathingLookup[room.name][0]);
                     if (destinationF) {
@@ -76,8 +73,8 @@ export class RemoteMineHandler extends RemoteDispatcher {
         const room = spawn.room;
         const storage = room.storage?.pos;
         if (storage) {
-            if (spawn.memory.remoteMines) {
-                for (let mine of spawn.memory.remoteMines) {
+            if (spawn.room.memory.remoteMines) {
+                for (let mine of spawn.room.memory.remoteMines) {
                     let first: boolean = true;
                     for (let room of _.keys(mine.pathingLookup)) {
                         if (first) {
@@ -101,8 +98,8 @@ export class RemoteMineHandler extends RemoteDispatcher {
         const room = spawn.room;
         const storage = room.storage?.pos;
         if (storage) {
-            if (spawn.memory.remoteMines) {
-                for (let mine of spawn.memory.remoteMines) {
+            if (spawn.room.memory.remoteMines) {
+                for (let mine of spawn.room.memory.remoteMines) {
                     let first: boolean = true;
                     for (let room of _.keys(mine.pathingLookup)) {
                         if (first) {

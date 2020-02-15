@@ -2,14 +2,14 @@ import { LocalExpansion } from "building/building.localExpansion";
 import { TerminalExpansion } from "building/building.terminalExpansion";
 import _ from "lodash";
 import { LabAddition } from "building/building.labAddtition";
-import { RemoteHarvestHandler } from "remote/remote.remoteHarvestHandler";
 import { ExtensionAddition } from "building/building.extensionAddition";
-import { SpawnTemplate } from "spawning/spawning.templating";
 import { CreepRequester } from "spawning/manager.creepRequester";
 import { CreepRole } from "enums/enum.roles";
 import { buildProjectCreator } from "building/building.buildProjectCreator";
 import { StorageAddition } from "building/building.storageAddition";
 import { TowerAddition } from "building/building.towerAddition";
+import { RemoteMineExpansion } from "expansion/expansion.remoteMine";
+import { LinkAddition } from "building/building.linkAddition";
 
 export class RCLUpgradeHandler {
     public static handleRCLUpgrades(spawn: StructureSpawn) {
@@ -86,7 +86,7 @@ export class RCLUpgradeHandler {
     }
 
     private static handleRCLUpgradeTo3(spawn: StructureSpawn): boolean {
-        if (!this.handleRoomExtensionsEnqueue([spawn], true, 10)) {
+        if (!this.handleRoomExtensionsEnqueue([spawn], true, 10, 0, true)) {
             return false;
         }
 
@@ -110,20 +110,27 @@ export class RCLUpgradeHandler {
     private static handleRCLUpgradeTo4(spawn: StructureSpawn): boolean {
         const bpc: buildProjectCreator = new buildProjectCreator(spawn.room, spawn);
         bpc.createReservedRoads();
-        if (!this.handleRoomExtensionsEnqueue([spawn], true, 20)) {
+        if (!this.handleRoomExtensionsEnqueue([spawn], true, 20, 0)) {
             return false;
         }
         const storageAddition: StorageAddition = new StorageAddition(spawn, spawn.room);
         if (!storageAddition.buildStorageFromReservedMemory()) {
             return false;
         }
+
+        if (!this.checkForNeighboringRemoteMine(spawn)) {
+        }
         return true;
     }
 
     private static handleRCLUpgradeTo5(spawn: StructureSpawn): boolean {
         const bpc: buildProjectCreator = new buildProjectCreator(spawn.room, spawn);
-        bpc.createReservedRoads();
-        if (!this.handleRoomExtensionsEnqueue([spawn], true, 30)) {
+        //bpc.createReservedRoads();
+        const linkAddition: LinkAddition = new LinkAddition(spawn, spawn.room);
+        if (!linkAddition.addAndReserveLinks(2)) {
+            return false;
+        }
+        if (!this.handleRoomExtensionsEnqueue([spawn], true, 30, 5)) {
             return false;
         }
         const towerAddition: TowerAddition = new TowerAddition(spawn, spawn.room);
@@ -159,7 +166,7 @@ export class RCLUpgradeHandler {
     }
 
     private static handleRCLUpgradeTo7(spawn: StructureSpawn): boolean {
-        if (!this.handleRoomExtensionsEnqueue([spawn], true, 50)) {
+        if (!this.handleRoomExtensionsEnqueue([spawn], true, 50, 10)) {
             return false;
         }
         /*
@@ -190,6 +197,63 @@ export class RCLUpgradeHandler {
         return true;
     }
 
+    public static checkForNeighboringRemoteMine(spawn: StructureSpawn): boolean {
+        const describedExits = Game.map.describeExits(spawn.room.name);
+        if (describedExits) {
+            for (const neighbor of _.compact(_.values(describedExits))) {
+                if (this.checkNeighbor(neighbor, spawn)) {
+                    return true;
+                }
+            }
+        }
+        return true;
+    }
+
+    private static checkNeighbor(neighbor: string, spawn: StructureSpawn) {
+        console.log(neighbor);
+        const RoomScout = Memory.scouting.roomScouts[neighbor];
+        const room = Game.rooms[neighbor];
+        console.log("a");
+        console.log(JSON.stringify(RoomScout));
+        if (RoomScout && !RoomScout.threatAssessment && RoomScout.sourceA) {
+            console.log(JSON.stringify(RoomScout));
+            console.log("b");
+            if (room) {
+                console.log("d");
+                if (!room.memory.spawns || room.memory.spawns.length === 0) {
+                    const storage = spawn.room.storage?.pos ?? this.getStoragePositionFromReservation(spawn.room);
+                    console.log("E");
+                    if (storage) {
+                        const rmExpo: RemoteMineExpansion = new RemoteMineExpansion(RoomScout.sourceA, storage, spawn);
+                        rmExpo.expandToLocation();
+                        if (RoomScout.sourceB) {
+                            const rmExpoB: RemoteMineExpansion = new RemoteMineExpansion(
+                                RoomScout.sourceA,
+                                storage,
+                                spawn
+                            );
+                            rmExpoB.expandToLocation();
+                        }
+                    }
+                    return true;
+                }
+            } else {
+                const cr: CreepRequester = new CreepRequester(spawn);
+                cr.RequestScoutToRoom(neighbor);
+                return false;
+            }
+        }
+        return false;
+    }
+
+    private static getStoragePositionFromReservation(room: Room): RoomPosition | null {
+        const sBO = _.first(_.filter(room.memory.reservedBuilds!, rb => rb.type === STRUCTURE_STORAGE));
+        if (sBO) {
+            return new RoomPosition(sBO.x, sBO.y, room.name);
+        }
+        return null;
+    }
+
     private static stealRemoteHarvesters(spawn: StructureSpawn) {
         for (let c of _.values(Game.creeps)) {
             if (c.memory.role === CreepRole.harvester && c.memory.home && c.memory.orders!.target === spawn.room.name) {
@@ -205,7 +269,7 @@ export class RCLUpgradeHandler {
     }
 
     private static handleRoomExtensionsBootstrap(spawn: StructureSpawn): boolean {
-        const ea: ExtensionAddition = new ExtensionAddition([spawn], false);
+        const ea: ExtensionAddition = new ExtensionAddition([spawn], false, 0);
         const returnCode = ea.alreadyProcessedSuccessfully(5);
         switch (returnCode) {
             case 0: {
@@ -226,9 +290,11 @@ export class RCLUpgradeHandler {
     private static handleRoomExtensionsEnqueue(
         spawns: StructureSpawn[],
         buildRoads: boolean,
-        extensionCap: number
+        extensionCap: number,
+        boundAdd: number,
+        resolvePartials?: boolean
     ): boolean {
-        const ea: ExtensionAddition = new ExtensionAddition(spawns, buildRoads);
+        const ea: ExtensionAddition = new ExtensionAddition(spawns, buildRoads, boundAdd, resolvePartials);
         const returnCode = ea.alreadyProcessedSuccessfully(extensionCap);
         switch (returnCode) {
             case 0: {

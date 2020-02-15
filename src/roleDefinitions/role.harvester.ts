@@ -22,7 +22,7 @@ export class RoleHarvester extends RoleCreep {
         else {
             harvestSourceSmart(creep);
             if (creep.room.memory.lowRCLBoost) {
-                this.checkForAdjacentDroppedEnergy(creep);
+                this.checkForAdjacentDroppedResources(creep);
             }
         }
     }

@@ -11,8 +11,10 @@ interface CreepMemory {
     dedication?: string | null;
     precious?: string | null;
     preciousPosition?: { x: number; y: number } | null;
+    dropOffLocation?: { x: number; y: number } | null;
     home?: string | null;
     repair?: string | null;
+    adjLink?: Id<StructureLink> | null;
 
     //* Edge Case Management
     time?: number;
@@ -26,6 +28,7 @@ interface CreepMemory {
     //* Efficiency Processing Trade Off Modifiers
     ignoreLinks?: boolean | null;
     repairWhileMove?: boolean | null;
+    tick?: number | null;
 
     //* Combat
     hitsLast?: number | null;
@@ -47,6 +50,7 @@ interface RoomMemory {
 
     //* Deployment Structures
     mine: Mine | null;
+    remoteMines: RemoteMine[] | null;
 
     //* Building
     reservedBuilds?: BuildOrder[] | null;
@@ -69,6 +73,7 @@ interface RoomMemory {
     lowRCLBoost: boolean;
     staticUpgraders: boolean;
     upgraderTaxi: boolean;
+    linksActive: boolean;
 }
 
 interface SpawnMemory {
@@ -76,7 +81,6 @@ interface SpawnMemory {
     creepRequest: CreepRequest[] | null;
     dedicatedCreepRequest: DedicatedCreepRequest[] | null;
     remoteMineExpansionInProgress: boolean | null;
-    remoteMines: RemoteMine[] | null;
     expeditionResults: IExpeditionResults[] | null;
     sourcesUtilized: boolean;
     remoteHarvests: RemoteHarvest[] | null;

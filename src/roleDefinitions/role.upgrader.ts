@@ -7,8 +7,8 @@ export class RoleUpgrader extends RoleCreep {
 
         if (creep.memory.working && currentEnergy === 0) {
             if (creep.room.memory.staticUpgraders) {
-                if (creep.room.memory.dumpLinks && creep.room.memory.dumpLinks.length > 0) {
-                    const link = this.checkForAdjacentLink(creep);
+                if (creep.room.memory.linksActive) {
+                    const link = this.checkForAdjacentLinkToRecharge(creep);
                     if (link) {
                         creep.withdraw(link, RESOURCE_ENERGY);
                     }
@@ -35,7 +35,11 @@ export class RoleUpgrader extends RoleCreep {
         }
 
         if (creep.memory.working) {
-            this.upgradeController(creep);
+            if (!this.upgradeController(creep, creep.room.memory.upgraderTaxi)) {
+                if (creep.room.memory.upgraderTaxi) {
+                    TaxiServiceManager.requestTaxi(creep, creep.room.controller!.pos, 1, 3);
+                }
+            }
         } else {
             if (creep.memory.precious) {
                 if (this.safeSpawnWithdrawal(creep)) {

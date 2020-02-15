@@ -77,8 +77,8 @@ export class remoteMineExpeditionHandler extends ExpeditionResultsHandler {
     }
 
     private persistPathingToMemory(spawn: StructureSpawn, costing: ExpansionCosting) {
-        if (!spawn.memory.remoteMines) {
-            spawn.memory.remoteMines = new Array<RemoteMine>();
+        if (!spawn.room.memory.remoteMines) {
+            spawn.room.memory.remoteMines = new Array<RemoteMine>();
         }
         if (!spawn.memory.remoteHarvests) {
             spawn.memory.remoteHarvests = new Array<RemoteHarvest>();
@@ -108,10 +108,10 @@ export class remoteMineExpeditionHandler extends ExpeditionResultsHandler {
             reserved: false
         };
 
-        if (spawn.memory.remoteMines.length === 0) {
-            spawn.memory.remoteMines = [remoteMine];
+        if (spawn.room.memory.remoteMines.length === 0) {
+            spawn.room.memory.remoteMines = [remoteMine];
         } else {
-            spawn.memory.remoteMines.push(remoteMine);
+            spawn.room.memory.remoteMines.push(remoteMine);
         }
 
         // Add a remote harvest to the source at least temporarily as the path will already be utilized and it can help speed building.
@@ -174,8 +174,8 @@ export class remoteMineExpeditionHandler extends ExpeditionResultsHandler {
         if (spawn.room.memory.mine) {
             totalUtilizedContainers += 1;
         }
-        if (spawn.memory.remoteMines) {
-            totalUtilizedContainers += spawn.memory.remoteMines.length;
+        if (spawn.room.memory.remoteMines) {
+            totalUtilizedContainers += spawn.room.memory.remoteMines.length;
         }
         if (totalUtilizedContainers < 5) {
             return true;

@@ -363,14 +363,15 @@ export class GeneralBuilding {
         serializedTransformCheck: number[],
         transformCheckThreshold: number,
         boundA: RoomPosition,
-        boundB: RoomPosition
+        boundB: RoomPosition,
+        boundaryBuffer: number
     ): RoomPosition | null {
         const transform: CostMatrix = PathFinder.CostMatrix.deserialize(serializedTransform);
         const transformCheck: CostMatrix = PathFinder.CostMatrix.deserialize(serializedTransformCheck);
-        const xMinBound = Math.min(o.x, boundA.x, boundB.x);
-        const xMaxBound = Math.max(o.x, boundA.x, boundB.x);
-        const yMinBound = Math.min(o.y, boundA.y, boundB.y);
-        const yMaxBound = Math.max(o.y, boundA.y, boundB.x);
+        const xMinBound = Math.max(Math.min(o.x, boundA.x, boundB.x) - boundaryBuffer, 1);
+        const xMaxBound = Math.min(Math.max(o.x, boundA.x, boundB.x) + boundaryBuffer, 48);
+        const yMinBound = Math.max(Math.min(o.y, boundA.y, boundB.y) - boundaryBuffer, 1);
+        const yMaxBound = Math.min(Math.max(o.y, boundA.y, boundB.x) + boundaryBuffer, 48);
 
         const X = 25;
         const Y = 25;
@@ -386,7 +387,6 @@ export class GeneralBuilding {
                     transform.get(o.x + x, o.y + y) === threshold &&
                     transformCheck.get(o.x + x, o.y + y) === transformCheckThreshold
                 ) {
-                    console.log(`x: ${o.x + x} y: ${o.y + y} roomName: ${o.roomName}`);
                     return new RoomPosition(o.x + x, o.y + y, o.roomName);
                 }
             }
@@ -409,6 +409,17 @@ export class GeneralBuilding {
         boundB: RoomPosition
     ): RoomPosition | null {
         const transform: CostMatrix = PathFinder.CostMatrix.deserialize(serializedTransform);
+        return this.traverseDistanceTransformBoundedDeserialized(o, transform, threshold, boundA, boundB);
+    }
+
+    protected traverseDistanceTransformBoundedDeserialized(
+        o: RoomPosition,
+        transform: CostMatrix,
+        threshold: number,
+        boundA: RoomPosition,
+        boundB: RoomPosition
+    ): RoomPosition | null {
+        console.log("1");
         const xMinBound = Math.min(o.x, boundA.x, boundB.x);
         const xMaxBound = Math.max(o.x, boundA.x, boundB.x);
         const yMinBound = Math.min(o.y, boundA.y, boundB.y);
@@ -423,6 +434,7 @@ export class GeneralBuilding {
         let maxI = t * t;
         for (let i = 0; i < maxI; i++) {
             if (-X / 2 <= x && x <= X / 2 && -Y / 2 <= y && y <= Y / 2) {
+                console.log(`x: ${o.x + x} | y: ${o.y + y}`);
                 if (
                     this.inBoundary(o.x + x, o.y + y, xMinBound, xMaxBound, yMinBound, yMaxBound) &&
                     transform.get(o.x + x, o.y + y) >= threshold

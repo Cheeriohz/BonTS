@@ -15,13 +15,17 @@ export class ExtensionAddition extends GeneralBuilding {
     private extensionsToPlan: number = 0;
     private sources: Source[] = [];
     private buildRoads: boolean = false;
+    private boundAdd: number;
+    private resolvePartials?: boolean = false;
     private noPartials?: boolean;
 
-    constructor(spawns: StructureSpawn[], buildRoads: boolean) {
+    constructor(spawns: StructureSpawn[], buildRoads: boolean, boundAdd: number, resolvePartials?: boolean) {
         super();
         this.spawns = spawns;
         this.room = _.first(spawns)!.room;
         this.buildRoads = buildRoads;
+        this.boundAdd = boundAdd;
+        this.resolvePartials = resolvePartials;
     }
 
     //* Re-Run support
@@ -188,7 +192,7 @@ export class ExtensionAddition extends GeneralBuilding {
     private determineBuildPositions(): BuildOrder[] {
         let buildOrders: BuildOrder[] = [];
         while (this.extensionsToPlan > 0 && Game.cpu.limit - Game.cpu.getUsed() > 4) {
-            if (this.noPartials) {
+            if (this.noPartials || !this.resolvePartials) {
                 const GreenfieldBuildOrders = this.determineGreenFieldSite();
                 if (GreenfieldBuildOrders.length > 0) {
                     buildOrders = _.concat(buildOrders, GreenfieldBuildOrders);
@@ -264,7 +268,8 @@ export class ExtensionAddition extends GeneralBuilding {
                 this.room.memory.roadAgnosticDistanceTransform!,
                 3,
                 bPos,
-                this.room.controller!.pos
+				this.room.controller!.pos,
+				this.boundAdd
             );
             const centerB: RoomPosition | null = this.traverseDistanceTransformWithCheckBoundedExact(
                 aPos,
@@ -273,7 +278,8 @@ export class ExtensionAddition extends GeneralBuilding {
                 this.room.memory.roadAgnosticDistanceTransform!,
                 3,
                 aPos,
-                this.room.controller!.pos
+				this.room.controller!.pos,
+				this.boundAdd
             );
             if (centerA && centerB) {
                 if (this.extensionsToPlan > 5) {

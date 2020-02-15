@@ -103,7 +103,7 @@ export class BuildProjectHandoff {
     }
 
     private static handOffRemoteContainerExpansion(project: BuildProject, spawn: StructureSpawn) {
-        const remoteMine: RemoteMine | undefined = _.find(spawn.memory.remoteMines, rm => {
+        const remoteMine: RemoteMine | undefined = _.find(spawn.room.memory.remoteMines, rm => {
             return (
                 rm.containerId === null &&
                 rm.haulers === null &&

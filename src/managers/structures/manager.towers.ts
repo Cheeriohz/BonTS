@@ -1,7 +1,7 @@
 import _ from "lodash";
 
 export class TowerManager {
-    private static priorityStructures: StructureConstant[] = [STRUCTURE_CONTAINER, STRUCTURE_ROAD];
+    static roadNormal: number = 5000;
     public static run() {
         for (const room in Game.rooms) {
             for (const tower of Game.rooms[room].find<StructureTower>(FIND_STRUCTURES, {
@@ -87,27 +87,14 @@ export class TowerManager {
             filter: structure => {
                 return (
                     structure.hits < structure.hitsMax &&
-                    TowerManager.priorityStructures.includes(structure.structureType)
+                    structure.structureType === STRUCTURE_ROAD &&
+                    structure.hitsMax === this.roadNormal
                 );
             }
         });
 
         if (damagedStructures.length > 0) {
-            tower.repair(damagedStructures[0]);
-            return true;
-        }
-        return false;
-    }
-
-    private static repairAny(tower: StructureTower): boolean {
-        const damagedStructures = tower.room.find(FIND_STRUCTURES, {
-            filter: structure => {
-                return structure.hits < structure.hitsMax;
-            }
-        });
-
-        if (damagedStructures.length > 0) {
-            tower.repair(damagedStructures[0]);
+            tower.repair(_.first(damagedStructures)!);
             return true;
         }
         return false;

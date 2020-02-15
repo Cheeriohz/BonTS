@@ -33,9 +33,9 @@ export class GameManager {
         const rm: RolesManager = new RolesManager();
         rm.run();
 
-        // Manage mines
+        // Manage remotes and mines.
         if (Memory.cycle % __cycle_medium_term__ === 0) {
-            for (const spawn of _.values(Game.spawns)) {
+            for (const spawn of _.uniqBy(_.values(Game.spawns), s => s.room.name)) {
                 if (spawn.room.memory.mine) {
                     const mm: MineManager = new MineManager(spawn.room, spawn);
                     mm.manageMine(true);
@@ -53,6 +53,7 @@ export class GameManager {
     }
 
     private static manageRemotes(spawn: StructureSpawn) {
+        // TODO this could use major refactoring
         this.manageRemoteReservations(spawn);
         this.manageRemoteMines(spawn);
         this.manageRemoteHarvests(spawn);
@@ -88,8 +89,8 @@ export class GameManager {
     }
 
     private static manageRemoteMines(spawn: StructureSpawn) {
-        if (spawn.memory.remoteMines && spawn.memory.remoteMines.length > 0) {
-            for (const remoteMine of spawn.memory.remoteMines) {
+        if (spawn.room.memory.remoteMines && spawn.room.memory.remoteMines.length > 0) {
+            for (const remoteMine of spawn.room.memory.remoteMines) {
                 if (remoteMine.containerId) {
                     const containerRoomName = _.last(_.keys(remoteMine.pathingLookup));
                     if (containerRoomName) {

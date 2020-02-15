@@ -193,7 +193,7 @@ export class RoleCreep {
         }
         const storage = this.checkStorageForDeposit(creep.room);
         if (storage) {
-            this.depositMove(creep, storage);
+            this.depositMoveUnspecified(creep, storage);
             return true;
         }
         return false;
@@ -206,7 +206,11 @@ export class RoleCreep {
             }
         });
         if (upgraders && upgraders.length > 0) {
-            const transferTarget = _.first(_.sortBy(upgraders, u => u.store.getUsedCapacity(RESOURCE_ENERGY)));
+            const transferTarget = _.first(
+                _.sortBy(upgraders, u => {
+                    return u.store.getUsedCapacity(RESOURCE_ENERGY) + u.pos.getRangeTo(creep);
+                })
+            );
             if (transferTarget) {
                 if (creep.pos.getRangeTo(transferTarget) > 5) {
                     creep.memory.path = creep.pos.findPathTo(transferTarget, { ignoreCreeps: false });
@@ -232,6 +236,17 @@ export class RoleCreep {
         const storage = this.checkStorageForDeposit(creep.room);
         if (storage) {
             return this.depositMove(creep, storage);
+        }
+    }
+
+    protected depositMoveUnspecified(creep: Creep, structure: Structure) {
+        // console.log(JSON.stringify(structure));
+        if (creep.pos.isNearTo(structure)) {
+            creep.transfer(structure, <ResourceConstant>_.last(_.keys(creep.store)));
+            return;
+        } else {
+            creep.moveTo(structure, { reusePath: 10, ignoreCreeps: false });
+            return;
         }
     }
 
@@ -328,10 +343,10 @@ export class RoleCreep {
         const queryItem: Structure | null = creep.pos.findClosestByRange(FIND_STRUCTURES, {
             filter: structure => {
                 return (
-                    (structure.structureType === STRUCTURE_EXTENSION ||
-                        structure.structureType === STRUCTURE_SPAWN ||
-                        structure.structureType === STRUCTURE_TOWER) &&
-                    structure.store.getFreeCapacity(RESOURCE_ENERGY) > 0
+                    (structure.structureType === STRUCTURE_TOWER &&
+                        structure.store.getFreeCapacity(RESOURCE_ENERGY) > 100) ||
+                    ((structure.structureType === STRUCTURE_EXTENSION || structure.structureType === STRUCTURE_SPAWN) &&
+                        structure.store.getFreeCapacity(RESOURCE_ENERGY) > 0)
                 );
             }
         });
@@ -383,16 +398,56 @@ export class RoleCreep {
         }
     }
 
-    protected checkForAdjacentLink(creep: Creep): StructureLink | null {
-        if (creep.room.memory.dumpLinks) {
+    protected checkForAdjacentLinkToFill(creep: Creep): boolean {
+        if (creep.memory.adjLink) {
+            const link = Game.getObjectById(creep.memory.adjLink);
+            if (link && link.store) {
+                if (link.store.energy <= 750) {
+                    creep.transfer(link, RESOURCE_ENERGY);
+                    return true;
+                } else {
+                    return false;
+                }
+            } else {
+                delete creep.memory.adjLink;
+                return false;
+            }
+        }
+        if (creep.room.memory.sourceLinks) {
             const links: StructureLink[] = _.compact(
-                _.map(creep.room.memory?.dumpLinks, id => {
-                    return this.checkLinkForEnergy(id);
+                _.map(creep.room.memory?.sourceLinks, id => {
+                    return Game.getObjectById(id);
                 })
             );
             if (links.length > 0) {
                 const queryItem: StructureLink | null = creep.pos.findInRange<StructureLink>(links, 1)[0];
-                return queryItem;
+                if (queryItem) {
+                    creep.memory.adjLink = queryItem.id;
+                    return this.checkForAdjacentLinkToFill(creep);
+                } else {
+                    return false;
+                }
+            }
+        }
+        return false;
+    }
+
+    protected checkForAdjacentLinkToRecharge(creep: Creep): StructureLink | null {
+        if (creep.memory.adjLink) {
+            return this.checkLinkForEnergy(creep, creep.memory.adjLink);
+        }
+        if (creep.room.memory.dumpLinks) {
+            const links: StructureLink[] = _.compact(
+                _.map(creep.room.memory?.dumpLinks, id => {
+                    return Game.getObjectById(id);
+                })
+            );
+            if (links.length > 0) {
+                const queryItem: StructureLink | null = creep.pos.findInRange<StructureLink>(links, 1)[0];
+                if (queryItem) {
+                    creep.memory.adjLink = queryItem.id;
+                    return this.checkForAdjacentLinkToRecharge(creep);
+                }
             }
         }
         return null;
@@ -402,7 +457,7 @@ export class RoleCreep {
         if (creep.room.memory.dumpLinks) {
             const links: StructureLink[] = _.compact(
                 _.map(creep.room.memory?.dumpLinks, id => {
-                    return this.checkLinkForEnergy(id);
+                    return this.checkLinkForEnergy(creep, id);
                 })
             );
             if (links.length > 0) {
@@ -413,11 +468,16 @@ export class RoleCreep {
         return null;
     }
 
-    private checkLinkForEnergy(id: Id<StructureLink>): StructureLink | null {
+    private checkLinkForEnergy(creep: Creep, id: Id<StructureLink>): StructureLink | null {
         const link = Game.getObjectById(id);
-        if (link && link.store.energy > 50) {
-            return link;
+        if (link) {
+            if (link.store.energy > 50) {
+                return link;
+            } else {
+                return null;
+            }
         } else {
+            delete creep.memory.adjLink;
             return null;
         }
     }
@@ -446,6 +506,23 @@ export class RoleCreep {
         return null;
     }
 
+    // ? Do we need this? TODO remove
+    protected _checkForAdjacentLinktoFill(creep: Creep): StructureLink | null {
+        if (creep.room.memory.sourceLinks) {
+            const links: StructureLink[] = _.compact(
+                _.map(creep.room.memory?.sourceLinks, id => {
+                    return this.checkLinkForFillable(id);
+                })
+            );
+            if (links.length > 0) {
+                const queryItem: StructureLink | null = creep.pos.findInRange<StructureLink>(links, 1, {})[0];
+
+                return queryItem;
+            }
+        }
+        return null;
+    }
+
     //* Adjacency Logic
     protected grabAdjacentDroppedEnergy(creep: Creep, adjacentPos: RoomPosition): void {
         const droppedResources = adjacentPos.findInRange(FIND_DROPPED_RESOURCES, 0);
@@ -455,11 +532,13 @@ export class RoleCreep {
     }
 
     // Quite inefficient, but might be able to find an application where it is valueable.
-    protected checkForAdjacentDroppedEnergy(creep: Creep): void {
+    protected checkForAdjacentDroppedResources(creep: Creep): boolean {
         const droppedResources = creep.pos.findInRange(FIND_DROPPED_RESOURCES, 1);
         if (droppedResources && droppedResources.length > 0) {
-            creep.pickup(droppedResources[0]);
+            creep.pickup(_.first(droppedResources)!);
+            return true;
         }
+        return false;
     }
 
     protected repairRoad(creep: Creep) {
@@ -594,7 +673,12 @@ export class RoleCreep {
             if (blockers.length > 0) {
                 const blocker = _.first(blockers);
                 if (blocker) {
-                    if (blocker.fatigue || blocker.memory.role === CreepRole.dropper) {
+                    if (
+                        blocker.fatigue ||
+                        !blocker.getActiveBodyparts(MOVE) ||
+                        blocker.memory.taxi ||
+                        blocker.memory.activeTaxi
+                    ) {
                         return this.pathingOvertake(creep);
                     } else {
                         blocker.moveTo(creep.pos.x, creep.pos.y);
@@ -635,11 +719,15 @@ export class RoleCreep {
 
     //* Work Tasks
     // This intentionally tries to upgrade first. Upgrading is generally done by upgraders, and they are usually in range.
-    protected upgradeController(creep: Creep): boolean {
+    protected upgradeController(creep: Creep, taxi?: boolean): boolean {
         const target = creep.room.controller;
         if (target) {
             if (creep.upgradeController(target) === ERR_NOT_IN_RANGE) {
-                creep.moveTo(target, { visualizePathStyle: { stroke: "#AE02E6", strokeWidth: 0.15 } });
+                if (taxi) {
+                    return false;
+                } else {
+                    creep.moveTo(target, { visualizePathStyle: { stroke: "#AE02E6", strokeWidth: 0.15 } });
+                }
                 return true;
             } else {
                 return true;

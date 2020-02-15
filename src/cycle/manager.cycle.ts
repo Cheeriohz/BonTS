@@ -13,7 +13,6 @@ import { Visualizer } from "building/building.visualizer";
 import { BorderAggression } from "military/military.borderAggression";
 import { GeneralBuilding } from "building/base/building.general";
 import { buildProjectCreator } from "building/building.buildProjectCreator";
-import { SpawnTemplate } from "spawning/spawning.templating";
 
 export class CycleManager {
     public static check() {

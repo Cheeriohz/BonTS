@@ -40,7 +40,7 @@ export class CreepRequester {
             working: true,
             orders: {
                 target: roomName,
-                independentOperator: true
+                independentOperator: false
             }
         };
         const scoutRequest: CreepRequest = { role: CreepRole.scout, body: [MOVE], memory: memory };

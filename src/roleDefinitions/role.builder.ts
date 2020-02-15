@@ -1,14 +1,11 @@
 import { RoleCreep } from "./base/role.creep";
 export class RoleBuilder extends RoleCreep {
     private maxRepairThreshold: number = 2000000;
+    private normalRoad: number = 5000;
 
     public run(creep: Creep) {
-        const currentEnergy = creep.store[RESOURCE_ENERGY];
-
         if (creep.memory.working && creep.store.getUsedCapacity(RESOURCE_ENERGY) === 0) {
             creep.memory.working = false;
-            //TODO remove
-            this.checkForAdjacentDroppedEnergy(creep);
             creep.say("🔋 recharge");
         }
         if (!creep.memory.working && creep.store.getFreeCapacity() === 0) {
@@ -47,7 +44,7 @@ export class RoleBuilder extends RoleCreep {
         const targets = creep.room.find(FIND_STRUCTURES, {
             filter: structure => {
                 return (
-                    structure.structureType !== STRUCTURE_ROAD &&
+                    (structure.structureType !== STRUCTURE_ROAD || structure.hitsMax !== this.normalRoad) &&
                     structure.structureType !== STRUCTURE_WALL &&
                     structure.hits < structure.hitsMax &&
                     structure.hits < this.maxRepairThreshold

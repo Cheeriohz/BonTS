@@ -14,4 +14,5 @@ interface RoomScout {
     sourceA?: Id<Source>;
     sourceB?: Id<Source>;
     threatAssessment?: number;
+    closestRoom?: string;
 }
