@@ -13,14 +13,17 @@ export class RoleHauler extends RoleCreep {
         }
 
         if (creep.memory.working && currentEnergy === 0) {
+            creep.memory.upgraderDuty = false;
             // Check if we can retrieve any dropped resources
             if (this.droppedResourceHandling(creep)) {
                 creep.say("💎👀");
                 return;
             }
+            if (creep.store.getUsedCapacity() > 0 && creep.room.storage) {
+                this.depositMoveUnspecified(creep, creep.room.storage);
+                return;
+            }
             creep.memory.working = false;
-            // Check to see if we need to toggle link dumping
-            this.checkRoomEnergy(creep);
             creep.say("🏗️ pickup");
         }
         if (!creep.memory.working && creep.store.getFreeCapacity() === 0) {
@@ -50,7 +53,11 @@ export class RoleHauler extends RoleCreep {
 
     protected carryOutGeneralWork(creep: Creep, ignoreLinks: boolean) {
         if (creep.memory.working) {
-            this.fillClosest(creep, ignoreLinks, !creep.room.memory.linksActive);
+            if (creep.memory.upgraderDuty) {
+                this.refillUpgraders(creep);
+                return;
+            }
+            this.fillClosest(creep, true, !creep.room.memory.linksActive);
         } else {
             // energy full, time to find deposit location.
             this.fillUpHauler(creep);
