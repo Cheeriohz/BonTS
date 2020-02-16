@@ -3,6 +3,7 @@ import { getContainer, refreshTree } from "../caching/manager.containerSelector"
 import { profile } from "Profiler";
 import { RoleCreep } from "./base/role.creep";
 import { getdropMapPosition } from "caching/caching.dropPickupCacher";
+import _ from "lodash";
 
 @profile
 export class RoleHauler extends RoleCreep {
@@ -37,6 +38,19 @@ export class RoleHauler extends RoleCreep {
     protected droppedResourceHandling(creep: Creep): Boolean {
         if (this.checkForAdjacentDroppedResources(creep)) {
             return true;
+        }
+        const enemyResources = creep.room.find(FIND_TOMBSTONES);
+        if (enemyResources) {
+            const nonEnergy = _.filter(enemyResources, r => r.store.getUsedCapacity() > 0);
+            if (nonEnergy) {
+                const droppedResource = creep.pos.findClosestByPath(nonEnergy);
+                if (droppedResource) {
+                    creep.memory.path = creep.pos.findPathTo(droppedResource);
+                    creep.memory.path.pop();
+                    this.pathHandling(creep);
+                    return true;
+                }
+            }
         }
         const droppedResources = creep.room.find(FIND_DROPPED_RESOURCES);
         if (droppedResources) {

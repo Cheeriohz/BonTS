@@ -39,4 +39,20 @@ export class BodyBuilder {
         }
         return _.concat(move, workA, workB);
     }
+
+    public static generateHaulerBody(carryCount: number, repairBuild: boolean) {
+        const body: BodyPartConstant[] = [];
+        for (let i = 0; i < carryCount; i++) {
+            body.push(CARRY);
+        }
+        if (repairBuild) {
+            body.push(WORK);
+        }
+        const moveNeeds: number = Math.ceil(body.length / 2);
+        for (let i = 0; i < moveNeeds; i++) {
+            body.push(MOVE);
+        }
+
+        return body;
+    }
 }

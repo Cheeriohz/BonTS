@@ -1,4 +1,5 @@
 import _ from "lodash";
+import { CreepRole } from "enums/enum.roles";
 
 export class LinkManager {
     // TODO Should treat storage as a source link... maybe
@@ -39,6 +40,7 @@ export class LinkManager {
                     spawnRoom.memory.sourceLinks
                 )
             );
+            spawnRoom.memory.templates![CreepRole.dropper] = [WORK, WORK, WORK, WORK, WORK, CARRY];
             spawnRoom.memory.linksActive = true;
         }
     }

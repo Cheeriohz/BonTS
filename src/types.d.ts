@@ -53,6 +53,7 @@ interface RoomMemory {
     mine: Mine | null;
     remoteMines: RemoteMine[] | null;
     remoteReservations: RemoteReservation[] | null;
+    remotePatrols: RemotePatrol[] | null;
 
     //* Building
     reservedBuilds?: BuildOrder[] | null;
@@ -87,7 +88,6 @@ interface SpawnMemory {
     sourcesUtilized: boolean;
     remoteHarvests: RemoteHarvest[] | null;
     roomHarass: RoomHarrass[] | null;
-    remotePatrols: RemotePatrol[] | null;
 }
 
 interface Memory {

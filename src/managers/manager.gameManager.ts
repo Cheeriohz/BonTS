@@ -62,8 +62,8 @@ export class GameManager {
     }
 
     private static managePatrol(spawn: StructureSpawn) {
-        if (spawn.memory.remotePatrols && spawn.memory.remotePatrols.length > 0) {
-            for (const remotePatrol of spawn.memory.remotePatrols) {
+        if (spawn.room.memory.remotePatrols && spawn.room.memory.remotePatrols.length > 0) {
+            for (const remotePatrol of spawn.room.memory.remotePatrols) {
                 const remotePatrolManager: RemotePatrolManager = new RemotePatrolManager(spawn, remotePatrol);
                 remotePatrolManager.managePatrol();
             }

@@ -76,6 +76,12 @@ export class DedicatedCreepRequester {
             }
             case CreepRole.hauler: {
                 if (isRemote) {
+                    if (body) {
+                        this.spawn.memory.dedicatedCreepRequest.push(
+                            this.createDedicatedRemoteHaulerSpecified(dedication, specifiedName, body, precious, orders)
+                        );
+                        break;
+                    }
                     this.spawn.memory.dedicatedCreepRequest.push(
                         this.createDedicatedRemoteHauler(dedication, specifiedName, precious, orders)
                     );
@@ -263,28 +269,7 @@ export class DedicatedCreepRequester {
     ): DedicatedCreepRequest {
         return {
             role: CreepRole.knight,
-            body: [
-                TOUGH,
-                TOUGH,
-                TOUGH,
-                TOUGH,
-                ATTACK,
-                ATTACK,
-                ATTACK,
-                ATTACK,
-                MOVE,
-                MOVE,
-                MOVE,
-                MOVE,
-                MOVE,
-                MOVE,
-                MOVE,
-                MOVE,
-                MOVE,
-                MOVE,
-                HEAL,
-                HEAL
-            ],
+            body: [TOUGH, ATTACK, ATTACK, ATTACK, MOVE, MOVE, MOVE, MOVE, MOVE, HEAL],
             dedication: dedication,
             specifiedName: specifiedName,
             precious: precious,
@@ -357,6 +342,24 @@ export class DedicatedCreepRequester {
         return {
             role: CreepRole.dropper,
             body: [WORK, WORK, WORK, WORK, WORK, WORK, CARRY, MOVE, MOVE, MOVE],
+            dedication: dedication,
+            specifiedName: specifiedName,
+            precious: precious,
+            home: this.spawn.room.name,
+            orders: orders
+        };
+    }
+
+    private createDedicatedRemoteHaulerSpecified(
+        dedication: string,
+        specifiedName: string,
+        body: BodyPartConstant[],
+        precious?: string,
+        orders?: CreepOrder
+    ): DedicatedCreepRequest {
+        return {
+            role: CreepRole.hauler,
+            body: body,
             dedication: dedication,
             specifiedName: specifiedName,
             precious: precious,

@@ -1,6 +1,7 @@
 import { CreepRole } from "enums/enum.roles";
 import { DedicatedCreepRequester } from "../spawning/manager.dedicatedCreepRequester";
 import _ from "lodash";
+import { BodyBuilder } from "spawning/spawning.bodyBuilder";
 
 export class RemoteMineManager {
     room!: Room;
@@ -14,6 +15,9 @@ export class RemoteMineManager {
     }
 
     public manageMine(checkPersonnel: boolean) {
+        if (!this.mine.configured) {
+            this.configureMine();
+        }
         if (checkPersonnel) {
             this.checkPersonnel();
         }
@@ -39,11 +43,7 @@ export class RemoteMineManager {
         }
         if (this.mine.haulers) {
             this.removeUnusedHaulers();
-            let haulerCap = 2;
-            if (this.mine.reserved) {
-                haulerCap = 4;
-            }
-            if (this.mine.haulers.length < haulerCap) {
+            if (this.mine.haulers.length < this.mine.haulerCount!) {
                 if (!this.creepInQueue(CreepRole.hauler)) {
                     if (this.haulerNeeded()) {
                         this.requestHauler();
@@ -109,27 +109,31 @@ export class RemoteMineManager {
         const endPos = _.last(this.mine.pathingLookup[this.mine.roomName][0]);
         if (endPos) {
             this.room.createConstructionSite(endPos.x, endPos.y, STRUCTURE_CONTAINER);
-            this.maintainActiveRemoteBuilder(this.mine.roomName);
+            this.maintainActiveRemoteHarvesterBuilder(this.mine.roomName);
         }
     }
 
-    // TODO -  This code is common to remote. Should make it available external to any one class.
-    private maintainActiveRemoteBuilder(containerRoomName: string) {
-        if (!this.getActiveRemoteBuilder(containerRoomName)) {
+    private maintainActiveRemoteHarvesterBuilder(containerRoomName: string) {
+        if (!this.getActiveRemoteHarvesterBuilder(containerRoomName)) {
             const dcr: DedicatedCreepRequester = new DedicatedCreepRequester(this.spawn);
+            const orders: CreepOrder = {
+                target: this.mine.roomName,
+                independentOperator: false
+            };
             dcr.createdDedicatedCreepRequest({
-                dedication: containerRoomName,
-                role: CreepRole.builder,
+                dedication: this.mine.vein,
+                role: CreepRole.harvester,
                 specifiedName: `${this.spawn.name}_BPR_${containerRoomName}`,
-                precious: undefined,
-                isRemote: true
+                precious: RESOURCE_ENERGY,
+                isRemote: true,
+                orders: orders
             });
         }
     }
 
-    private getActiveRemoteBuilder(roomName: string): Creep | null {
+    private getActiveRemoteHarvesterBuilder(roomName: string): Creep | null {
         for (const creep of _.values(Game.creeps)) {
-            if (creep.memory.role === CreepRole.builder) {
+            if (creep.memory.role === CreepRole.harvester) {
                 if (creep.memory.dedication) {
                     if (creep.memory.dedication === roomName) {
                         return creep;
@@ -179,12 +183,51 @@ export class RemoteMineManager {
             orders: {
                 target: this.mine.roomName,
                 independentOperator: false
-            }
+            },
+            body: this.mine.haulerBody
         });
         if (this.mine.haulers!.length > 0) {
             this.mine.haulers?.push(haulerName);
         } else {
             this.mine.haulers = [haulerName];
+        }
+    }
+
+    private configureMine() {
+        let distance: number = 0;
+        for (let pathRoom of _.values(this.mine.pathingLookup)) {
+            const departing = pathRoom[0];
+            if (departing) {
+                distance += departing.length;
+                console.log(`Adding ${pathRoom.length} for: ${JSON.stringify(pathRoom)}`);
+            }
+        }
+        console.log(`Distance is: ${distance}`);
+        let multiplier = 1;
+        if (this.mine.reserved) {
+            multiplier = 2;
+        }
+
+        const requiredCarry: number = Math.floor((distance * multiplier) / 5);
+
+        console.log(`RequiredCarry is: ${requiredCarry}`);
+        // Check if we can consolidate into a single hauler.
+        if (this.spawn.room.energyCapacityAvailable > requiredCarry * 50) {
+            // We can just use a single hauler.
+            this.mine.haulerBody = BodyBuilder.generateHaulerBody(requiredCarry, true);
+            this.mine.haulerCount = 1;
+            this.mine.configured = true;
+        } else {
+            let haulerCount = 2;
+            while (!this.mine.configured) {
+                if (this.spawn.room.energyCapacityAvailable > (requiredCarry * 50) / haulerCount) {
+                    this.mine.haulerBody = BodyBuilder.generateHaulerBody(requiredCarry / haulerCount, true);
+                    this.mine.haulerCount = haulerCount;
+                    this.mine.configured = true;
+                } else {
+                    haulerCount++;
+                }
+            }
         }
     }
 }

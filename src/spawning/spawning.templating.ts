@@ -34,6 +34,9 @@ export class SpawnTemplate {
         room.memory.roleTargets![CreepRole.upgrader] = 2 * sourceCount;
         room.memory.roleTargets![CreepRole.harvester] = 0;
         room.memory.staticUpgraders = true;
+
+        room.memory.templates![CreepRole.knight] = [TOUGH, ATTACK, ATTACK, MOVE, MOVE, MOVE];
+        room.memory.templates![CreepRole.archer] = [RANGED_ATTACK, RANGED_ATTACK, MOVE, MOVE];
     }
 
     //* RCL3 -> 800 Energy
@@ -77,6 +80,18 @@ export class SpawnTemplate {
 
         // Remove dropper legs
         room.memory.templates![CreepRole.dropper] = [WORK, WORK, WORK, WORK, WORK];
+
+        room.memory.templates![CreepRole.knight] = [TOUGH, ATTACK, ATTACK, ATTACK, MOVE, MOVE, MOVE, MOVE, HEAL];
+        room.memory.templates![CreepRole.archer] = [
+            MOVE,
+            MOVE,
+            MOVE,
+            MOVE,
+            RANGED_ATTACK,
+            RANGED_ATTACK,
+            RANGED_ATTACK,
+            RANGED_ATTACK
+        ];
     }
 
     //* RCL4 -> 1300 Energy
@@ -120,14 +135,72 @@ export class SpawnTemplate {
         // Roads will be finished, change Haulers for efficiency.
         room.memory.templates![CreepRole.hauler] = [CARRY, CARRY, CARRY, CARRY, MOVE, MOVE];
 
-        // TODO Probably should make builders taxi-able at this point.
+        room.memory.templates![CreepRole.knight] = [
+            TOUGH,
+            TOUGH,
+            TOUGH,
+            MOVE,
+            MOVE,
+            MOVE,
+            MOVE,
+            MOVE,
+            MOVE,
+            MOVE,
+            MOVE,
+            MOVE,
+            MOVE,
+            ATTACK,
+            ATTACK,
+            ATTACK,
+            ATTACK,
+            ATTACK,
+            ATTACK,
+            HEAL
+        ];
+        room.memory.templates![CreepRole.archer] = [
+            MOVE,
+            MOVE,
+            MOVE,
+            MOVE,
+            MOVE,
+            MOVE,
+            RANGED_ATTACK,
+            RANGED_ATTACK,
+            RANGED_ATTACK,
+            RANGED_ATTACK,
+            RANGED_ATTACK,
+            HEAL
+        ];
     }
 
     //* RCL5 -> 1800 Energy
     public static RCL5Improvements(room: Room) {
+        const sourceCount = room.memory.sourceMap.length;
         // Droppers should now check for links
         room.memory.templates![CreepRole.dropper] = [WORK, WORK, WORK, WORK, WORK, CARRY];
         room.memory.linksActive = true;
+
+        //Don't need as many haulers now.
+
+        room.memory.roleTargets![CreepRole.hauler] = 1 * sourceCount;
+        room.memory.templates![CreepRole.hauler] = [CARRY, CARRY, MOVE];
+
+        // Upgraders should be only one at a time
+
+        room.memory.templates![CreepRole.upgrader] = [
+            WORK,
+            WORK,
+            WORK,
+            WORK,
+            WORK,
+            WORK,
+            WORK,
+            WORK,
+            WORK,
+            WORK,
+            CARRY
+        ];
+        room.memory.roleTargets![CreepRole.upgrader] = 1;
 
         //Beef builders
         room.memory.templates![CreepRole.builder] = [

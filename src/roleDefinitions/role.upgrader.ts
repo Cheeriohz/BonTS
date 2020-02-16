@@ -13,6 +13,11 @@ export class RoleUpgrader extends RoleCreep {
                         creep.withdraw(link, RESOURCE_ENERGY);
                     }
                 }
+                if (creep.room.memory.linksActive) {
+                    if (creep.pos.getRangeTo(creep.room.controller!) > 3) {
+                        TaxiServiceManager.requestTaxi(creep, creep.room.controller!.pos, 1, 3);
+                    }
+                }
                 return;
             }
             creep.memory.working = false;
@@ -28,6 +33,7 @@ export class RoleUpgrader extends RoleCreep {
         }
         if (!creep.memory.working && creep.store.getFreeCapacity() === 0) {
             if (creep.room.memory.upgraderTaxi) {
+				creep.room.controller!
                 TaxiServiceManager.requestTaxi(creep, creep.room.controller!.pos, 1, 3);
             }
             creep.memory.working = true;

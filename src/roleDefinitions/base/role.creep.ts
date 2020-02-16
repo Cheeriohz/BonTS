@@ -536,8 +536,13 @@ export class RoleCreep {
     protected checkForAdjacentDroppedResources(creep: Creep): boolean {
         const droppedResources = creep.pos.findInRange(FIND_DROPPED_RESOURCES, 1);
         if (droppedResources && droppedResources.length > 0) {
-            creep.pickup(_.first(droppedResources)!);
+            creep.pickup(_.last(droppedResources)!);
             return true;
+        }
+        const tombStones = creep.pos.findInRange(FIND_TOMBSTONES, 1);
+        if (tombStones && tombStones.length > 0) {
+            const tombStone = _.last(tombStones);
+            creep.withdraw(tombStone!, <ResourceConstant>_.last(_.keys(tombStone!.store)));
         }
         return false;
     }

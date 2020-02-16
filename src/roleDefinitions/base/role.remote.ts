@@ -8,8 +8,13 @@ export class RoleRemote extends RoleCreep {
         return `${pos.x}${pos.y}`;
     }
 
-    protected cachedTravel(destination: RoomPosition, creep: Creep, repairWhileMove: boolean): boolean {
-        const path = creep.pos.findPathTo(destination, { ignoreCreeps: true });
+    protected cachedTravel(
+        destination: RoomPosition,
+        creep: Creep,
+        repairWhileMove: boolean,
+        ignoreRoads?: boolean
+    ): boolean {
+        const path = creep.pos.findPathTo(destination, { ignoreCreeps: true, ignoreRoads: ignoreRoads ?? false });
         if (path) {
             this.travelByCachedPath(repairWhileMove, creep, path);
             return true;
@@ -27,12 +32,12 @@ export class RoleRemote extends RoleCreep {
         this.pathHandling(creep);
     }
 
-    protected travelToRoom(creep: Creep, roomName: string, repairWhileMove: boolean) {
+    protected travelToRoom(creep: Creep, roomName: string, repairWhileMove: boolean, ignoreRoads?: boolean) {
         let target = Game.map.findExit(creep.room.name, roomName);
         if (target > 0) {
             const destination = creep.pos.findClosestByPath(<ExitConstant>target);
             if (destination) {
-                return this.cachedTravel(destination, creep, repairWhileMove);
+                return this.cachedTravel(destination, creep, repairWhileMove, ignoreRoads);
             }
         }
         return false;

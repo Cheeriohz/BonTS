@@ -12,10 +12,11 @@ export class RemotePatrolManager {
     }
 
     public managePatrol() {
+        console.log("Checking patrol");
         if (this.spawn.spawning) {
             return;
         }
-        if (this.patrol.knights === null) {
+        if (!this.patrol.knights) {
             this.patrol.knights = [];
         }
         this.maintainKnights();
