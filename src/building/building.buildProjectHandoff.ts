@@ -3,6 +3,7 @@ import _ from "lodash";
 import { SpawnTemplate } from "spawning/spawning.templating";
 import { buildEmptyContainerMap } from "caching/manager.containerSelector";
 import { CreepRole } from "enums/enum.roles";
+import { ReservationManager } from "remote/manager.remote.reservation";
 
 export class BuildProjectHandoff {
     public static handOffProject(remote: boolean, project: BuildProject, spawn: StructureSpawn) {
@@ -123,7 +124,7 @@ export class BuildProjectHandoff {
                     if (container) {
                         const source = container.pos.findClosestByRange(FIND_SOURCES);
                         if (source) {
-                            const reserved = BuildProjectHandoff.shouldReserve(remoteMine, spawn);
+                            const reserved = ReservationManager.shouldReserve(remoteMine, spawn);
                             BuildProjectHandoff.updateRemoteMineInMemoryForHandoff(
                                 source,
                                 <StructureContainer>container,
@@ -150,27 +151,6 @@ export class BuildProjectHandoff {
         } else {
             console.log("Could not identify remote mine");
         }
-    }
-
-    private static shouldReserve(remoteMine: RemoteMine, spawn: StructureSpawn): boolean {
-        let travelDistance = 0;
-        for (const pathStep of _.values(remoteMine.pathingLookup)) {
-            travelDistance += pathStep[0].length;
-        }
-        if (travelDistance < 100) {
-            const remoteReservation: RemoteReservation = {
-                roomName: remoteMine.roomName,
-                spawnTime: Game.time,
-                leadTime: travelDistance + 20
-            };
-            if (spawn.memory.remoteReservations) {
-                spawn.memory.remoteReservations.push(remoteReservation);
-            } else {
-                spawn.memory.remoteReservations = [remoteReservation];
-            }
-            return true;
-        }
-        return false;
     }
 
     private static updateRemoteMineInMemoryForHandoff(

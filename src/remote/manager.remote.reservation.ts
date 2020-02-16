@@ -1,5 +1,6 @@
 import { DedicatedCreepRequester } from "spawning/manager.dedicatedCreepRequester";
 import { CreepRole } from "enums/enum.roles";
+import _ from "lodash";
 
 const reserverThreshold: number = 1200;
 
@@ -45,6 +46,27 @@ export class ReservationManager {
             orders: orders
         });
         this.reservation.spawnTime = gameTime;
+    }
+
+    public static shouldReserve(remoteMine: RemoteMine, spawn: StructureSpawn): boolean {
+        let travelDistance = 0;
+        for (const pathStep of _.values(remoteMine.pathingLookup)) {
+            travelDistance += pathStep[0].length;
+        }
+        if (travelDistance < 100) {
+            const remoteReservation: RemoteReservation = {
+                roomName: remoteMine.roomName,
+                spawnTime: Game.time,
+                leadTime: travelDistance + 20
+            };
+            if (spawn.room.memory.remoteReservations) {
+                spawn.room.memory.remoteReservations.push(remoteReservation);
+            } else {
+                spawn.room.memory.remoteReservations = [remoteReservation];
+            }
+            return true;
+        }
+        return false;
     }
 }
 

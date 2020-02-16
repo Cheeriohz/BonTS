@@ -29,6 +29,7 @@ interface CreepMemory {
     ignoreLinks?: boolean | null;
     repairWhileMove?: boolean | null;
     tick?: number | null;
+    upgraderDuty?: boolean;
 
     //* Combat
     hitsLast?: number | null;
@@ -51,6 +52,7 @@ interface RoomMemory {
     //* Deployment Structures
     mine: Mine | null;
     remoteMines: RemoteMine[] | null;
+    remoteReservations: RemoteReservation[] | null;
 
     //* Building
     reservedBuilds?: BuildOrder[] | null;
@@ -84,7 +86,6 @@ interface SpawnMemory {
     expeditionResults: IExpeditionResults[] | null;
     sourcesUtilized: boolean;
     remoteHarvests: RemoteHarvest[] | null;
-    remoteReservations: RemoteReservation[] | null;
     roomHarass: RoomHarrass[] | null;
     remotePatrols: RemotePatrol[] | null;
 }
