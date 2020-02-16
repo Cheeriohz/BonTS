@@ -121,7 +121,7 @@ export class RemoteMineManager {
                 independentOperator: false
             };
             dcr.createdDedicatedCreepRequest({
-                dedication: this.mine.vein,
+                dedication: this.mine.containerId!,
                 role: CreepRole.harvester,
                 specifiedName: `${this.spawn.name}_BPR_${containerRoomName}`,
                 precious: RESOURCE_ENERGY,
@@ -131,7 +131,10 @@ export class RemoteMineManager {
         }
     }
 
-    private getActiveRemoteHarvesterBuilder(roomName: string): Creep | null {
+    private getActiveRemoteHarvesterBuilder(roomName: string): Creep | Boolean | null {
+        if (this.creepInQueue(CreepRole.harvester)) {
+            return true;
+        }
         for (const creep of _.values(Game.creeps)) {
             if (creep.memory.role === CreepRole.harvester) {
                 if (creep.memory.dedication) {
@@ -212,7 +215,7 @@ export class RemoteMineManager {
 
         console.log(`RequiredCarry is: ${requiredCarry}`);
         // Check if we can consolidate into a single hauler.
-        if (this.spawn.room.energyCapacityAvailable > requiredCarry * 50) {
+        if (this.spawn.room.energyCapacityAvailable > requiredCarry * 1.5 * 50 + 100) {
             // We can just use a single hauler.
             this.mine.haulerBody = BodyBuilder.generateHaulerBody(requiredCarry, true);
             this.mine.haulerCount = 1;
@@ -220,7 +223,7 @@ export class RemoteMineManager {
         } else {
             let haulerCount = 2;
             while (!this.mine.configured) {
-                if (this.spawn.room.energyCapacityAvailable > (requiredCarry * 50) / haulerCount) {
+                if (this.spawn.room.energyCapacityAvailable > (requiredCarry * 1.5 * 50 + 100) / haulerCount) {
                     this.mine.haulerBody = BodyBuilder.generateHaulerBody(requiredCarry / haulerCount, true);
                     this.mine.haulerCount = haulerCount;
                     this.mine.configured = true;

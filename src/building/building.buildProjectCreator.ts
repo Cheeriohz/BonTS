@@ -4,14 +4,20 @@ import _ from "lodash";
 export class buildProjectCreator {
     private spawn!: StructureSpawn;
     private room!: Room;
+    private roomName!: string;
 
-    constructor(room: Room, spawn: StructureSpawn) {
+    constructor(room: Room, spawn: StructureSpawn, roomName?: string) {
         this.room = room;
         this.spawn = spawn;
+        if (roomName) {
+            this.roomName = roomName;
+        } else {
+            this.roomName = this.room.name;
+        }
     }
 
     public passThroughCreateMasked(buildOrders: BuildOrder[], bpcEnum: BuildProjectEnum) {
-        this.pushBuildProjectToSpawn(buildOrders, BuildProjectEnum.PassThroughCreate);
+        this.pushBuildProjectToSpawn(buildOrders, bpcEnum);
     }
 
     public passThroughCreate(buildOrders: BuildOrder[]) {
@@ -59,7 +65,7 @@ export class buildProjectCreator {
             {
                 vein: scoutInfo.sourceA!,
                 harvesters: [],
-                roomName: scoutInfo.roomName,
+                roomName: this.roomName,
                 type: RESOURCE_ENERGY,
                 pathingLookup: {},
                 reserved: false
@@ -67,7 +73,7 @@ export class buildProjectCreator {
             {
                 vein: scoutInfo.sourceB!,
                 harvesters: [],
-                roomName: scoutInfo.roomName,
+                roomName: this.roomName,
                 type: RESOURCE_ENERGY,
                 pathingLookup: {},
                 reserved: false
@@ -100,7 +106,7 @@ export class buildProjectCreator {
     private pushBuildProjectToSpawn(buildOrders: BuildOrder[], projectType: BuildProjectEnum) {
         let buildProject: BuildProject = {
             buildOrders: buildOrders,
-            roomName: this.room.name,
+            roomName: this.roomName,
             activeSites: 0,
             projectType: projectType
         };

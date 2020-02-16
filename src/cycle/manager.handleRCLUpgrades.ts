@@ -10,6 +10,7 @@ import { StorageAddition } from "building/building.storageAddition";
 import { TowerAddition } from "building/building.towerAddition";
 import { RemoteMineExpansion } from "expansion/expansion.remoteMine";
 import { LinkAddition } from "building/building.linkAddition";
+import { RemoteMineHandler } from "remote/remote.remoteMineHandler";
 
 export class RCLUpgradeHandler {
     public static handleRCLUpgrades(spawn: StructureSpawn) {
@@ -118,8 +119,7 @@ export class RCLUpgradeHandler {
             return false;
         }
 
-        if (!this.checkForNeighboringRemoteMine(spawn)) {
-        }
+        RemoteMineHandler.checkForNeighboringRemoteMine(spawn);
         return true;
     }
 
@@ -141,6 +141,10 @@ export class RCLUpgradeHandler {
     }
 
     private static handleRCLUpgradeTo6(spawn: StructureSpawn): boolean {
+        if (!this.handleRoomExtensionsEnqueue([spawn], true, 40, 5, false)) {
+            return false;
+        }
+
         const localExpansion: LocalExpansion = new LocalExpansion(spawn, spawn.room, spawn.pos, false);
         localExpansion.checkForMineralExpansion();
 
@@ -166,7 +170,7 @@ export class RCLUpgradeHandler {
     }
 
     private static handleRCLUpgradeTo7(spawn: StructureSpawn): boolean {
-        if (!this.handleRoomExtensionsEnqueue([spawn], true, 50, 10)) {
+        if (!this.handleRoomExtensionsEnqueue([spawn], true, 50, 10, false)) {
             return false;
         }
         /*
@@ -174,12 +178,11 @@ export class RCLUpgradeHandler {
 		if(!sa.enqueSpawnProject()) {
 			return false;
 		}
-
-		const ta: TowerAddition = new TowerAddition(spawn);
-		if(!ta.enqueueTowerProject()){
-			return false;
-		}
 		*/
+        const ta: TowerAddition = new TowerAddition(spawn, spawn.room);
+        if (!ta.addTower()) {
+            return false;
+        }
 
         const le: LabAddition = new LabAddition(spawn);
         if (!le.alreadyProcessedSuccessfully(7)) {
@@ -195,63 +198,6 @@ export class RCLUpgradeHandler {
 		}
 		*/
         return true;
-    }
-
-    public static checkForNeighboringRemoteMine(spawn: StructureSpawn): boolean {
-        const describedExits = Game.map.describeExits(spawn.room.name);
-        if (describedExits) {
-            for (const neighbor of _.compact(_.values(describedExits))) {
-                if (this.checkNeighbor(neighbor, spawn)) {
-                    return true;
-                }
-            }
-        }
-        return true;
-    }
-
-    private static checkNeighbor(neighbor: string, spawn: StructureSpawn) {
-        console.log(neighbor);
-        const RoomScout = Memory.scouting.roomScouts[neighbor];
-        const room = Game.rooms[neighbor];
-        console.log("a");
-        console.log(JSON.stringify(RoomScout));
-        if (RoomScout && !RoomScout.threatAssessment && RoomScout.sourceA) {
-            console.log(JSON.stringify(RoomScout));
-            console.log("b");
-            if (room) {
-                console.log("d");
-                if (!room.memory.spawns || room.memory.spawns.length === 0) {
-                    const storage = spawn.room.storage?.pos ?? this.getStoragePositionFromReservation(spawn.room);
-                    console.log("E");
-                    if (storage) {
-                        const rmExpo: RemoteMineExpansion = new RemoteMineExpansion(RoomScout.sourceA, storage, spawn);
-                        rmExpo.expandToLocation();
-                        if (RoomScout.sourceB) {
-                            const rmExpoB: RemoteMineExpansion = new RemoteMineExpansion(
-                                RoomScout.sourceA,
-                                storage,
-                                spawn
-                            );
-                            rmExpoB.expandToLocation();
-                        }
-                    }
-                    return true;
-                }
-            } else {
-                const cr: CreepRequester = new CreepRequester(spawn);
-                cr.RequestScoutToRoom(neighbor);
-                return false;
-            }
-        }
-        return false;
-    }
-
-    private static getStoragePositionFromReservation(room: Room): RoomPosition | null {
-        const sBO = _.first(_.filter(room.memory.reservedBuilds!, rb => rb.type === STRUCTURE_STORAGE));
-        if (sBO) {
-            return new RoomPosition(sBO.x, sBO.y, room.name);
-        }
-        return null;
     }
 
     private static stealRemoteHarvesters(spawn: StructureSpawn) {

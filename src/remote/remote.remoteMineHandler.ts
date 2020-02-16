@@ -1,23 +1,21 @@
 import { RemoteDispatcher } from "./remote.dispatcher";
 import _ from "lodash";
+import { RemoteMineExpansion } from "expansion/expansion.remoteMine";
+import { CreepRequester } from "spawning/manager.creepRequester";
 
 export class RemoteMineHandler extends RemoteDispatcher {
-    public requestRemoteDispatch(dispatchRequest: RemoteDispatchRequest): PathStep[] | null {
+    public static requestRemoteDispatch(dispatchRequest: RemoteDispatchRequest): PathStep[] | null {
         const remoteMine = this.getRemoteMine(Game.creeps[dispatchRequest.creep.name]);
         if (remoteMine) {
             let returnPath: PathStep[] | null = this.RequestDispatch(dispatchRequest, remoteMine);
             if (returnPath) {
-                if (dispatchRequest.departing) {
-                    return returnPath;
-                } else {
-                    return _.tail(returnPath);
-                }
+                return returnPath;
             }
         }
         return null;
     }
 
-    public getRemoteMine(creep: Creep): RemoteMine | null {
+    public static getRemoteMine(creep: Creep): RemoteMine | null {
         const room = Game.rooms[creep.memory.home!];
         if (room) {
             const remoteMine = _.find(room.memory.remoteMines, rm => {
@@ -31,7 +29,7 @@ export class RemoteMineHandler extends RemoteDispatcher {
     }
 
     // TODO probably obsolete now
-    public repathRemoteMineToStorage(spawn: StructureSpawn) {
+    public static repathRemoteMineToStorage(spawn: StructureSpawn) {
         const room = spawn.room;
         const storage = room.storage?.pos;
         if (storage) {
@@ -67,122 +65,82 @@ export class RemoteMineHandler extends RemoteDispatcher {
             console.log("No storage for remote mine repath");
         }
     }
-    //- THIS IS FROM REALLY MESSING UP MY PATHS AND HAVING TO FIX THEM.
-    /*
-    public fixRemoteMinePathDropHeadOnlyRunOnce(spawn: StructureSpawn) {
-        const room = spawn.room;
-        const storage = room.storage?.pos;
-        if (storage) {
-            if (spawn.room.memory.remoteMines) {
-                for (let mine of spawn.room.memory.remoteMines) {
-                    let first: boolean = true;
-                    for (let room of _.keys(mine.pathingLookup)) {
-                        if (first) {
-                            first = false;
-                        } else {
-                            for (let i = 0; i < 2; i++) {
-                                mine.pathingLookup[room][i] = _.tail(mine.pathingLookup[room][i]);
+
+    public static checkNeighborsForNeighboringRemoteMine(spawn: StructureSpawn): boolean {
+        const describedExits = Game.map.describeExits(spawn.room.name);
+
+        if (describedExits) {
+            for (const neighbor of _.compact(_.values(describedExits))) {
+                if (this.checkNeighbor(neighbor, spawn)) {
+                    return true;
+                } else {
+                    const describedExitsNeighbor = Game.map.describeExits(neighbor);
+                    if (describedExitsNeighbor) {
+                        for (const neighborNeighbor of _.compact(_.values(describedExitsNeighbor))) {
+                            if (this.checkNeighbor(neighborNeighbor, spawn)) {
+                                return true;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        return true;
+    }
+
+    public static checkForNeighboringRemoteMine(spawn: StructureSpawn): boolean {
+        const describedExits = Game.map.describeExits(spawn.room.name);
+        if (describedExits) {
+            for (const neighbor of _.compact(_.values(describedExits))) {
+                if (this.checkNeighbor(neighbor, spawn)) {
+                    return true;
+                }
+            }
+        }
+        return true;
+    }
+
+    private static checkNeighbor(neighbor: string, spawn: StructureSpawn) {
+        const RoomScout = Memory.scouting.roomScouts[neighbor];
+        const room = Game.rooms[neighbor];
+
+        // Check our current scouting information to determine if the room is valid for consideration.
+        if (RoomScout && !RoomScout.threatAssessment && RoomScout.sourceA && !RoomScout.utilized) {
+            // Check if we have visibility currently
+            if (room) {
+                if (!room.memory.spawns || room.memory.spawns.length === 0) {
+                    const storage = spawn.room.storage?.pos ?? this.getStoragePositionFromReservation(spawn.room);
+                    if (storage) {
+                        console.log(`attempting remote expo create to :  ${RoomScout.roomName}`);
+                        const rmExpo: RemoteMineExpansion = new RemoteMineExpansion(RoomScout.sourceA, storage, spawn);
+                        if (rmExpo.expandToLocation()) {
+                            RoomScout.utilized = true;
+                            if (RoomScout.sourceB) {
+                                const rmExpoB: RemoteMineExpansion = new RemoteMineExpansion(
+                                    RoomScout.sourceA,
+                                    storage,
+                                    spawn
+                                );
+                                rmExpoB.expandToLocation();
+                                return true;
                             }
                         }
                     }
                 }
             } else {
-                console.log("No mines for remote mine repath");
+                const cr: CreepRequester = new CreepRequester(spawn);
+                cr.RequestScoutToRoom(neighbor);
+                return false;
             }
-        } else {
-            console.log("No storage for remote mine repath");
         }
+        return false;
     }
 
-    public fixRemoteMinePath(spawn: StructureSpawn) {
-        const room = spawn.room;
-        const storage = room.storage?.pos;
-        if (storage) {
-            if (spawn.room.memory.remoteMines) {
-                for (let mine of spawn.room.memory.remoteMines) {
-                    let first: boolean = true;
-                    for (let room of _.keys(mine.pathingLookup)) {
-                        if (first) {
-                            first = false;
-                        } else {
-                            for (let i = 0; i < 2; i++) {
-                                for (let j = 1; j < mine.pathingLookup[room][i].length; j++) {
-                                    mine.pathingLookup[room][i][j].dx =
-                                        mine.pathingLookup[room][i][j].x - mine.pathingLookup[room][i][j - 1].x;
-                                    mine.pathingLookup[room][i][j].dy =
-                                        mine.pathingLookup[room][i][j].y - mine.pathingLookup[room][i][j - 1].y;
-                                    mine.pathingLookup[room][i][j].direction = this.getDirectionConstant(
-                                        mine.pathingLookup[room][i][j].dx,
-                                        mine.pathingLookup[room][i][j].dy
-                                    );
-                                }
-                            }
-                        }
-                    }
-                }
-            } else {
-                console.log("No mines for remote mine repath");
-            }
-        } else {
-            console.log("No storage for remote mine repath");
+    private static getStoragePositionFromReservation(room: Room): RoomPosition | null {
+        const sBO = _.first(_.filter(room.memory.reservedBuilds!, rb => rb.type === STRUCTURE_STORAGE));
+        if (sBO) {
+            return new RoomPosition(sBO.x, sBO.y, room.name);
         }
+        return null;
     }
-
-    protected getDirectionConstant(dx: number, dy: number): DirectionConstant {
-        switch (dx) {
-            case 0: {
-                switch (dy) {
-                    case 1: {
-                        return BOTTOM;
-                    }
-                    case -1: {
-                        return TOP;
-                    }
-                    default: {
-                        console.log("Error invalid dy for a pathstep");
-                    }
-                }
-                break;
-            }
-            case 1: {
-                switch (dy) {
-                    case 0: {
-                        return RIGHT;
-                    }
-                    case 1: {
-                        return BOTTOM_RIGHT;
-                    }
-                    case -1: {
-                        return TOP_RIGHT;
-                    }
-                    default: {
-                        console.log("Error invalid dy for a pathstep");
-                    }
-                }
-                break;
-            }
-            case -1: {
-                switch (dy) {
-                    case 0: {
-                        return LEFT;
-                    }
-                    case 1: {
-                        return BOTTOM_LEFT;
-                    }
-                    case -1: {
-                        return TOP_LEFT;
-                    }
-                    default: {
-                        console.log("Error invalid dy for a pathstep");
-                    }
-                }
-                break;
-            }
-            default: {
-                console.log("Error invalid dx for a pathstep");
-                break;
-            }
-        }
-        throw `dx: ${dx}  dy: ${dy} was invalid`;
-    } */
 }

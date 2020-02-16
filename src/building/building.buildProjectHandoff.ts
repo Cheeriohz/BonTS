@@ -48,24 +48,31 @@ export class BuildProjectHandoff {
         switch (spawn.room.controller!.level) {
             case 2: {
                 SpawnTemplate.RCL2Improvements(spawn.room);
+                break;
             }
             case 3: {
                 SpawnTemplate.RCL3Improvements(spawn.room);
+                break;
             }
             case 4: {
                 SpawnTemplate.RCL4Improvements(spawn.room);
+                break;
             }
             case 5: {
                 SpawnTemplate.RCL5Improvements(spawn.room);
+                break;
             }
             case 6: {
                 SpawnTemplate.RCL6Improvements(spawn.room);
+                break;
             }
             case 7: {
                 SpawnTemplate.RCL7Improvements(spawn.room);
+                break;
             }
             case 8: {
                 SpawnTemplate.RCL8Improvements(spawn.room);
+                break;
             }
         }
     }
@@ -85,7 +92,13 @@ export class BuildProjectHandoff {
                     remoteBot.memory.dedication = spawn.room.memory.buildProjects![0].roomName;
                 }
             }
-        } else {
+        }
+        if (
+            spawn.room.memory.remoteMines &&
+            _.filter(spawn.room.memory.remoteMines, rm => {
+                return rm.roomName === project.roomName && !rm.containerId;
+            })
+        ) {
             BuildProjectHandoff.handOffRemoteContainerExpansion(project, spawn);
         }
     }

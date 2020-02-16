@@ -32,6 +32,7 @@ export class RoleTaxi extends RoleHauler {
                 const lastPos = _.first(taxi.memory.taxi!.taxiRoute);
                 if (lastPos!.x === taxi.pos.x && lastPos!.y === taxi.pos.y) {
                     taxi.memory.taxi!.taxiRoute = _.tail(taxi.memory.taxi!.taxiRoute);
+                    taxi.memory.stuckCount = 0;
                 } else {
                     if (!taxi.memory.stuckCount) {
                         taxi.memory.stuckCount = 1;
@@ -79,7 +80,7 @@ export class RoleTaxi extends RoleHauler {
         const blockers = pos.lookFor(LOOK_CREEPS);
         if (blockers.length > 0) {
             const blocker = _.first(blockers);
-            if (blocker) {
+            if (blocker && blocker.name !== taxi.memory.taxi!.client) {
                 if (blocker.fatigue) {
                     taxi.say("🚨");
                     return false;
@@ -92,13 +93,6 @@ export class RoleTaxi extends RoleHauler {
                     }
                 }
             }
-        } else {
-            const structures = pos.lookFor(LOOK_STRUCTURES);
-            if (structures.length > 0) {
-                // TODO really this shouldn't happen. Figure out why it does
-                this.taxiOvertake(taxi, client);
-            }
-            return true;
         }
         return false;
     }
@@ -119,13 +113,11 @@ export class RoleTaxi extends RoleHauler {
                 const routeToPos = new RoomPosition(routeToPathStep.x, routeToPathStep.y, taxi.room.name);
                 const bypassPath = taxi.pos.findPathTo(routeToPos, { ignoreCreeps: false });
                 if (bypassPath) {
-                    taxi.memory.taxi!.taxiRoute = _.concat(bypassPath, _.tail(taxi.memory.taxi!.taxiRoute));
+                    taxi.memory.taxi!.taxiRoute = _.concat(bypassPath, _.drop(taxi.memory.taxi!.taxiRoute, 2));
+                    taxi.memory.stuckCount = 0;
                     return true;
                 }
             }
-        } else {
-            this.concludeTaxi(taxi, client);
-            return false;
         }
         return false;
     }

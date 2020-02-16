@@ -37,7 +37,12 @@ export class RoleScout extends RoleRemote {
         for (const exit of _.shuffle(exits)) {
             const exitName = _.get(neighbors, exit);
             if (exitName) {
-                if (ignoreRescout || !Memory.scouting.roomScouts[exitName]) {
+                if (
+                    (ignoreRescout &&
+                        Memory.scouting.roomScouts[exitName] &&
+                        !Memory.scouting.roomScouts[exitName].threatAssessment) ||
+                    !Memory.scouting.roomScouts[exitName]
+                ) {
                     creep.memory.orders!.target = exitName;
                     switch (exit) {
                         case "1": {
@@ -99,10 +104,17 @@ export class RoleScout extends RoleRemote {
 
     private reportIndependentRoomScouting(creep: Creep) {
         creep.memory.orders!.target = "";
-        // TODO HACK, this needs fixing
-        const spawn = _.first(_.values(Game.spawns));
-        const distance = Game.map.getRoomLinearDistance(creep.room.name, spawn!.room.name);
-        let roomScout: RoomScout = { roomName: creep.room.name, distance: distance };
+        let roomScout = Memory.scouting.roomScouts[creep.room.name] ?? { roomName: creep.room.name, distance: 10000 };
+
+        for (const spawn of _.uniqBy(_.values(Game.spawns), s => s.room.name)) {
+            const distance = Game.map.getRoomLinearDistance(creep.room.name, spawn.room.name);
+            console.log(`spawn: ${spawn.name} | distance : ${distance}`);
+            if (roomScout.distance > distance) {
+                roomScout.distance = distance;
+                roomScout.closestRoom = spawn.room.name;
+            }
+        }
+
         this.roomScoutAddSources(creep.room, roomScout);
         this.roomScoutAddDeposit(creep.room, roomScout);
         this.roomScoutAddMineral(creep.room, roomScout);
@@ -112,6 +124,7 @@ export class RoleScout extends RoleRemote {
     }
 
     private logRoomScout(roomScout: RoomScout) {
+        console.log(`	${JSON.stringify(roomScout)}`);
         Memory.scouting.roomScouts[roomScout.roomName] = roomScout;
     }
 

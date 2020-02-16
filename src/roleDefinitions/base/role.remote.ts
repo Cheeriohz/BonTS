@@ -137,6 +137,7 @@ export class RoleRemote extends RoleCreep {
 
     protected constructRemote(creep: Creep, constructRoom: string, repairWhileMove: boolean) {
         if (creep.room.name === constructRoom) {
+            this.leaveBorder(creep);
             this.construct(creep);
             return;
         } else {
@@ -150,13 +151,7 @@ export class RoleRemote extends RoleCreep {
             this.travelToRoom(creep, harvestRoom, false);
             return;
         } else {
-            const source: Source | null = Game.getObjectById(target);
-            if (source) {
-                if (creep.harvest(source) === ERR_NOT_IN_RANGE) {
-                    creep.moveTo(source, { reusePath: 20, visualizePathStyle: { stroke: "#ffaa00" } });
-                    return;
-                }
-            }
+            this.harvestMove(creep, target);
         }
     }
 }

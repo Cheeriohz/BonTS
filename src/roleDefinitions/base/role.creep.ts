@@ -399,6 +399,24 @@ export class RoleCreep {
         }
     }
 
+    protected fillAdjacentExtension(creep: Creep): boolean {
+        const extensions: StructureExtension[] | null = creep.pos.findInRange<StructureExtension>(
+            FIND_MY_STRUCTURES,
+            1,
+            {
+                filter: s => {
+                    return s.structureType === STRUCTURE_EXTENSION && s.store.getFreeCapacity(RESOURCE_ENERGY) > 0;
+                }
+            }
+        );
+        if (extensions && extensions.length > 0) {
+            creep.transfer(_.first(extensions)!, RESOURCE_ENERGY);
+            return true;
+        } else {
+            return false;
+        }
+    }
+
     protected checkForAdjacentLinkToFill(creep: Creep): boolean {
         if (creep.memory.adjLink) {
             const link = Game.getObjectById(creep.memory.adjLink);
@@ -765,5 +783,15 @@ export class RoleCreep {
             }
         }
         return 0;
+    }
+
+    protected harvestMove(creep: Creep, target: string) {
+        const source: Source | null = Game.getObjectById(target);
+        if (source) {
+            if (creep.harvest(source) === ERR_NOT_IN_RANGE) {
+                creep.moveTo(source, { reusePath: 20, visualizePathStyle: { stroke: "#ffaa00" } });
+                return;
+            }
+        }
     }
 }

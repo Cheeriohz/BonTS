@@ -11,8 +11,11 @@ export class RoleDropper extends RoleCreep {
             if (creep.room.memory.linksActive) {
                 creep.memory.tick = (creep.memory.tick ?? 0) + 1;
                 if (creep.memory.tick! > 5) {
-                    creep.memory.tick = 0;
-                    this.checkForAdjacentLinkToFill(creep);
+					creep.memory.tick = 0;
+					if(!this.fillAdjacentExtension(creep)) {
+						this.checkForAdjacentLinkToFill(creep);
+					}
+
                 }
             }
             if (this.harvestPrecious(creep) === ERR_NOT_IN_RANGE) {

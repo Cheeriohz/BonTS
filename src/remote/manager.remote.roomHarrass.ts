@@ -119,10 +119,11 @@ export class RoomHarassManager {
     private removeUnusedknights() {
         for (const knight of this.harass.knights!) {
             if (!Game.creeps[knight]) {
-                console.log(`Removing unused knight ${knight}`);
-                _.remove(this.harass.knights!, h => {
-                    return h === knight;
-                });
+                if (_.filter(this.spawn.memory.dedicatedCreepRequest, cr => cr.specifiedName === knight).length === 0) {
+                    _.remove(this.harass.knights!, h => {
+                        return h === knight;
+                    });
+                }
             }
         }
     }
@@ -130,10 +131,11 @@ export class RoomHarassManager {
     private removeUnusedArchers() {
         for (const archer of this.harass.archers!) {
             if (!Game.creeps[archer]) {
-                console.log(`Removing unused archer ${archer}`);
-                _.remove(this.harass.archers!, h => {
-                    return h === archer;
-                });
+                if (_.filter(this.spawn.memory.dedicatedCreepRequest, cr => cr.specifiedName === archer).length === 0) {
+                    _.remove(this.harass.archers!, h => {
+                        return h === archer;
+                    });
+                }
             }
         }
     }

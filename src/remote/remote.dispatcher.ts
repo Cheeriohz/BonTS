@@ -1,7 +1,10 @@
 import _ from "lodash";
 
 export class RemoteDispatcher {
-    public RequestDispatch(dispatchRequest: RemoteDispatchRequest, pathingLookup: PathingLookup): PathStep[] | null {
+    public static RequestDispatch(
+        dispatchRequest: RemoteDispatchRequest,
+        pathingLookup: PathingLookup
+    ): PathStep[] | null {
         let index = 1;
         if (dispatchRequest.departing) {
             index = 0;

@@ -4,12 +4,21 @@ export class TowerManager {
     static roadNormal: number = 5000;
     public static run() {
         for (const room in Game.rooms) {
-            for (const tower of Game.rooms[room].find<StructureTower>(FIND_STRUCTURES, {
+            const towers = Game.rooms[room].find<StructureTower>(FIND_MY_STRUCTURES, {
                 filter: structure => {
                     return structure.structureType === STRUCTURE_TOWER;
                 }
-            })) {
-                this.handleTower(tower);
+            });
+            if (towers && towers.length > 0) {
+                const primeTower = _.first(towers);
+                if (this.identifyPrimeTarget(primeTower!)) {
+                    for (const tower of _.drop(towers)) {
+                        this.handleTower(tower);
+                    }
+                } else {
+                    primeTower!.room.memory.target = null;
+                    this.handleRejuvenation(primeTower!);
+                }
             }
         }
     }
@@ -17,12 +26,13 @@ export class TowerManager {
     private static handleTower(tower: StructureTower) {
         if (tower.room.memory.target) {
             this.attackId(tower, tower.room.memory.target);
-        } else if (!this.identifyPrimeTarget(tower)) {
-            if (tower.energy > 200) {
-                if (!this.repairImportant(tower)) {
-                    this.healCreeps(tower);
-                    // this.repairAny(tower);
-                }
+        }
+    }
+
+    private static handleRejuvenation(tower: StructureTower) {
+        if (tower.energy > 200) {
+            if (!this.repairImportant(tower)) {
+                this.healCreeps(tower);
             }
         }
     }
@@ -39,7 +49,7 @@ export class TowerManager {
     private static identifyPrimeTarget(tower: StructureTower): boolean {
         const enemies: Creep[] | null = tower.room.find(FIND_HOSTILE_CREEPS);
         if (enemies && enemies.length > 1) {
-            tower.room.memory.target = this.towerAttackPrioritize(enemies);
+            tower.room.memory.target = this.towerAttackPrioritize(enemies, tower);
             if (tower.room.memory.target) {
                 this.attackId(tower, tower.room.memory.target);
                 return true;
@@ -56,12 +66,14 @@ export class TowerManager {
         return false;
     }
 
-    private static towerAttackPrioritize(creeps: Creep[]): Id<Creep> | undefined {
-        return _.last(_.sortBy(creeps, c => this.getPriorityForCreep(c)))?.id;
+    private static towerAttackPrioritize(creeps: Creep[], tower: StructureTower): Id<Creep> | undefined {
+        return _.last(_.sortBy(creeps, c => this.getPriorityForCreep(c, tower)))?.id;
     }
 
-    private static getPriorityForCreep(creep: Creep): number {
-        if (creep.getActiveBodyparts(HEAL)) {
+    private static getPriorityForCreep(creep: Creep, tower: StructureTower): number {
+        if (tower.pos.getRangeTo(creep) < 10) {
+            return 12;
+        } else if (creep.getActiveBodyparts(HEAL)) {
             return 10;
         } else if (creep.getActiveBodyparts(RANGED_ATTACK)) {
             return 8;
@@ -86,7 +98,7 @@ export class TowerManager {
         const damagedStructures = tower.room.find(FIND_STRUCTURES, {
             filter: structure => {
                 return (
-                    structure.hits < structure.hitsMax &&
+                    structure.hitsMax - structure.hits > 500 &&
                     structure.structureType === STRUCTURE_ROAD &&
                     structure.hitsMax === this.roadNormal
                 );

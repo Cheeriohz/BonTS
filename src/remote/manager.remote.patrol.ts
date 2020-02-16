@@ -12,8 +12,8 @@ export class RemotePatrolManager {
     }
 
     public managePatrol() {
-        console.log("Checking patrol");
         if (this.spawn.spawning) {
+            this.checkForRoute();
             return;
         }
         if (!this.patrol.knights) {
@@ -44,6 +44,7 @@ export class RemotePatrolManager {
                 knight.memory.orders &&
                 knight.memory.orders.independentOperator === true
             ) {
+				knight.say("♞")
                 knight.memory.working = true;
                 knight.memory.orders.independentOperator = false;
                 knight.memory.orders.target = roomName;
@@ -77,9 +78,11 @@ export class RemotePatrolManager {
     private removeUnusedknights() {
         for (const knight of this.patrol.knights!) {
             if (!Game.creeps[knight]) {
-                _.remove(this.patrol.knights!, h => {
-                    return h === knight;
-                });
+                if (_.filter(this.spawn.memory.dedicatedCreepRequest, cr => cr.specifiedName === knight).length === 0) {
+                    _.remove(this.patrol.knights!, h => {
+                        return h === knight;
+                    });
+                }
             }
         }
     }

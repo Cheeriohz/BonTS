@@ -269,7 +269,24 @@ export class DedicatedCreepRequester {
     ): DedicatedCreepRequest {
         return {
             role: CreepRole.knight,
-            body: [TOUGH, ATTACK, ATTACK, ATTACK, MOVE, MOVE, MOVE, MOVE, MOVE, HEAL],
+            body: [
+                TOUGH,
+                TOUGH,
+                MOVE,
+                MOVE,
+                MOVE,
+                MOVE,
+                MOVE,
+                MOVE,
+                MOVE,
+                MOVE,
+                ATTACK,
+                ATTACK,
+                ATTACK,
+                ATTACK,
+                ATTACK,
+                HEAL
+            ],
             dedication: dedication,
             specifiedName: specifiedName,
             precious: precious,

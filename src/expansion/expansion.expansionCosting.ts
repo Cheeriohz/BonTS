@@ -26,8 +26,20 @@ export class ExpansionCosting extends GeneralBuilding {
         return this.destination.roomName;
     }
 
+    public costMatrixCallbackRoomEligibility(roomName: string): boolean {
+        const roomScout: RoomScout = Memory.scouting!.roomScouts[roomName];
+        if (roomScout && roomScout.threatAssessment && roomScout.threatAssessment > 0) {
+            return false;
+        }
+        return true;
+    }
+
     private determineFullPath(completionRange: number): PathFinderPath | null {
-        return PathFinder.search(this.origin, { pos: this.destination, range: completionRange });
+        return PathFinder.search(
+            this.origin,
+            { pos: this.destination, range: completionRange },
+            { roomCallback: this.costMatrixCallbackRoomEligibility }
+        );
     }
 
     public translateFullPathToRetainableRoomPaths() {

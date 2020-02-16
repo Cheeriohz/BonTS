@@ -8,8 +8,7 @@ export class RoleRemoteHauler extends RoleRemote {
         if (creep.memory.working && creep.store.getUsedCapacity() === 0) {
             creep.memory.working = false;
             creep.say("🏗️");
-            const rmh: RemoteMineHandler = new RemoteMineHandler();
-            const path = rmh.requestRemoteDispatch({ departing: true, creep: creep });
+            const path = RemoteMineHandler.requestRemoteDispatch({ departing: true, creep: creep });
             if (path) {
                 // Remove the last space as that is the container.
                 path.pop();
@@ -20,8 +19,7 @@ export class RoleRemoteHauler extends RoleRemote {
         if (!creep.memory.working && creep.store.getFreeCapacity() === 0) {
             creep.memory.working = true;
             creep.say("💦");
-            const rmh: RemoteMineHandler = new RemoteMineHandler();
-            const path = rmh.requestRemoteDispatch({ departing: false, creep: creep });
+            const path = RemoteMineHandler.requestRemoteDispatch({ departing: false, creep: creep });
             if (path) {
                 this.travelByCachedPath(true, creep, path);
                 return;

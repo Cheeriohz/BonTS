@@ -14,6 +14,7 @@ import { BorderAggression } from "military/military.borderAggression";
 import { GeneralBuilding } from "building/base/building.general";
 import { buildProjectCreator } from "building/building.buildProjectCreator";
 import { SpawnTemplate } from "spawning/spawning.templating";
+import { RemoteMineHandler } from "remote/remote.remoteMineHandler";
 
 export class CycleManager {
     public static check() {
@@ -28,6 +29,7 @@ export class CycleManager {
     }
 
     private static manageLongTermTasks() {
+        this.compilePushRemoteExpo("Spawn2");
         this.roomLevelTasksLongTerm();
         this.spawnLevelTasksLongTerm();
         this.manageMediumTermTasks();
@@ -162,6 +164,10 @@ export class CycleManager {
     }
 
     //* Helpers
+    private static compilePushRemoteExpo(spawn: string) {
+        RemoteMineHandler.checkNeighborsForNeighboringRemoteMine(Game.spawns[spawn]);
+    }
+
     private static distanceTransformRoom(roomName: string) {
         const bg: GeneralBuilding = new GeneralBuilding();
         bg.distanceTransformRaw(roomName, false);

@@ -5,6 +5,18 @@ export class RoleRemoteBuilder extends RoleRemote {
         const currentEnergy = creep.store[RESOURCE_ENERGY];
         if (creep.memory.working && currentEnergy === 0) {
             creep.memory.working = false;
+            if (!creep.memory.precious) {
+                const localSources = creep.room.find(FIND_SOURCES, {
+                    filter: s => s.pos.findInRange(FIND_STRUCTURES, 1).length === 0
+                });
+                if (localSources.length > 0) {
+                    const closestSource = creep.pos.findClosestByPath(localSources);
+                    if (closestSource) {
+                        creep.memory.precious = closestSource.id;
+                    }
+                }
+            }
+
             creep.say("🔄 harvest");
         }
         if (!creep.memory.working && creep.store.getFreeCapacity() === 0) {
@@ -16,6 +28,9 @@ export class RoleRemoteBuilder extends RoleRemote {
             this.constructRemote(creep, creep.memory.dedication!, true);
             return;
         } else {
+            if (creep.memory.precious) {
+                this.harvestMove(creep, creep.memory.precious);
+            }
             this.fillUpAtHome(creep);
             return;
         }

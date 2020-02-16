@@ -26,7 +26,9 @@ Game.spawns['A'].spawnCreep([ATTACK,ATTACK,ATTACK,ATTACK,TOUGH,TOUGH,TOUGH,TOUGH
 
 Game.spawns['A'].spawnCreep([CARRY,CARRY,MOVE], "top" + Game.time.toString(), {memory: {role: 9, working: false}});
 
-
+Combat
+---------------------------
+Game.spawns['A'].spawnCreep([MOVE,MOVE, MOVE, MOVE,MOVE,ATTACK,ATTACK,ATTACK,ATTACK,ATTACK], "grunt" + Game.time.toString(), {memory: {role: 8, working: false, home: "W31S51", orders: {target: "W29S49", independentOperator: false }}});
 
 Game.spawns['A'].spawnCreep([TOUGH,TOUGH,TOUGH,TOUGH,MOVE,MOVE,MOVE,MOVE,MOVE,MOVE,MOVE,MOVE,MOVE,MOVE,MOVE,MOVE,MOVE,MOVE,ATTACK,ATTACK,ATTACK,ATTACK,ATTACK,ATTACK,ATTACK,ATTACK,ATTACK,ATTACK], "patrol" + Game.time.toString(), {memory: {role: 8, working: false, home: "W31S51", orders: {target: "W29S49", independentOperator: false }}});
 
