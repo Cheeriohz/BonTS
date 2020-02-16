@@ -114,12 +114,12 @@ export class RoleTaxi extends RoleHauler {
 
     private taxiOvertake(taxi: Creep, client: Creep): boolean {
         if (taxi.memory.taxi!.taxiRoute && taxi.memory.taxi!.taxiRoute.length >= 2) {
-            const routeToPathStep = taxi.memory.taxi!.taxiRoute[2];
+            const routeToPathStep = taxi.memory.taxi!.taxiRoute[1];
             if (routeToPathStep) {
                 const routeToPos = new RoomPosition(routeToPathStep.x, routeToPathStep.y, taxi.room.name);
                 const bypassPath = taxi.pos.findPathTo(routeToPos, { ignoreCreeps: false });
                 if (bypassPath) {
-                    taxi.memory.taxi!.taxiRoute = _.concat(bypassPath, _.drop(taxi.memory.taxi!.taxiRoute, 2));
+                    taxi.memory.taxi!.taxiRoute = _.concat(bypassPath, _.tail(taxi.memory.taxi!.taxiRoute));
                     return true;
                 }
             }
