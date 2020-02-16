@@ -80,8 +80,8 @@ export class GameManager {
     }
 
     private static manageRemoteReservations(spawn: StructureSpawn) {
-        if (spawn.memory.remoteReservations && spawn.memory.remoteReservations.length > 0) {
-            for (const reservation of spawn.memory.remoteReservations) {
+        if (spawn.room.memory.remoteReservations && spawn.room.memory.remoteReservations.length > 0) {
+            for (const reservation of spawn.room.memory.remoteReservations) {
                 const reservationManager: ReservationManager = new ReservationManager(reservation, spawn);
                 reservationManager.manageReservation();
             }

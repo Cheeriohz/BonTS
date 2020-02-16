@@ -199,7 +199,7 @@ export class RoleCreep {
         return false;
     }
 
-    private refillUpgraders(creep: Creep): boolean {
+    protected refillUpgraders(creep: Creep): boolean {
         const upgraders = creep.room.find(FIND_MY_CREEPS, {
             filter: c => {
                 return c.memory.role === CreepRole.upgrader && c.store.getFreeCapacity() > 0;
@@ -215,6 +215,7 @@ export class RoleCreep {
                 if (creep.pos.getRangeTo(transferTarget) > 5) {
                     creep.memory.path = creep.pos.findPathTo(transferTarget, { ignoreCreeps: false });
                     this.pathHandling(creep);
+                    creep.memory.upgraderDuty = true;
                 } else {
                     this.transferMove(creep, transferTarget!);
                 }

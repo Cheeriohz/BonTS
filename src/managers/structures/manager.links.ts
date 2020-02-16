@@ -12,8 +12,10 @@ export class LinkManager {
                     return structure.structureType === STRUCTURE_LINK;
                 }
             });
-            if (this.findSourceLinks(spawn.room, sources, allLinks)) {
-                this.findDumpLinks(spawn.room, allLinks);
+            if (allLinks.length >= 2) {
+                if (this.findSourceLinks(spawn.room, sources, allLinks)) {
+                    this.findDumpLinks(spawn.room, allLinks);
+                }
             }
         }
     }
@@ -37,6 +39,7 @@ export class LinkManager {
                     spawnRoom.memory.sourceLinks
                 )
             );
+            spawnRoom.memory.linksActive = true;
         }
     }
 

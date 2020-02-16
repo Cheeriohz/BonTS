@@ -11,6 +11,8 @@ export class RoleRemoteHauler extends RoleRemote {
             const rmh: RemoteMineHandler = new RemoteMineHandler();
             const path = rmh.requestRemoteDispatch({ departing: true, creep: creep });
             if (path) {
+                // Remove the last space as that is the container.
+                path.pop();
                 this.travelByCachedPath(false, creep, path);
                 return;
             }
