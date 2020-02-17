@@ -31,7 +31,6 @@ export class CycleManager {
     }
 
     private static manageLongTermTasks() {
-        this.compilePushRemoteExpo("Spawn2");
         this.roomLevelTasksLongTerm();
         this.spawnLevelTasksLongTerm();
         this.manageMediumTermTasks();
@@ -208,11 +207,14 @@ export class CycleManager {
             if (room.memory.reservedBuilds) {
                 boAll = _.concat(boAll, room.memory.reservedBuilds);
             }
-            if (room.memory.buildProjects) {
-                for (const bp of room.memory.buildProjects) {
-                    boAll = _.concat(boAll, bp.buildOrders);
+            for (const spawn of _.uniqBy(_.values(Game.spawns), s => s.room.name)) {
+                if (spawn.room.memory.buildProjects) {
+                    for (const bp of spawn.room.memory.buildProjects) {
+                        if (bp.roomName === roomName) boAll = _.concat(boAll, bp.buildOrders);
+                    }
                 }
             }
+
             vis.drawBuildOrders(boAll, roomName);
         }
     }
