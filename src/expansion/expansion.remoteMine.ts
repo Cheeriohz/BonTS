@@ -5,6 +5,7 @@ import { buildProjectCreator } from "building/building.buildProjectCreator";
 import { ErrorMapper } from "utils/ErrorMapper";
 import { BuildProjectEnum } from "building/interfaces/building.enum";
 import { ReservationManager } from "remote/manager.remote.reservation";
+import { CreepRole } from "enums/enum.roles";
 
 export class RemoteMineExpansion {
     private vein!: Id<Source>;
@@ -134,6 +135,14 @@ export class RemoteMineExpansion {
             this.storageRoom.memory.remoteMines = [remoteMine];
         } else {
             this.storageRoom.memory.remoteMines.push(remoteMine);
+        }
+
+        if (this.storageRoom.memory.remoteMines.length > 1) {
+            // Ensure we have a dropper enabled in the room template if we have more than one remote mine
+            Memory.roleRoomMap[this.storageRoom.name][CreepRole.topper] = Math.max(
+                Memory.roleRoomMap[this.storageRoom.name][CreepRole.topper],
+                1
+            );
         }
     }
 

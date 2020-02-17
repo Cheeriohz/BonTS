@@ -5,7 +5,8 @@ export class RoleDedicatedKnight extends RoleRemote {
     public runDedicated(creep: Creep) {
         if (!this.protect(creep)) {
             if (creep.memory.orders && creep.memory.orders.target !== creep.room.name) {
-                this.travelToRoom(creep, creep.memory.orders!.target, false, true);
+                //this.travelToRoom(creep, creep.memory.orders!.target, false, true);
+                this.cachedTravel(new RoomPosition(25, 25, creep.memory.orders!.target), creep, false, true);
                 return;
             } else {
                 creep.moveTo(25, 25, { ignoreRoads: true });

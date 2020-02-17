@@ -38,12 +38,7 @@ export class RemotePatrolManager {
     private routeKnights(roomName: string) {
         for (const knightName of this.patrol.knights!) {
             const knight = Game.creeps[knightName];
-            if (
-                knight &&
-                knight.memory.working === false &&
-                knight.memory.orders &&
-                knight.memory.orders.independentOperator === true
-            ) {
+            if (knight && knight.memory.working === false && knight.memory.orders) {
                 knight.say("♞");
                 knight.memory.working = true;
                 knight.memory.orders.independentOperator = false;

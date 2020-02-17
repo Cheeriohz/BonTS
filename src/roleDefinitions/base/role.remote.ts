@@ -30,7 +30,12 @@ export class RoleRemote extends RoleCreep {
         }
         creep.memory.path = path;
         creep.memory.stuckCount = 0;
-        this.pathHandling(creep);
+        const firstStep = _.first(creep.memory.path);
+        if (firstStep) {
+            creep.move(firstStep.direction);
+        }
+
+        //this.pathHandling(creep);
     }
 
     protected travelToRoom(

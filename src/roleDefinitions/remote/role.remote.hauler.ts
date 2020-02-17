@@ -49,7 +49,12 @@ export class RoleRemoteHauler extends RoleRemote {
 
     protected withdrawRemote(creep: Creep) {
         if (creep.memory.orders!.target !== creep.room.name) {
-            this.travelToRoom(creep, creep.memory.orders!.target, false);
+            const container: Structure | null = Game.getObjectById(creep.memory.dedication!);
+            if (container) {
+                this.cachedTravel(container.pos, creep, false);
+            } else {
+                this.travelToRoom(creep, creep.memory.orders!.target, false);
+            }
         } else {
             const container: Structure | null = Game.getObjectById(creep.memory.dedication!);
             if (container) {

@@ -714,8 +714,8 @@ export class RoleCreep {
                     if (
                         blocker.fatigue ||
                         !blocker.getActiveBodyparts(MOVE) ||
-                        blocker.memory.taxi ||
-                        blocker.memory.activeTaxi
+                        blocker.memory?.taxi ||
+                        blocker.memory?.activeTaxi
                     ) {
                         return this.pathingOvertake(creep);
                     } else {

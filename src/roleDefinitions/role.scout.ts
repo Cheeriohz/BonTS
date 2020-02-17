@@ -167,14 +167,17 @@ export class RoleScout extends RoleRemote {
             if (creep.room.name === orders.target) {
                 if (creep.pos.isNearTo(25, 25)) {
                     if (!orders.independentOperator) {
-                        this.leaveBorderPlus(creep);
+                        //this.leaveBorderPlus(creep);
                         //this.report(creep, expeditionManager);
+                        creep.moveTo(25, 25, { reusePath: 1500, ignoreCreeps: true });
                     } else {
-                        this.leaveBorderPlus(creep);
+                        //this.leaveBorderPlus(creep);
+                        creep.moveTo(25, 25, { reusePath: 1500, ignoreCreeps: true });
                         //expeditionManager.reassignmentRequest(creep);
                     }
                 } else {
-                    this.leaveBorder(creep);
+                    creep.moveTo(25, 25, { reusePath: 1500, ignoreCreeps: true });
+                    //this.leaveBorder(creep);
                     //creep.moveTo(25, 25, { reusePath: 1500, ignoreCreeps: true });
                 }
             } else {

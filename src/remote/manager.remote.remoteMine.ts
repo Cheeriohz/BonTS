@@ -55,7 +55,7 @@ export class RemoteMineManager {
     private removeUnusedHaulers() {
         for (const hauler of this.mine.haulers!) {
             if (!CreepQualifiesAsActive(hauler)) {
-                console.log(`Removing Unused Hauler ${hauler} from : ${this.mine.haulers} at cycle: ${Memory.cycle}`);
+                //console.log(`Removing Unused Hauler ${hauler} from : ${this.mine.haulers} at cycle: ${Memory.cycle}`);
                 _.remove(this.mine.haulers!, h => {
                     return h === hauler;
                 });

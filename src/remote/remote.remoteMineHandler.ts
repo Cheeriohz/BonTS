@@ -84,12 +84,14 @@ export class RemoteMineHandler extends RemoteDispatcher {
 
         if (describedExits) {
             for (const neighbor of _.compact(_.values(describedExits))) {
+                console.log(`First Tier: ${neighbor}`);
                 if (this.checkNeighbor(neighbor, spawn)) {
                     return true;
                 } else {
                     const describedExitsNeighbor = Game.map.describeExits(neighbor);
                     if (describedExitsNeighbor) {
                         for (const neighborNeighbor of _.compact(_.values(describedExitsNeighbor))) {
+                            console.log(`Second Tier: ${neighborNeighbor}`);
                             if (this.checkNeighbor(neighborNeighbor, spawn)) {
                                 return true;
                             }
@@ -116,7 +118,7 @@ export class RemoteMineHandler extends RemoteDispatcher {
     private static checkNeighbor(neighbor: string, spawn: StructureSpawn) {
         const RoomScout = Memory.scouting.roomScouts[neighbor];
         const room = Game.rooms[neighbor];
-
+        console.log(`Checking out room: ${neighbor}`);
         // Check our current scouting information to determine if the room is valid for consideration.
         if (RoomScout && !RoomScout.threatAssessment && RoomScout.sourceA && !RoomScout.utilized) {
             // Check if we have visibility currently
