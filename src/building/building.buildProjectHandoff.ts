@@ -137,12 +137,12 @@ export class BuildProjectHandoff {
                     if (container) {
                         const source = container.pos.findClosestByRange(FIND_SOURCES);
                         if (source) {
-                            const reserved = ReservationManager.shouldReserve(remoteMine, spawn);
+                            // const reserved = ReservationManager.shouldReserve(remoteMine, spawn);
                             BuildProjectHandoff.updateRemoteMineInMemoryForHandoff(
                                 source,
                                 <StructureContainer>container,
                                 remoteMine,
-                                reserved
+                                remoteMine.reserved
                             );
                             spawn.room.createConstructionSite(container.pos.x, container.pos.y, STRUCTURE_ROAD);
                             _.remove(spawn.room.memory.buildProjects!, project);

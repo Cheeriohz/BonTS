@@ -1,6 +1,7 @@
 import _ from "lodash";
 import { GeneralBuilding } from "building/base/building.general";
 import { SourceMapGenerator } from "source-map";
+import { chmodSync } from "fs";
 
 export class ExpansionCosting extends GeneralBuilding {
     private origin!: RoomPosition;
@@ -19,6 +20,9 @@ export class ExpansionCosting extends GeneralBuilding {
         this.fullPath = this.determineFullPath(completionRange);
         if (this.fullPath) {
             this.cost = this.fullPath.cost;
+            console.log(JSON.stringify(this.fullPath.path));
+        } else {
+            console.log(`Optimality didn't work out`);
         }
     }
 
@@ -34,11 +38,55 @@ export class ExpansionCosting extends GeneralBuilding {
         return true;
     }
 
+    public costMatrixCallbackRoomOptimality(roomName: string): CostMatrix | boolean {
+        const roomScout: RoomScout = Memory.scouting!.roomScouts[roomName];
+        if (roomScout && roomScout.threatAssessment && roomScout.threatAssessment > 0) {
+            return false;
+        }
+        const cm: CostMatrix = new PathFinder.CostMatrix();
+        const rt: RoomTerrain = Game.map.getRoomTerrain(roomName);
+        for (let x = 0; x <= 49; x++) {
+            for (let y = 0; y <= 49; y++) {
+                switch (rt.get(x, y)) {
+                    case TERRAIN_MASK_WALL:
+                        cm.set(x, y, 255);
+                        break;
+                    case TERRAIN_MASK_SWAMP:
+                        cm.set(x, y, 4);
+                        break;
+                    case 0:
+                        cm.set(x, y, 3);
+                        break;
+                }
+            }
+        }
+        const room = Game.rooms[roomName];
+        if (room) {
+            const roads = room.find(FIND_STRUCTURES, { filter: s => s.structureType === STRUCTURE_ROAD });
+            for (const road of roads) {
+                cm.set(road.pos.x, road.pos.y, 1);
+            }
+        }
+        if (roomName === "E33S12") {
+            console.log(`HI HO`);
+            for (let y = 0; y < 50; y++) {
+                let buffer: string = "";
+                for (let x = 0; x < 50; x++) {
+                    buffer += cm.get(x, y);
+                }
+                console.log(buffer);
+            }
+        }
+
+        return cm;
+    }
+
     private determineFullPath(completionRange: number): PathFinderPath | null {
         return PathFinder.search(
             this.origin,
             { pos: this.destination, range: completionRange },
-            { roomCallback: this.costMatrixCallbackRoomEligibility }
+			{ roomCallback: this.costMatrixCallbackRoomOptimality,
+			  maxOps: 4000 }
         );
     }
 
@@ -107,7 +155,7 @@ export class ExpansionCosting extends GeneralBuilding {
             psuedoBorderPath!.dx = -1;
             psuedoBorderPath.x = 49;
         } else {
-            psuedoBorderPath!.dx = firstDestinationPath!.x - psuedoBorderPath!.x;
+            psuedoBorderPath!.dx = firstDestinationPath!.x - firstDestinationPath!.dx;
         }
         if (psuedoBorderPath!.y === 49) {
             psuedoBorderPath!.dy = 1;
@@ -116,7 +164,7 @@ export class ExpansionCosting extends GeneralBuilding {
             psuedoBorderPath!.dy = -1;
             psuedoBorderPath!.y = 49;
         } else {
-            psuedoBorderPath!.dy = firstDestinationPath!.y - psuedoBorderPath!.y;
+            psuedoBorderPath!.dy = firstDestinationPath!.y - firstDestinationPath!.dy;
         }
         psuedoBorderPath!.direction = this.getDirectionConstant(lastOriginPath!.dx, lastOriginPath!.dy);
         destinationRoom.path = _.concat([psuedoBorderPath], destinationRoom.path);

@@ -47,7 +47,12 @@ export class RemoteMineExpansion {
             const translatedPath = this.costing.translatedPaths[index];
             if (
                 this.spawn.room.memory.buildProjects &&
-                !_.find(this.spawn.room.memory.buildProjects, bp => bp.roomName === translatedPath.roomName)
+                !_.find(this.spawn.room.memory.buildProjects, bp => {
+                    return (
+                        bp.roomName === translatedPath.roomName &&
+                        bp.projectType === BuildProjectEnum.RemoteContainerExpansion
+                    );
+                })
             ) {
                 let clonedPath = _.cloneDeep(translatedPath.path);
                 const room: Room | undefined = Game.rooms[translatedPath.roomName];
@@ -65,23 +70,31 @@ export class RemoteMineExpansion {
         }
 
         const translatedPath = _.last(this.costing.translatedPaths);
-        if (
-            this.spawn.room.memory.buildProjects &&
-            !_.find(this.spawn.room.memory.buildProjects, bp => bp.roomName === translatedPath!.roomName)
-        ) {
-            let clonedPath = _.cloneDeep(translatedPath!.path);
-            const room: Room | undefined = Game.rooms[translatedPath!.roomName];
-            if (!room) {
-                // Need room visibility.
-                const cr: CreepRequester = new CreepRequester(this.spawn);
-                cr.RequestScoutToRoom(translatedPath!.roomName);
-                success = false;
-            } else {
-                const bpc: buildProjectCreator = new buildProjectCreator(room, this.spawn);
-                bpc.createBuildProjectContainerExpansionLegacy(clonedPath, BuildProjectEnum.RemoteContainerExpansion);
+        if (translatedPath) {
+            if (
+                this.spawn.room.memory.buildProjects &&
+                !_.find(this.spawn.room.memory.buildProjects, bp => bp.roomName === translatedPath.roomName)
+            ) {
+                let clonedPath = _.cloneDeep(translatedPath!.path);
+                const room: Room | undefined = Game.rooms[translatedPath!.roomName];
+                if (!room) {
+                    // Need room visibility.
+                    const cr: CreepRequester = new CreepRequester(this.spawn);
+                    cr.RequestScoutToRoom(translatedPath!.roomName);
+                    success = false;
+                } else {
+                    const bpc: buildProjectCreator = new buildProjectCreator(room, this.spawn);
+                    bpc.createBuildProjectContainerExpansionLegacy(
+                        clonedPath,
+                        BuildProjectEnum.RemoteContainerExpansion
+                    );
+                }
             }
+            return success;
+        } else {
+            console.log("No path detected.");
+            return false;
         }
-        return success;
     }
 
     private persistPathingToMemory() {
