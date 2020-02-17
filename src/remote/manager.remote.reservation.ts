@@ -56,7 +56,7 @@ export class ReservationManager {
         if (travelDistance < 100) {
             const remoteReservation: RemoteReservation = {
                 roomName: remoteMine.roomName,
-                spawnTime: Game.time,
+                spawnTime: Game.time + 2000,
                 leadTime: travelDistance + 20
             };
             if (spawn.room.memory.remoteReservations) {

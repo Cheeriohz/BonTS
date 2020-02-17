@@ -19,7 +19,7 @@ export class RoleRemoteHauler extends RoleRemote {
         if (!creep.memory.working && creep.store.getFreeCapacity() === 0) {
             creep.memory.working = true;
             creep.say("💦");
-            const path = RemoteMineHandler.requestRemoteDispatch({ departing: false, creep: creep });
+            const path = RemoteMineHandler.requestCustomRemoteDispatch({ departing: false, creep: creep });
             if (path) {
                 this.travelByCachedPath(true, creep, path);
                 return;

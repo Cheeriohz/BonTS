@@ -30,8 +30,9 @@ export class RoleRemoteBuilder extends RoleRemote {
         } else {
             if (creep.memory.precious) {
                 this.harvestMove(creep, creep.memory.precious);
+            } else {
+                this.fillUpAtHome(creep);
             }
-            this.fillUpAtHome(creep);
             return;
         }
     }

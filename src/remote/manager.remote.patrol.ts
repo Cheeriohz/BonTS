@@ -44,7 +44,7 @@ export class RemotePatrolManager {
                 knight.memory.orders &&
                 knight.memory.orders.independentOperator === true
             ) {
-				knight.say("♞")
+                knight.say("♞");
                 knight.memory.working = true;
                 knight.memory.orders.independentOperator = false;
                 knight.memory.orders.target = roomName;
@@ -100,7 +100,7 @@ export class RemotePatrolManager {
             const dcr: DedicatedCreepRequester = new DedicatedCreepRequester(this.spawn);
             const orders: CreepOrder = {
                 target: this.patrol.roomName,
-                independentOperator: true
+                independentOperator: false
             };
             dcr.createdDedicatedCreepRequest({
                 dedication: "Chivalry",

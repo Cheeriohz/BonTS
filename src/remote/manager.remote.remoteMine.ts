@@ -2,6 +2,7 @@ import { CreepRole } from "enums/enum.roles";
 import { DedicatedCreepRequester } from "../spawning/manager.dedicatedCreepRequester";
 import _ from "lodash";
 import { BodyBuilder } from "spawning/spawning.bodyBuilder";
+import { CreepQualifiesAsActive } from "caching/caching.creepCaching";
 
 export class RemoteMineManager {
     room!: Room;
@@ -28,14 +29,9 @@ export class RemoteMineManager {
             return;
         }
         if (this.mine.miner) {
-            if (this.minerPreSpawn()) {
-                this.requestMiner();
-            } else {
-                const miner = Game.creeps[this.mine.miner];
-                if (!miner) {
-                    if (!this.creepInQueue(CreepRole.dropper)) {
-                        this.requestMiner();
-                    }
+            if (!CreepQualifiesAsActive(this.mine.miner, this.mine.distance)) {
+                if (!this.creepInQueue(CreepRole.dropper)) {
+                    this.requestMiner();
                 }
             }
         } else {
@@ -56,13 +52,10 @@ export class RemoteMineManager {
         }
     }
 
-    private minerPreSpawn(): boolean {
-        return false;
-    }
-
     private removeUnusedHaulers() {
         for (const hauler of this.mine.haulers!) {
-            if (!Game.creeps[hauler]) {
+            if (!CreepQualifiesAsActive(hauler)) {
+                console.log(`Removing Unused Hauler ${hauler} from : ${this.mine.haulers} at cycle: ${Memory.cycle}`);
                 _.remove(this.mine.haulers!, h => {
                     return h === hauler;
                 });
@@ -189,11 +182,7 @@ export class RemoteMineManager {
             },
             body: this.mine.haulerBody
         });
-        if (this.mine.haulers!.length > 0) {
-            this.mine.haulers?.push(haulerName);
-        } else {
-            this.mine.haulers = [haulerName];
-        }
+        this.mine.haulers!.push(haulerName);
     }
 
     private configureMine() {
@@ -202,10 +191,11 @@ export class RemoteMineManager {
             const departing = pathRoom[0];
             if (departing) {
                 distance += departing.length;
-                console.log(`Adding ${pathRoom.length} for: ${JSON.stringify(pathRoom)}`);
             }
         }
-        console.log(`Distance is: ${distance}`);
+        // Cache the distance for use elsewhere
+        this.mine.distance = distance;
+
         let multiplier = 1;
         if (this.mine.reserved) {
             multiplier = 2;
@@ -213,7 +203,6 @@ export class RemoteMineManager {
 
         const requiredCarry: number = Math.floor((distance * multiplier) / 5);
 
-        console.log(`RequiredCarry is: ${requiredCarry}`);
         // Check if we can consolidate into a single hauler.
         if (this.spawn.room.energyCapacityAvailable > requiredCarry * 1.5 * 50 + 100) {
             // We can just use a single hauler.

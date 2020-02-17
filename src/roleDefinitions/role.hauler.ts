@@ -18,7 +18,9 @@ export class RoleHauler extends RoleCreep {
             // Check if we can retrieve any dropped resources
             if (this.droppedResourceHandling(creep)) {
                 creep.say("💎👀");
-                return;
+                if (creep.store.getFreeCapacity() !== 0) {
+                    return;
+                }
             }
             if (creep.store.getUsedCapacity() > 0 && creep.room.storage) {
                 this.depositMoveUnspecified(creep, creep.room.storage);

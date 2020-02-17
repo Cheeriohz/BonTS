@@ -137,10 +137,16 @@ export class RCLUpgradeHandler {
         if (!towerAddition.addTower()) {
             return false;
         }
+
+        RemoteMineHandler.checkNeighborsForNeighboringRemoteMine(spawn);
         return true;
     }
 
     private static handleRCLUpgradeTo6(spawn: StructureSpawn): boolean {
+        const linkAddition: LinkAddition = new LinkAddition(spawn, spawn.room);
+        if (!linkAddition.addAndReserveLinks(3)) {
+            return false;
+        }
         if (!this.handleRoomExtensionsEnqueue([spawn], true, 40, 5, false)) {
             return false;
         }

@@ -15,6 +15,8 @@ import { GeneralBuilding } from "building/base/building.general";
 import { buildProjectCreator } from "building/building.buildProjectCreator";
 import { SpawnTemplate } from "spawning/spawning.templating";
 import { RemoteMineHandler } from "remote/remote.remoteMineHandler";
+import { RemoteMineExpansion } from "expansion/expansion.remoteMine";
+import { remoteMineExpeditionHandler } from "expansion/manager.remoteMineExpedition";
 
 export class CycleManager {
     public static check() {
@@ -164,6 +166,21 @@ export class CycleManager {
     }
 
     //* Helpers
+
+    private static employGuardTest(spawnName: string, index: number) {
+        const spawn = Game.spawns[spawnName];
+        if (spawn) {
+            if (spawn.room.memory.remoteMines && spawn.room.memory.remoteMines.length > index) {
+                const rme: RemoteMineExpansion = new RemoteMineExpansion(
+                    <Id<Source>>spawn.room.memory.remoteMines[index].vein,
+                    spawn.room.storage!.pos,
+                    spawn
+                );
+                rme.enlistGuard(spawn.room.memory.remoteMines[index].roomName);
+            }
+        }
+    }
+
     private static compilePushRemoteExpo(spawn: string) {
         RemoteMineHandler.checkNeighborsForNeighboringRemoteMine(Game.spawns[spawn]);
     }

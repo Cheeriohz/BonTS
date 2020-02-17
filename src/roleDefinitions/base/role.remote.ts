@@ -1,6 +1,7 @@
 import { RoleCreep } from "./role.creep";
 import _ from "lodash";
 import { profile } from "Profiler";
+import { RemoteMineHandler } from "remote/remote.remoteMineHandler";
 
 @profile
 export class RoleRemote extends RoleCreep {
@@ -32,8 +33,19 @@ export class RoleRemote extends RoleCreep {
         this.pathHandling(creep);
     }
 
-    protected travelToRoom(creep: Creep, roomName: string, repairWhileMove: boolean, ignoreRoads?: boolean) {
-        let target = Game.map.findExit(creep.room.name, roomName);
+    protected travelToRoom(
+        creep: Creep,
+        roomName: string,
+        repairWhileMove: boolean,
+        ignoreRoads?: boolean,
+        travelSafe?: boolean
+    ) {
+        let target;
+        if (travelSafe) {
+            target = Game.map.findExit(creep.room.name, roomName, { routeCallback: this.remoteSafeRoomTravel });
+        } else {
+            target = Game.map.findExit(creep.room.name, roomName);
+        }
         if (target > 0) {
             const destination = creep.pos.findClosestByPath(<ExitConstant>target);
             if (destination) {
@@ -41,6 +53,14 @@ export class RoleRemote extends RoleCreep {
             }
         }
         return false;
+    }
+
+    private remoteSafeRoomTravel(roomName: string, fromRoomName: string) {
+        const roomScout = Memory.scouting.roomScouts[roomName];
+        if (roomScout && roomScout.threatAssessment && roomScout.threatAssessment > 0) {
+            return Infinity;
+        }
+        return 0;
     }
 
     protected renew(creep: Creep, timeToLiveThreshold: number): boolean {
@@ -110,7 +130,12 @@ export class RoleRemote extends RoleCreep {
 
     protected dedicatedContainerRelocateRemote(creep: Creep, dedication: string, remoteRoom: string): boolean {
         if (creep.room.name !== remoteRoom) {
-            this.travelToRoom(creep, remoteRoom, false);
+            if (creep.room.name === creep.memory.home) {
+                creep.memory.path = RemoteMineHandler.requestCustomRemoteDispatch({ departing: true, creep: creep });
+                this.pathHandling(creep);
+            } else {
+                this.travelToRoom(creep, remoteRoom, false, false, true);
+            }
             return false;
         } else {
             const container = Game.getObjectById<StructureContainer>(dedication);
@@ -131,7 +156,7 @@ export class RoleRemote extends RoleCreep {
         if (creep.room.name === creep.memory.home) {
             this.fillUp(creep);
         } else {
-            this.travelToRoom(creep, creep.memory.home!, false);
+            this.travelToRoom(creep, creep.memory.home!, false, false, true);
         }
     }
 
@@ -141,14 +166,14 @@ export class RoleRemote extends RoleCreep {
             this.construct(creep);
             return;
         } else {
-            this.travelToRoom(creep, constructRoom, repairWhileMove);
+            this.travelToRoom(creep, constructRoom, repairWhileMove, false, true);
             return;
         }
     }
 
     protected harvestRemote(creep: Creep, harvestRoom: string, target: string) {
         if (creep.room.name !== harvestRoom) {
-            this.travelToRoom(creep, harvestRoom, false);
+            this.travelToRoom(creep, harvestRoom, false, false, true);
             return;
         } else {
             this.harvestMove(creep, target);

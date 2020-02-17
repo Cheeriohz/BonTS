@@ -136,9 +136,6 @@ export class RoleCreep {
     protected withdrawMove(creep: Creep, structure: Structure) {
         if (creep.pos.isNearTo(structure)) {
             creep.withdraw(structure, RESOURCE_ENERGY);
-            if (creep.store.getFreeCapacity() > 25) {
-                this.grabAdjacentDroppedEnergy(creep, structure.pos);
-            }
             return;
         } else {
             creep.moveTo(structure, { reusePath: 10, ignoreCreeps: false });
@@ -595,6 +592,23 @@ export class RoleCreep {
             creep.moveTo(creep.pos.x + 2, creep.pos.y);
             return false;
         } else if (creep.pos.x === 49) {
+            creep.moveTo(creep.pos.x - 2, creep.pos.y);
+            return false;
+        }
+        return true;
+    }
+
+    protected leaveBorderPlus(creep: Creep): boolean {
+        if (creep.pos.y <= 3) {
+            creep.moveTo(creep.pos.x, creep.pos.y + 2);
+            return false;
+        } else if (creep.pos.y >= 47) {
+            creep.moveTo(creep.pos.x, creep.pos.y + -2);
+            return false;
+        } else if (creep.pos.x <= 3) {
+            creep.moveTo(creep.pos.x + 2, creep.pos.y);
+            return false;
+        } else if (creep.pos.x >= 47) {
             creep.moveTo(creep.pos.x - 2, creep.pos.y);
             return false;
         }

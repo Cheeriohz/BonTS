@@ -3,26 +3,49 @@ import _ from "lodash";
 export class RemoteDispatcher {
     public static RequestDispatch(
         dispatchRequest: RemoteDispatchRequest,
-        pathingLookup: PathingLookup
+        pathingLookup: PathingLookup,
+        intercept?: boolean
     ): PathStep[] | null {
         let index = 1;
         if (dispatchRequest.departing) {
             index = 0;
         }
-        //console.log(JSON.stringify(pathingLookup.pathingLookup));
+        let intercepted = false;
         let path: PathStep[] = [];
         if (dispatchRequest.departing) {
             for (const roomPath of _.values(pathingLookup.pathingLookup)) {
-                path = _.concat(path, roomPath[index]);
+                if (!intercepted && intercept) {
+                    const interceptTarget = roomPath[index];
+                    // drop the first 6 steps, as this should get us close to the best reconcile point without major computations.
+                    if (interceptTarget.length > 6) {
+                        path = _.drop(interceptTarget, 6);
+                    } else {
+                        path = _.drop(interceptTarget, interceptTarget.length - 2);
+                    }
+                    intercepted = true;
+                } else {
+                    path = _.concat(path, roomPath[index]);
+                }
             }
         } else {
             for (const roomPath of _.values(pathingLookup.pathingLookup).reverse()) {
-                path = _.concat(path, roomPath[index]);
+                if (!intercept && intercept) {
+                    const interceptTarget = roomPath[index];
+                    // drop the first 6 steps, as this should get us close to the best reconcile point without major computations.
+                    if (interceptTarget.length > 6) {
+                        path = _.drop(interceptTarget, 6);
+                    } else {
+                        path = _.drop(interceptTarget, interceptTarget.length - 2);
+                    }
+                    intercepted = true;
+                } else {
+                    path = _.concat(path, roomPath[index]);
+                }
             }
         }
 
         if (path) {
-            return path; //this.cutPath(dispatchRequest.creep.pos, path);//this.routeToPath(dispatchRequest.creep.pos, path);
+            return path;
         } else {
             return null;
         }

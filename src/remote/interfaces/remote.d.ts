@@ -13,6 +13,7 @@ interface RemoteMine extends PathingLookup {
     roomName: string;
     reserved: boolean;
     configured?: boolean;
+    distance?: number;
     haulerCount?: number;
     haulerBody?: BodyPartConstant[];
 }

@@ -15,6 +15,19 @@ export class RemoteMineHandler extends RemoteDispatcher {
         return null;
     }
 
+    public static requestCustomRemoteDispatch(dispatchRequest: RemoteDispatchRequest): PathStep[] | null {
+        const remoteMine = this.getRemoteMine(dispatchRequest.creep);
+        if (remoteMine) {
+            let returnPath: PathStep[] | null = this.RequestDispatch(dispatchRequest, remoteMine, true);
+            if (returnPath) {
+                // Need to daisy chain the current position of the creep to the master path.
+                const entry = _.first(returnPath);
+                return _.concat(dispatchRequest.creep.pos.findPathTo(entry!.x, entry!.y), _.tail(returnPath));
+            }
+        }
+        return null;
+    }
+
     public static getRemoteMine(creep: Creep): RemoteMine | null {
         const room = Game.rooms[creep.memory.home!];
         if (room) {
