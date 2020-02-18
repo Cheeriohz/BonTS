@@ -108,7 +108,7 @@ export function profile(
 ): void {
     // Had to hard code this for now because the profiler variable is getting lost in the rollup.
     // __PROFILER_ENABLED__
-    if (!false) {
+    if (!true) {
         return;
     }
     if (key) {

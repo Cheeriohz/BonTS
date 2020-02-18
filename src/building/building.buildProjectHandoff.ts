@@ -17,7 +17,6 @@ export class BuildProjectHandoff {
                 break;
             }
             case BuildProjectEnum.RemoteContainerExpansion: {
-                // TODO Need to ensure if we are running multi project execution that we don't hand off the end point project
                 BuildProjectHandoff.attemptRemoteContainerExpansionHandOff(remote, project, spawn);
                 break;
             }

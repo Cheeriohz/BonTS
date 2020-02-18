@@ -53,7 +53,6 @@ export class GameManager {
     }
 
     private static manageRemotes(spawn: StructureSpawn) {
-        // TODO this could use major refactoring
         this.manageRemoteReservations(spawn);
         this.manageRemoteMines(spawn);
         this.manageRemoteHarvests(spawn);

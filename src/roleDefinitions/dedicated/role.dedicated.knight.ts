@@ -6,7 +6,9 @@ export class RoleDedicatedKnight extends RoleRemote {
         if (!this.protect(creep)) {
             if (creep.memory.orders && creep.memory.orders.target !== creep.room.name) {
                 //this.travelToRoom(creep, creep.memory.orders!.target, false, true);
-                this.cachedTravel(new RoomPosition(25, 25, creep.memory.orders!.target), creep, false, true);
+                if (!this.leaveBorder(creep)) {
+                    this.cachedTravel(new RoomPosition(25, 25, creep.memory.orders!.target), creep, false, true);
+                }
                 return;
             } else {
                 creep.moveTo(25, 25, { ignoreRoads: true });
@@ -48,26 +50,39 @@ export class RoleDedicatedKnight extends RoleRemote {
     }
 
     private vanquishEvil(creep: Creep): boolean {
-        const harassTargets: Creep[] = creep.room.find(FIND_HOSTILE_CREEPS);
-        if (harassTargets && harassTargets.length > 0) {
-            const harrassTarget: Creep | null = creep.pos.findClosestByRange(harassTargets);
-            if (harrassTarget) {
-                creep.memory.precious = harrassTarget.id;
-                this.attackTarget(creep, harrassTarget);
-                return true;
+        if (creep.memory.orders!.target !== creep.room.name) {
+            const harassTargets: Creep[] = creep.pos.findInRange(FIND_HOSTILE_CREEPS, 10);
+            if (harassTargets && harassTargets.length > 0) {
+                this.chooseCreepTarget(creep, harassTargets);
             }
         } else {
-            const harrassStructures: Structure[] = creep.room.find(FIND_HOSTILE_STRUCTURES, {
-                filter: s => s.structureType !== STRUCTURE_CONTROLLER
-            });
-            if (harrassStructures && harrassStructures.length > 0) {
-                const harrassStructure: Structure | undefined = _.first(harrassStructures);
-                if (harrassStructure) {
-                    creep.memory.precious = harrassStructure.id;
-                    this.attackTarget(creep, harrassStructure);
-                    return true;
+            const harassTargets: Creep[] = creep.room.find(FIND_HOSTILE_CREEPS);
+            if (harassTargets && harassTargets.length > 0) {
+                this.chooseCreepTarget(creep, harassTargets);
+            } else {
+                const harrassStructures: Structure[] = creep.room.find(FIND_HOSTILE_STRUCTURES, {
+                    filter: s => s.structureType !== STRUCTURE_CONTROLLER
+                });
+                if (harrassStructures && harrassStructures.length > 0) {
+                    const harrassStructure: Structure | undefined = _.first(harrassStructures);
+                    if (harrassStructure) {
+                        creep.memory.precious = harrassStructure.id;
+                        this.attackTarget(creep, harrassStructure);
+                        return true;
+                    }
                 }
             }
+        }
+
+        return false;
+    }
+
+    private chooseCreepTarget(creep: Creep, targets: Creep[]): boolean {
+        const target: Creep | null = creep.pos.findClosestByRange(targets);
+        if (target) {
+            creep.memory.precious = target.id;
+            this.attackTarget(creep, target);
+            return true;
         }
         return false;
     }
@@ -76,6 +91,10 @@ export class RoleDedicatedKnight extends RoleRemote {
         if (victim) {
             if (!creep.pos.isNearTo(victim)) {
                 creep.moveTo(victim);
+            } else {
+                if (victim.pos.x !== 49 && victim.pos.x !== 0 && victim.pos.y !== 49 && victim.pos.x !== 0) {
+                    creep.move(creep.pos.getDirectionTo(victim));
+                }
             }
             creep.attack(victim);
         }

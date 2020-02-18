@@ -30,7 +30,8 @@ export class remoteMineExpeditionHandler extends ExpeditionResultsHandler {
     }
 
     private chooseExpansionTarget(spawn: StructureSpawn) {
-        // TODO optimize this for single target search
+        // // TODO optimize this for single target search
+        // TODO trash this whole piece of garbage
         if (this.targets.length > 0) {
             // choose the closest expansion first.
             let costings: ExpansionCosting[] = new Array<ExpansionCosting>();

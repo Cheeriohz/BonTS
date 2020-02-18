@@ -1,11 +1,14 @@
 Most basic harvester spawn
 ---------------------------
 Game.spawns['A'].spawnCreep([WORK,CARRY,MOVE], "Harvester" + Game.time.toString(), {memory: {role: 0, working: false}});
-Game.spawns['A'].spawnCreep([WORK, WORK, WORK, WORK, WORK, WORK, WORK, CARRY, CARRY], "upg" + Game.time.toString(), {memory: {role: 1, working: false}});
+Game.spawns['A'].spawnCreep([WORK, WORK, WORK, WORK, WORK, WORK, WORK, CARRY, CARRY], "dropper" + Game.time.toString(), {memory: {role: 1, working: false}});
 
-Game.spawns['A'].spawnCreep([WORK,WORK,CARRY,CARRY,MOVE,MOVE], "Builder" + Game.time.toString(), {memory: {role: 2, working: false}});
+Game.spawns['A'].spawnCreep([WORK,WORK,CARRY,CARRY,MOVE,MOVE], "Builder" + Game.time.toString(), {memory: {role: 3, working: false}});
 
-Game.spawns['A'].spawnCreep([WORK,WORK,WORK,WORK,WORK,WORK,CARRY,CARRY,MOVE,MOVE,MOVE,MOVE], "Bld" + Game.time.toString(), {memory: {role: 2, working: false}});
+-- Remote Builder ---
+Game.spawns['A'].spawnCreep([WORK,WORK,WORK,WORK,CARRY,CARRY,CARRY,CARRY,MOVE,MOVE,MOVE,MOVE], "Builder" + Game.time.toString(), {memory: {role: 3, working: false, home: 'E34S13', dedication: 'E34S12'}});
+
+Game.spawns['A'].spawnCreep([WORK,WORK,WORK,WORK,WORK,WORK,CARRY,CARRY,MOVE,MOVE,MOVE,MOVE], "Bld" + Game.time.toString(), {memory: {role: 3, working: false}});
 
 Bronze Era Spawns
 ---------------------------

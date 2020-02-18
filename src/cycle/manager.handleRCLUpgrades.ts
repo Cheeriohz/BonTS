@@ -14,7 +14,6 @@ import { RemoteMineHandler } from "remote/remote.remoteMineHandler";
 
 export class RCLUpgradeHandler {
     public static handleRCLUpgrades(spawn: StructureSpawn) {
-        // TODO This requires us moving our RCLUpgrade to be room level or global rather than just spawn level... eventually
         if (spawn.room.memory?.rclUpgrades) {
             const rclUpgradeEvent: RCLUpgradeEvent = spawn.room.memory.rclUpgrades[0];
             if (rclUpgradeEvent) {

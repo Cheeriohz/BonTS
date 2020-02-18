@@ -268,8 +268,8 @@ export class ExtensionAddition extends GeneralBuilding {
                 this.room.memory.roadAgnosticDistanceTransform!,
                 3,
                 bPos,
-				this.room.controller!.pos,
-				this.boundAdd
+                this.room.controller!.pos,
+                this.boundAdd
             );
             const centerB: RoomPosition | null = this.traverseDistanceTransformWithCheckBoundedExact(
                 aPos,
@@ -278,8 +278,8 @@ export class ExtensionAddition extends GeneralBuilding {
                 this.room.memory.roadAgnosticDistanceTransform!,
                 3,
                 aPos,
-				this.room.controller!.pos,
-				this.boundAdd
+                this.room.controller!.pos,
+                this.boundAdd
             );
             if (centerA && centerB) {
                 if (this.extensionsToPlan > 5) {
@@ -320,8 +320,6 @@ export class ExtensionAddition extends GeneralBuilding {
         );
         if (this.checkCenterIsCenterForGivenProspects(center, prospects)) {
             const dtValue = deserializedExtensionAgnosticDistanceTransform.get(center.x, center.y);
-            // console.log(`dtValue: ${dtValue} for center: ${center}`);
-            // TODO Break this out into different testers.
             if (dtValue >= 1) {
                 // Just dump the entire project in then filter on the end.
                 return this.PlotFromCenter(center, prospects);

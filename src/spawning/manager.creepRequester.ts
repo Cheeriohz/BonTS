@@ -1,5 +1,6 @@
 import { CreepRole } from "enums/enum.roles";
 import _ from "lodash";
+import { RepairChecker } from "./spawning.repairChecker";
 
 // This requester is for common creep requests for relatively generic purposes.
 // Requests here should ensure we don't create infinite requests without external request management.
@@ -51,23 +52,20 @@ export class CreepRequester {
     }
 
     public MaintainBuilder(): void {
-        if (!this.RepairCreepRequested() && !this.HaveRepairWorker()) {
+        const repairChecker: RepairChecker = new RepairChecker(this.spawn.room);
+        if (repairChecker.RepairMaintain()) {
             this.RequestRepairBot();
         }
     }
 
     public CheckForRepairNeed(): void {
-        if (
-            !this.RepairCreepRequested() &&
-            !this.HaveRepairWorker() &&
-            (this.spawn.room.memory.target ||
-                this.spawn.room.memory.constructionSites.length > 0 ||
-                this.HaveDamagedRamparts() ||
-                this.HaveDamagedContainers())
-        ) {
+        const repairChecker: RepairChecker = new RepairChecker(this.spawn.room);
+        if (repairChecker.RepairNeeded()) {
             this.RequestRepairBot();
         }
     }
+
+    public CheckForUpgraderDumping(): void {}
 
     private scoutAlreadyRequested(roomName: string): boolean {
         for (const creep of _.values(Game.creeps)) {
@@ -111,69 +109,5 @@ export class CreepRequester {
             this.spawn.memory.creepRequest = [];
         }
         this.spawn.memory.creepRequest.push(builderRequest);
-    }
-
-    private RepairCreepRequested(): boolean {
-        const creepRequest = _.filter(this.spawn.memory.creepRequest, cr => {
-            return cr.role === CreepRole.builder;
-        });
-        if (creepRequest) {
-            if (creepRequest.length > 0) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    private HaveRepairWorker(): boolean {
-        // first see if we already have a local repairer.
-        const roomData = Memory.roleRoomMap[this.spawn.room.name];
-        if (roomData) {
-            if (roomData[CreepRole.builder] > 0) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    private HaveDamagedContainers(): boolean {
-        return this.HaveDamagedStructure(STRUCTURE_CONTAINER, 250000, 250000 / 5, 2 * (250000 / 5));
-    }
-
-    private HaveDamagedRamparts(): boolean {
-        return this.HaveDamagedStructure(
-            STRUCTURE_RAMPART,
-            this.rampartMaxRepairThreshold,
-            100000,
-            this.builderSpawnThreshold
-        );
-    }
-
-    private HaveDamagedStructure(
-        structureType: StructureConstant,
-        individualThreshold: number,
-        individualDifference: number,
-        totalThreshold: number
-    ): boolean {
-        // console.log(`structureType: ${structureType} | individualThreshold: ${individualThreshold} | individualDifference: ${individualDifference} | totalThreshold : ${totalThreshold} `);
-        const structures = this.spawn.room.find(FIND_STRUCTURES, {
-            filter: structure => {
-                return (
-                    structure.structureType === structureType &&
-                    individualThreshold - structure.hits > individualDifference
-                );
-            }
-        });
-        // console.log(JSON.stringify(structures));
-        if (structures) {
-            if (structures.length > 0) {
-                let totalDamage: number = 0;
-                _.forEach(structures, s => (totalDamage += individualThreshold - s.hits));
-                if (totalDamage > totalThreshold) {
-                    return true;
-                }
-            }
-        }
-        return false;
     }
 }

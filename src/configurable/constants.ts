@@ -1,4 +1,4 @@
-const __profiler_enabled: boolean = false;
+const __profiler_enabled__: boolean = false;
 
 const __spawn_buffer_ticks__: number = 10;
 

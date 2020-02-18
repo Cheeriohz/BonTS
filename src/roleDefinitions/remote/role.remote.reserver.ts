@@ -26,7 +26,6 @@ export class RoleRemoteReserver extends RoleRemote {
 
     private Pilgrimage(creep: Creep) {
         if (creep.memory.dedication !== creep.room.name) {
-            console.log(`${creep.name} is traveling to ${creep.memory.dedication!}`);
             const controllerRoom: Room | null = Game.rooms[creep.memory.dedication!];
             if (controllerRoom) {
                 this.cachedTravel(controllerRoom.controller!.pos, creep, false);
@@ -39,11 +38,7 @@ export class RoleRemoteReserver extends RoleRemote {
                 creep.memory.working = true;
                 return;
             } else {
-                console.log(`${creep.name} is handling path`);
                 this.cachedTravel(creep.room.controller!.pos, creep, false);
-                //creep.memory.path = creep.pos.findPathTo(creep.room.controller!, { ignoreCreeps: true });
-                //this.pathHandling(creep);
-                //creep.moveTo(creep.room.controller!, { ignoreCreeps: false, reusePath: 50 });
                 return;
             }
         }

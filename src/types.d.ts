@@ -129,6 +129,7 @@ interface Taxi {
 declare namespace NodeJS {
     interface Global {
         pr: Profiler;
-        log: any;
+		log: any;
+		__profiler_enabled__: boolean;
     }
 }
