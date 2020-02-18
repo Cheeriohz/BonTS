@@ -34,6 +34,7 @@ interface CreepMemory {
     //* Combat
     hitsLast?: number | null;
     mrf?: boolean;
+    heal?: string | null;
 }
 
 interface RoomMemory {
@@ -129,7 +130,7 @@ interface Taxi {
 declare namespace NodeJS {
     interface Global {
         pr: Profiler;
-		log: any;
-		__profiler_enabled__: boolean;
+        log: any;
+        __profiler_enabled__: boolean;
     }
 }

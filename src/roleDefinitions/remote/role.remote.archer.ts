@@ -67,6 +67,20 @@ export class RoleRemoteArcher extends RoleRemote {
                 creep.heal(creep);
             }
         }
+        this.roomHeal(creep);
+    }
+
+    private roomHeal(creep: Creep) {
+        creep.memory.tick = (creep.memory.tick ?? 0) + 1;
+        if (creep.memory.tick! > 20) {
+            creep.memory.tick = 0;
+            const damagedCreeps = creep.room.find(FIND_MY_CREEPS, {
+                filter: c => c.hits != c.hitsMax
+            });
+            if (damagedCreeps.length > 0) {
+                creep.memory.heal = creep.id;
+            }
+        }
     }
 
     private findHarrass(creep: Creep) {
@@ -105,7 +119,7 @@ export class RoleRemoteArcher extends RoleRemote {
         const wall: Structure | null = creep.pos.findClosestByPath(FIND_STRUCTURES, {
             filter: structure => {
                 {
-                    return structure.structureType === STRUCTURE_WALL;
+                    return structure.structureType === STRUCTURE_WALL && structure.hitsMax;
                 }
             }
         });
@@ -114,6 +128,13 @@ export class RoleRemoteArcher extends RoleRemote {
             creep.memory.dedication = null;
             this.attackTarget(creep, wall);
             return;
+        }
+        if (creep.memory.heal) {
+            const healTarget: Creep | null = Game.getObjectById(creep.memory.heal);
+            if (healTarget) {
+                creep.moveTo(healTarget);
+                return;
+            }
         }
         creep.moveTo(25, 25);
     }

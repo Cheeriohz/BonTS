@@ -129,6 +129,7 @@ export class CycleManager {
                     if (spawn.room.memory.rcl >= 4) {
                         const creepRequester: CreepRequester = new CreepRequester(spawn);
                         creepRequester.CheckForRepairNeed();
+                        creepRequester.CheckForUpgraderDumping();
                     }
                 }
             }

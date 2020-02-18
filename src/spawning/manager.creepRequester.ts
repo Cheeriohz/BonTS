@@ -1,6 +1,7 @@
 import { CreepRole } from "enums/enum.roles";
 import _ from "lodash";
 import { RepairChecker } from "./spawning.repairChecker";
+import { BurnoffChecker } from "./spawning.burnoffChecker";
 
 // This requester is for common creep requests for relatively generic purposes.
 // Requests here should ensure we don't create infinite requests without external request management.
@@ -65,7 +66,12 @@ export class CreepRequester {
         }
     }
 
-    public CheckForUpgraderDumping(): void {}
+    public CheckForUpgraderDumping(): void {
+        const burnChecker: BurnoffChecker = new BurnoffChecker(this.spawn.room);
+        if (burnChecker.CheckForBurnoff()) {
+            this.RequestBurnUpgrader();
+        }
+    }
 
     private scoutAlreadyRequested(roomName: string): boolean {
         for (const creep of _.values(Game.creeps)) {
@@ -109,5 +115,24 @@ export class CreepRequester {
             this.spawn.memory.creepRequest = [];
         }
         this.spawn.memory.creepRequest.push(builderRequest);
+    }
+
+    private RequestBurnUpgrader() {
+        const builderRequest: CreepRequest = {
+            role: CreepRole.upgrader,
+            body: this.spawn.room.memory.templates![CreepRole.upgrader]
+        };
+        if (!this.spawn.memory.creepRequest) {
+            this.spawn.memory.creepRequest = [];
+        }
+        this.spawn.memory.creepRequest.push(builderRequest);
+        this.EnableTopper();
+    }
+
+    private EnableTopper() {
+        Memory.roleRoomMap[this.spawn.room.name][CreepRole.topper] = Math.max(
+            Memory.roleRoomMap[this.spawn.room.name][CreepRole.topper],
+            1
+        );
     }
 }

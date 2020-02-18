@@ -253,12 +253,14 @@ export class RoomHarassManager {
                 } else {
                     this.harass.dgClaim = false;
                 }
-                if (this.spawn.room.energyCapacityAvailable >= 1300 && !this.harass.dgClaim) {
-                    this.harass.dgStrength = 2;
-                } else if (this.spawn.room.energyCapacityAvailable >= 650) {
-                    this.harass.dgStrength = 1;
-                } else {
-                    this.harass.dgStrength = 0;
+                if (Memory.readyForExpansion) {
+                    if (this.spawn.room.energyCapacityAvailable >= 1300 && !this.harass.dgClaim) {
+                        this.harass.dgStrength = 2;
+                    } else if (this.spawn.room.energyCapacityAvailable >= 650) {
+                        this.harass.dgStrength = 1;
+                    } else {
+                        this.harass.dgStrength = 0;
+                    }
                 }
             }
         }
