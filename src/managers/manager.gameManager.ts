@@ -26,13 +26,6 @@ export class GameManager {
 
     private static runClean() {
         const executionTime = Game.cpu.getUsed();
-        // Spawn creeps
-        Spawn.run();
-
-        // Manage roles
-        const rm: RolesManager = new RolesManager();
-        rm.run();
-
         // Manage remotes and mines.
         if (Memory.cycle % __cycle_medium_term__ === 0) {
             for (const spawn of _.uniqBy(_.values(Game.spawns), s => s.room.name)) {
@@ -43,6 +36,13 @@ export class GameManager {
                 GameManager.manageRemotes(spawn);
             }
         }
+
+        // Spawn creeps
+        Spawn.run();
+
+        // Manage roles
+        const rm: RolesManager = new RolesManager();
+        rm.run();
 
         // Manage structures
         TowerManager.run();
