@@ -3,6 +3,8 @@ import { DedicatedCreepRequester } from "../spawning/manager.dedicatedCreepReque
 import _ from "lodash";
 import { BodyBuilder } from "spawning/spawning.bodyBuilder";
 import { CreepQualifiesAsActive } from "caching/caching.creepCaching";
+import { RemoteMineHandler } from "./remote.remoteMineHandler";
+import { buildProjectCreator } from "building/building.buildProjectCreator";
 
 export class RemoteMineManager {
     room!: Room;
@@ -16,6 +18,7 @@ export class RemoteMineManager {
     }
 
     public manageMine(checkPersonnel: boolean) {
+        this.checkForRoadMaintenance();
         if (!this.mine.configured) {
             this.configureMine();
         }
@@ -24,6 +27,42 @@ export class RemoteMineManager {
         }
     }
 
+    private checkForRoadMaintenance() {
+        this.mine.cycleIterator = (this.mine.cycleIterator ?? 0) + 1;
+        if (this.mine.cycleIterator > 20) {
+            this.mine.cycleIterator = 0;
+            // Check against containerId because it affords an easy check on if the mine has been built.
+            if (this.mine.containerId) {
+                for (const room of _.keys(this.mine.pathingLookup)) {
+                    this.checkRoadsForRoom(room, this.mine.pathingLookup[room][0]);
+                }
+            }
+        }
+    }
+
+    private checkRoadsForRoom(roomName: string, path: PathStep[]) {
+        let createBuildProject: boolean = false;
+        const roomScout = Memory.scouting.roomScouts[roomName];
+        // Can't build in reserved rooms. We also won't keep scouts in them for visibility.
+        if (roomScout && roomScout.threatAssessment) {
+            return;
+        }
+        const room = Game.rooms[roomName];
+        if (room) {
+            for (const step of path) {
+                const existingRoad: Structure[] | null = room.lookForAt(LOOK_STRUCTURES, step.x, step.y);
+                if (!existingRoad || existingRoad.length === 0) {
+                    if (room.createConstructionSite(step.x, step.y, STRUCTURE_ROAD) === OK) {
+                        createBuildProject = true;
+                    }
+                }
+            }
+        }
+        if (createBuildProject) {
+            const bpc: buildProjectCreator = new buildProjectCreator(room, this.spawn);
+            bpc.rebuildRemoteCreate();
+        }
+    }
     private checkPersonnel() {
         if (this.spawn.spawning) {
             return;
@@ -114,10 +153,10 @@ export class RemoteMineManager {
                 independentOperator: false
             };
             dcr.createdDedicatedCreepRequest({
-                dedication: this.mine.containerId!,
+                dedication: this.mine.vein!,
                 role: CreepRole.harvester,
                 specifiedName: `${this.spawn.name}_BPR_${containerRoomName}`,
-                precious: RESOURCE_ENERGY,
+                precious: this.mine.vein,
                 isRemote: true,
                 orders: orders
             });
@@ -130,8 +169,8 @@ export class RemoteMineManager {
         }
         for (const creep of _.values(Game.creeps)) {
             if (creep.memory.role === CreepRole.harvester) {
-                if (creep.memory.dedication) {
-                    if (creep.memory.dedication === roomName) {
+                if (creep.memory.precious) {
+                    if (creep.memory.precious === this.mine.vein) {
                         return creep;
                     }
                 }

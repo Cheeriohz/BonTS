@@ -21,6 +21,7 @@ export class BuildProjectHandoff {
                 break;
             }
             case BuildProjectEnum.SingleConstructionSiteNoFollowUp:
+			case BuildProjectEnum.RebuildRemote:
             case BuildProjectEnum.PassThroughCreate: {
                 _.remove(spawn.room.memory.buildProjects!, p => p === project);
                 break;

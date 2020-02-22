@@ -24,7 +24,7 @@ export class BurnoffChecker {
 
     private AlreadyBurning() {
         if (this.room.controller && this.room.controller.level != 8) {
-            if (Memory.roleRoomMap[this.room.name][CreepRole.upgrader] >= 2) {
+            if (Memory.roleRoomMap[this.room.name][CreepRole.upgrader] < 2) {
                 if (!this.UpgraderRequested()) {
                     return true;
                 }

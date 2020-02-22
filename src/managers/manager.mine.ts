@@ -6,6 +6,7 @@ import { CreepRequester } from "../spawning/manager.creepRequester";
 export class MineManager {
     room!: Room;
     spawn!: StructureSpawn;
+    mineralAmount: number = 0;
 
     constructor(room: Room, spawn: StructureSpawn) {
         this.room = room;
@@ -65,10 +66,9 @@ export class MineManager {
     private minerNeeded(): boolean {
         if (this.room.memory.mine) {
             const vein: Mineral | Deposit | null = Game.getObjectById<Mineral | Deposit>(this.room.memory.mine.vein);
-            const mineralAmount = _.get(vein, "mineralAmount", null);
-            if (mineralAmount) {
-                // TODO Make this more robust
-                if (mineralAmount > 0) {
+            this.mineralAmount = _.get(vein, "mineralAmount", null);
+            if (this.mineralAmount) {
+                if (this.mineralAmount > 0) {
                     return true;
                 }
             }
@@ -81,6 +81,10 @@ export class MineManager {
         if (container) {
             if (container.store.getFreeCapacity() < 400) {
                 return true;
+            } else {
+                if (this.mineralAmount === 0 && container.store.getUsedCapacity() !== 0) {
+                    return true;
+                }
             }
         } else {
             // Container has been destroyed, need to rebuild

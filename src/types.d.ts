@@ -97,6 +97,7 @@ interface Memory {
     structureDT?: string;
     roadAgDT?: string;
     log: any;
+    cycleLog: boolean;
     readyForExpansion: boolean;
 
     //* Integral Game Memory
@@ -111,6 +112,9 @@ interface Memory {
 
     //* Scouting
     scouting: Scouting;
+
+    //* Market
+    market: Market;
 }
 
 interface Dictionary<T> {

@@ -9,35 +9,6 @@ export class RoleRemote extends RoleCreep {
         return `${pos.x}${pos.y}`;
     }
 
-    protected cachedTravel(
-        destination: RoomPosition,
-        creep: Creep,
-        repairWhileMove: boolean,
-        ignoreRoads?: boolean
-    ): boolean {
-        const path = creep.pos.findPathTo(destination, { ignoreCreeps: true, ignoreRoads: ignoreRoads ?? false });
-        if (path) {
-            this.travelByCachedPath(repairWhileMove, creep, path);
-            return true;
-        } else {
-            return false;
-        }
-    }
-
-    protected travelByCachedPath(repairWhileMove: boolean, creep: Creep, path: PathStep[]) {
-        if (repairWhileMove) {
-            creep.memory.repairWhileMove = true;
-        }
-        creep.memory.path = path;
-        creep.memory.stuckCount = 0;
-        const firstStep = _.first(creep.memory.path);
-        if (firstStep) {
-            creep.move(firstStep.direction);
-        }
-
-        //this.pathHandling(creep);
-    }
-
     protected travelToRoom(
         creep: Creep,
         roomName: string,
@@ -167,18 +138,26 @@ export class RoleRemote extends RoleCreep {
 
     protected constructRemote(creep: Creep, constructRoom: string, repairWhileMove: boolean) {
         if (creep.room.name === constructRoom) {
-            this.leaveBorder(creep);
-            this.construct(creep);
+            if (this.leaveBorder(creep)) {
+                this.construct(creep);
+            }
             return;
         } else {
-            this.travelToRoom(creep, constructRoom, repairWhileMove, false, true);
+            this.travelToRoom(creep, constructRoom, repairWhileMove, false, false);
             return;
         }
     }
 
     protected harvestRemote(creep: Creep, harvestRoom: string, target: string) {
         if (creep.room.name !== harvestRoom) {
-            this.travelToRoom(creep, harvestRoom, false, false, true);
+            if (this.leaveBorder(creep)) {
+                const source: Source | null = Game.getObjectById(target);
+                if (source) {
+                    this.cachedTravel(source.pos, creep, false, false);
+                } else {
+                    this.travelToRoom(creep, harvestRoom, false, false, false);
+                }
+            }
             return;
         } else {
             this.harvestMove(creep, target);

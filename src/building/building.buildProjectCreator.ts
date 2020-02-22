@@ -16,6 +16,20 @@ export class buildProjectCreator {
         }
     }
 
+    public rebuildRemoteCreate() {
+        let buildProject: BuildProject = {
+            buildOrders: [],
+            roomName: this.roomName,
+            activeSites: 1,
+            projectType: BuildProjectEnum.RebuildRemote
+        };
+        if (!this.spawn.room.memory.buildProjects) {
+            this.spawn.room.memory.buildProjects = [buildProject];
+        } else {
+            this.spawn.room.memory.buildProjects.push(buildProject);
+        }
+    }
+
     public passThroughCreateMasked(buildOrders: BuildOrder[], bpcEnum: BuildProjectEnum) {
         this.pushBuildProjectToSpawn(buildOrders, bpcEnum);
     }

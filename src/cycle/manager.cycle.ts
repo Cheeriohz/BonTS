@@ -17,32 +17,50 @@ import { SpawnTemplate } from "spawning/spawning.templating";
 import { RemoteMineHandler } from "remote/remote.remoteMineHandler";
 import { RemoteMineExpansion } from "expansion/expansion.remoteMine";
 import { remoteMineExpeditionHandler } from "expansion/manager.remoteMineExpedition";
+import { MarketSellOverflow } from "market/market.sellOverflow";
 
 export class CycleManager {
-    public static check() {
+    public static checkPre() {
+        if (Memory.cycle % __cycle_medium_term__ === 0) {
+            this.manageMediumTermTasksPre();
+        }
+    }
+
+    private static manageLongTermTasksPre() {
+        this.manageMediumTermTasksPre();
+    }
+
+    private static manageMediumTermTasksPre() {
+        this.spawnLevelTasksMediumTermPre();
+        this.manageShortTermTasksPre();
+    }
+
+    private static manageShortTermTasksPre() {}
+
+    public static checkPost() {
         if (Memory.cycle === 0) {
-            this.manageLongTermTasks();
+            this.manageLongTermTasksPost();
         } else if (Memory.cycle % __cycle_medium_term__ === 0) {
-            this.manageMediumTermTasks();
+            this.manageMediumTermTasksPost();
         } else if (Memory.cycle % __cycle_short_term__ === 0) {
-            this.manageShortTermTasks();
+            this.manageShortTermTasksPost();
         }
         this.everyCycle();
     }
 
-    private static manageLongTermTasks() {
-        this.roomLevelTasksLongTerm();
-        this.spawnLevelTasksLongTerm();
-        this.manageMediumTermTasks();
+    private static manageLongTermTasksPost() {
+        this.roomLevelTasksLongTermPost();
+        this.spawnLevelTasksLongTermPost();
+        this.manageMediumTermTasksPost();
     }
 
-    private static manageMediumTermTasks() {
-        this.spawnLevelTasksMediumTerm();
-        this.manageShortTermTasks();
+    private static manageMediumTermTasksPost() {
+        this.spawnLevelTasksMediumTermPost();
+        this.manageShortTermTasksPost();
     }
 
-    private static manageShortTermTasks() {
-        this.spawnLevelTasksShortTerm();
+    private static manageShortTermTasksPost() {
+        this.spawnLevelTasksShortTermPost();
         this.updateSpawnConstructionSiteMaps();
         // Global Creep Map
         Spawn.populateCreepCounts();
@@ -69,9 +87,9 @@ export class CycleManager {
         }
     }
 
-    private static roomLevelTasksLongTerm() {}
+    private static roomLevelTasksLongTermPost() {}
 
-    private static spawnLevelTasksLongTerm() {
+    private static spawnLevelTasksLongTermPost() {
         for (const spawn of _.values(Game.spawns)) {
             this.cleanUpTrees(spawn.room);
 
@@ -121,22 +139,28 @@ export class CycleManager {
         reassessment.reassess();
     }
 
-    private static spawnLevelTasksMediumTerm() {
-        for (const spawnName in Game.spawns) {
-            const spawn: StructureSpawn = Game.spawns[spawnName];
-            if (spawn) {
-                if (spawn.room.memory.rcl) {
-                    if (spawn.room.memory.rcl >= 4) {
-                        const creepRequester: CreepRequester = new CreepRequester(spawn);
-                        creepRequester.CheckForRepairNeed();
-                        creepRequester.CheckForUpgraderDumping();
-                    }
+    private static spawnLevelTasksMediumTermPre() {
+        for (const spawn of _.uniqBy(_.values(Game.spawns), s => s.room.name)) {
+            if (spawn.room.memory.rcl) {
+                if (spawn.room.memory.rcl >= 4) {
+                    const creepRequester: CreepRequester = new CreepRequester(spawn);
+                    creepRequester.CheckForRepairNeed();
+                    //creepRequester.CheckForUpgraderDumping();
                 }
             }
         }
     }
 
-    private static spawnLevelTasksShortTerm() {
+    private static spawnLevelTasksMediumTermPost() {
+        for (const spawn of _.uniqBy(_.values(Game.spawns), s => s.room.name)) {
+            if (spawn.room.memory.rcl && spawn.room.terminal) {
+                const marketSellOverflow: MarketSellOverflow = new MarketSellOverflow(spawn.room);
+                marketSellOverflow.checkAndSellOverflow();
+            }
+        }
+    }
+
+    private static spawnLevelTasksShortTermPost() {
         const linkManager: LinkManager = new LinkManager();
         for (const spawnName in Game.spawns) {
             const spawn = Game.spawns[spawnName];
@@ -217,6 +241,14 @@ export class CycleManager {
             }
 
             vis.drawBuildOrders(boAll, roomName);
+        }
+    }
+
+    private static listEnergyOrders() {
+        for (const order of Game.market.getAllOrders(o => {
+            return o.type === ORDER_BUY && o.resourceType === RESOURCE_ENERGY;
+        })) {
+            console.log(JSON.stringify(order));
         }
     }
 }

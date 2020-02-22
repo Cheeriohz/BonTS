@@ -70,6 +70,9 @@ export class SpawnWrapper {
                 orders: orders
             }
         });
+        if (returnCode === ERR_NAME_EXISTS) {
+            return OK;
+        }
         return returnCode;
     }
 

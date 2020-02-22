@@ -9,6 +9,7 @@ export class RemoteMineHandler extends RemoteDispatcher {
         if (remoteMine) {
             let returnPath: PathStep[] | null = this.RequestDispatch(dispatchRequest, remoteMine);
             if (returnPath) {
+                //console.log(`Standard Remote Mine Dispatch: ${Game.cpu.getUsed() - timeStart}`);
                 return returnPath;
             }
         }
@@ -22,7 +23,12 @@ export class RemoteMineHandler extends RemoteDispatcher {
             if (returnPath) {
                 // Need to daisy chain the current position of the creep to the master path.
                 const entry = _.first(returnPath);
-                return _.concat(dispatchRequest.creep.pos.findPathTo(entry!.x, entry!.y), _.tail(returnPath));
+                const concatPath = _.concat(
+                    dispatchRequest.creep.pos.findPathTo(entry!.x, entry!.y),
+                    _.tail(returnPath)
+                );
+                //console.log(`Custom Remote Mine Dispatch: ${Game.cpu.getUsed() - timeStart}`);
+                return concatPath;
             }
         }
         return null;

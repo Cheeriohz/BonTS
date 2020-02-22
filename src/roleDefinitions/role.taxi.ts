@@ -46,7 +46,6 @@ export class RoleTaxi extends RoleHauler {
                         }
                     }
                     if (taxi.memory.stuckCount > 2) {
-                        console.log(`test for ${taxi.name}`);
                         taxi.memory.taxi!.taxiRoute = taxi.pos.findPathTo(taxi.memory.taxi!.destination, {
                             ignoreCreeps: false,
                             range: taxi.memory.taxi!.arrivalDistance ?? 0

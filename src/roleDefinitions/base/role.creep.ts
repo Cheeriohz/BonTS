@@ -188,6 +188,13 @@ export class RoleCreep {
                 return true;
             }
         }
+        if (!ignoreLinks) {
+            const link = this.checkForLinktoFillFar(creep);
+            if (link) {
+                this.depositMoveCached(creep, link);
+                return true;
+            }
+        }
         const storage = this.checkStorageForDeposit(creep.room);
         if (storage) {
             this.depositMoveUnspecified(creep, storage);
@@ -325,16 +332,18 @@ export class RoleCreep {
         return queryItem;
     }
 
-    protected findClosestTower(creep: Creep): Structure | null {
-        const queryItem: Structure | null = creep.pos.findClosestByRange(FIND_STRUCTURES, {
+    protected findClosestTower(creep: Creep): Structure | null | undefined {
+        const towers: StructureTower[] | null = creep.room.find<StructureTower>(FIND_STRUCTURES, {
             filter: structure => {
                 return (
                     structure.structureType === STRUCTURE_TOWER && structure.store.getFreeCapacity(RESOURCE_ENERGY) > 0
                 );
             }
         });
-        // console.log(JSON.stringify(queryItem));
-        return queryItem;
+        if (towers && towers.length > 0) {
+            return _.first(_.sortBy(towers!, s => -s.store.getFreeCapacity(RESOURCE_ENERGY)));
+        }
+        return null;
     }
 
     protected findClosestFillableStructure(creep: Creep): Structure | null {
@@ -505,6 +514,21 @@ export class RoleCreep {
         } else {
             return null;
         }
+    }
+
+    protected checkForLinktoFillFar(creep: Creep): StructureLink | null {
+        if (creep.room.memory.sourceLinks) {
+            const links: StructureLink[] = _.compact(
+                _.map(creep.room.memory?.sourceLinks, id => {
+                    return this.checkLinkForFillable(id);
+                })
+            );
+            if (links.length > 0) {
+                const queryItem: StructureLink | null = creep.pos.findClosestByRange<StructureLink>(links);
+                return queryItem;
+            }
+        }
+        return null;
     }
 
     protected checkForLinktoFill(creep: Creep): StructureLink | null {
@@ -755,6 +779,37 @@ export class RoleCreep {
         return false;
     }
 
+    protected cachedTravel(
+        destination: RoomPosition,
+        creep: Creep,
+        repairWhileMove: boolean,
+        ignoreRoads?: boolean
+    ): boolean {
+        const path = creep.pos.findPathTo(destination, {
+            ignoreCreeps: true,
+            ignoreRoads: ignoreRoads ?? false
+        });
+        if (path && path.length > 0) {
+            this.travelByCachedPath(repairWhileMove, creep, path);
+            return true;
+        } else {
+            this.leaveBorder(creep);
+            return false;
+        }
+    }
+
+    protected travelByCachedPath(repairWhileMove: boolean, creep: Creep, path: PathStep[]) {
+        if (repairWhileMove) {
+            creep.memory.repairWhileMove = true;
+        }
+        creep.memory.path = path;
+        creep.memory.stuckCount = 0;
+        const firstStep = _.first(creep.memory.path);
+        if (firstStep) {
+            creep.move(firstStep.direction);
+        }
+    }
+
     //* Work Tasks
     // This intentionally tries to upgrade first. Upgrading is generally done by upgraders, and they are usually in range.
     protected upgradeController(creep: Creep, taxi?: boolean): boolean {
@@ -781,7 +836,7 @@ export class RoleCreep {
                 creep.build(target);
                 return true;
             } else {
-                creep.moveTo(target, { reusePath: 10, ignoreCreeps: false });
+                creep.moveTo(target, { reusePath: 10, ignoreCreeps: false, maxRooms: 1 });
                 return true;
             }
         }
@@ -800,10 +855,14 @@ export class RoleCreep {
     }
 
     protected harvestMove(creep: Creep, target: string) {
+        if (creep.fatigue) {
+            return;
+        }
         const source: Source | null = Game.getObjectById(target);
         if (source) {
-            if (creep.harvest(source) === ERR_NOT_IN_RANGE) {
-                creep.moveTo(source, { reusePath: 20, visualizePathStyle: { stroke: "#ffaa00" } });
+            const rc = creep.harvest(source);
+            if (rc === ERR_NOT_IN_RANGE) {
+                this.cachedTravel(source.pos, creep, false, false);
                 return;
             }
         }

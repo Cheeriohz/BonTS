@@ -16,6 +16,7 @@ interface RemoteMine extends PathingLookup {
     distance?: number;
     haulerCount?: number;
     haulerBody?: BodyPartConstant[];
+    cycleIterator?: number;
 }
 
 interface RemoteHarvest extends PathingLookup {

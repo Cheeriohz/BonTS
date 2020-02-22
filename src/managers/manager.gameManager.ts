@@ -37,6 +37,9 @@ export class GameManager {
             }
         }
 
+        // Manage cycle intermittent pre-and post actions
+        CycleManager.checkPre();
+
         // Spawn creeps
         Spawn.run();
 
@@ -48,8 +51,10 @@ export class GameManager {
         TowerManager.run();
 
         // Manage cycles
-        CycleManager.check();
-        console.log(`Cycle ${Memory.cycle} Execution Time: ${Game.cpu.getUsed() - executionTime}`);
+        CycleManager.checkPost();
+        if (Memory.cycleLog) {
+            console.log(`Cycle ${Memory.cycle} Execution Time: ${Game.cpu.getUsed() - executionTime}`);
+        }
     }
 
     private static manageRemotes(spawn: StructureSpawn) {
@@ -143,7 +148,7 @@ export class GameManager {
         const executionTimeStructures = Game.cpu.getUsed();
 
         // Manage cycles
-        CycleManager.check();
+        CycleManager.checkPost();
 
         const executionTimeCycles = Game.cpu.getUsed();
 
