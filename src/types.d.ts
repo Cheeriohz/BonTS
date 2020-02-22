@@ -10,6 +10,7 @@ interface CreepMemory {
     // * Id Caching
     dedication?: string | null;
     precious?: string | null;
+    preciousList?: string[] | null;
     preciousPosition?: { x: number; y: number } | null;
     dropOffLocation?: { x: number; y: number } | null;
     home?: string | null;
@@ -78,6 +79,7 @@ interface RoomMemory {
     staticUpgraders: boolean;
     upgraderTaxi: boolean;
     linksActive: boolean;
+    singleHaul: boolean;
 }
 
 interface SpawnMemory {
@@ -97,9 +99,9 @@ interface Memory {
     structureDT?: string;
     roadAgDT?: string;
     log: any;
-	cycleLog: boolean;
-	gameManagerLog: boolean;
-	creepLog: boolean;
+    cycleLog: boolean;
+    gameManagerLog: boolean;
+    creepLog: boolean;
     readyForExpansion: boolean;
 
     //* Integral Game Memory

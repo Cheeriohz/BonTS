@@ -22,11 +22,12 @@ export class RoleHauler extends RoleCreep {
                     return;
                 }
             }
-            if (creep.store.getUsedCapacity() > 0 && creep.room.storage) {
-                this.depositMoveUnspecified(creep, creep.room.storage);
-                return;
-            }
             creep.memory.working = false;
+            if (creep.memory.tick !== 0) {
+                creep.memory.tick = 0;
+            } else {
+                creep.memory.tick = 1;
+            }
             creep.say("🏗️ pickup");
         }
         if (!creep.memory.working && creep.store.getFreeCapacity() === 0) {
@@ -54,6 +55,10 @@ export class RoleHauler extends RoleCreep {
                 }
             }
         }
+        if (_.keys(creep.store).length > 0 && creep.room.storage) {
+            this.depositMoveUnspecified(creep, creep.room.storage);
+            return true;
+        }
         const droppedResources = creep.room.find(FIND_DROPPED_RESOURCES);
         if (droppedResources) {
             const droppedResource = creep.pos.findClosestByPath(droppedResources);
@@ -76,7 +81,11 @@ export class RoleHauler extends RoleCreep {
             this.fillClosest(creep, true, !creep.room.memory.linksActive);
         } else {
             // energy full, time to find deposit location.
-            this.fillUpHauler(creep);
+            if (creep.room.memory.singleHaul) {
+                this.fillUpHaulerMono(creep);
+            } else {
+                this.fillUpHauler(creep);
+            }
         }
     }
 
@@ -85,6 +94,28 @@ export class RoleHauler extends RoleCreep {
             creep.memory.ignoreLinks = true;
         } else {
             creep.memory.ignoreLinks = false;
+        }
+    }
+
+    protected fillUpHaulerMono(creep: Creep) {
+        // console.log(`creep mono: ${creep.name}`);
+        if (creep.memory.preciousList && creep.memory.preciousList.length > 0) {
+            // console.log(`creep mono trying to get container: ${creep.name}`);
+            const container = Game.getObjectById<StructureContainer>(
+                creep.memory.tick === 0 ? _.first(creep.memory.preciousList)! : _.last(creep.memory.preciousList)!
+            );
+            if (container) {
+                return this.withdrawMoveCached(creep, container);
+            } else {
+                creep.memory.preciousList = null;
+            }
+        } else {
+            if (creep.room.memory.containerMap && creep.room.memory.containerMap.length > 0) {
+                creep.memory.preciousList = _.map(creep.room.memory.containerMap, cm => cm.id!);
+                // console.log(JSON.stringify(creep.memory.preciousList));
+            } else {
+                this.fillUpHauler(creep);
+            }
         }
     }
 

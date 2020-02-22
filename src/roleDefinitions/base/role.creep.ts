@@ -250,7 +250,7 @@ export class RoleCreep {
             creep.transfer(structure, <ResourceConstant>_.last(_.keys(creep.store)));
             return;
         } else {
-            creep.moveTo(structure, { reusePath: 10, ignoreCreeps: false });
+            this.cachedTravel(structure.pos, creep, false, false);
             return;
         }
     }
@@ -352,7 +352,9 @@ export class RoleCreep {
                 return (
                     (structure.structureType === STRUCTURE_TOWER &&
                         structure.store.getFreeCapacity(RESOURCE_ENERGY) > 100) ||
-                    ((structure.structureType === STRUCTURE_EXTENSION || structure.structureType === STRUCTURE_SPAWN) &&
+                    ((structure.structureType === STRUCTURE_EXTENSION ||
+                        structure.structureType === STRUCTURE_SPAWN ||
+                        structure.structureType === STRUCTURE_LAB) &&
                         structure.store.getFreeCapacity(RESOURCE_ENERGY) > 0)
                 );
             }

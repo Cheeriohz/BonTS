@@ -226,16 +226,112 @@ export class SpawnTemplate {
             MOVE,
             MOVE
         ];
+        this.reassessRemotes(room);
     }
 
     //* RCL6 -> 2300 Energy
-    public static RCL6Improvements(room: Room) {}
+    public static RCL6Improvements(room: Room) {
+        const sourceCount = room.memory.sourceMap.length;
+        room.memory.templates![CreepRole.builder] = [
+            MOVE,
+            MOVE,
+            MOVE,
+            MOVE,
+            MOVE,
+            MOVE,
+            MOVE,
+            MOVE,
+            MOVE,
+            MOVE,
+            MOVE,
+            MOVE,
+            MOVE,
+            WORK,
+            WORK,
+            WORK,
+            WORK,
+            WORK,
+            WORK,
+            WORK,
+            WORK,
+            WORK,
+            CARRY,
+            CARRY,
+            CARRY,
+            CARRY,
+            CARRY
+        ];
+
+        // Switching to a single large hauler
+        if (sourceCount > 1) {
+            room.memory.templates![CreepRole.hauler] = [CARRY, CARRY, CARRY, CARRY, MOVE, MOVE];
+        }
+
+        room.memory.roleTargets![CreepRole.hauler] = 1;
+        room.memory.singleHaul = true;
+        this.reassessRemotes(room);
+    }
 
     //* RCL7 -> 5300 Energy
-    public static RCL7Improvements(room: Room) {}
+    public static RCL7Improvements(room: Room) {
+        room.memory.templates![CreepRole.builder] = [
+            MOVE,
+            MOVE,
+            MOVE,
+            MOVE,
+            MOVE,
+            MOVE,
+            MOVE,
+            MOVE,
+            MOVE,
+            MOVE,
+            MOVE,
+            MOVE,
+            MOVE,
+            MOVE,
+            MOVE,
+            MOVE,
+            MOVE,
+            MOVE,
+            MOVE,
+            MOVE,
+            WORK,
+            WORK,
+            WORK,
+            WORK,
+            WORK,
+            WORK,
+            WORK,
+            WORK,
+            WORK,
+            WORK,
+            WORK,
+            WORK,
+            CARRY,
+            CARRY,
+            CARRY,
+            CARRY,
+            CARRY,
+            CARRY,
+            CARRY,
+            CARRY
+        ];
+
+        this.reassessRemotes(room);
+    }
 
     //* RCL8 -> 12300 Energy
-    public static RCL8Improvements(room: Room) {}
+    public static RCL8Improvements(room: Room) {
+        this.reassessRemotes(room);
+    }
+
+    private static reassessRemotes(room: Room) {
+        if (room.memory.remoteMines) {
+            for (const mine of room.memory.remoteMines) {
+                mine.configured = false;
+            }
+        }
+    }
 
     private static getDefaultForRole(role: Number): BodyPartConstant[] {
         switch (role) {

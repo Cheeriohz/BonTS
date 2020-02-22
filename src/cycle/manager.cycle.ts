@@ -49,6 +49,7 @@ export class CycleManager {
     }
 
     private static manageLongTermTasksPost() {
+        SpawnTemplate.RCL6Improvements(Game.rooms["E34S13"]);
         this.roomLevelTasksLongTermPost();
         this.spawnLevelTasksLongTermPost();
         this.manageMediumTermTasksPost();
