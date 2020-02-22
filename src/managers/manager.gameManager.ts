@@ -19,9 +19,11 @@ export class GameManager {
         } else {
             Memory.cycle++;
         }
-
-        this.runClean();
-        // this.runLogging();
+        if (Memory.gameManagerLog) {
+            this.runLogging();
+        } else {
+            this.runClean();
+        }
     }
 
     private static runClean() {
@@ -55,6 +57,54 @@ export class GameManager {
         if (Memory.cycleLog) {
             console.log(`Cycle ${Memory.cycle} Execution Time: ${Game.cpu.getUsed() - executionTime}`);
         }
+    }
+
+    private static runLogging() {
+        const executionTime = Game.cpu.getUsed();
+        // Manage remotes and mines.
+        if (Memory.cycle % __cycle_medium_term__ === 0) {
+            for (const spawn of _.uniqBy(_.values(Game.spawns), s => s.room.name)) {
+                if (spawn.room.memory.mine) {
+                    const mm: MineManager = new MineManager(spawn.room, spawn);
+                    mm.manageMine(true);
+                }
+                GameManager.manageRemotes(spawn);
+            }
+        }
+
+        const executionTimeRemote = Game.cpu.getUsed();
+        // Manage cycle intermittent pre-and post actions
+        CycleManager.checkPre();
+
+        const executionTimeCheckPre = Game.cpu.getUsed();
+        // Spawn creeps
+        Spawn.run();
+
+        const executionTimeSpawner = Game.cpu.getUsed();
+
+        // Manage roles
+        const rm: RolesManager = new RolesManager();
+        rm.run();
+
+        const executionTimeRoles = Game.cpu.getUsed();
+
+        // Manage structures
+        TowerManager.run();
+
+        const executionTimeStructures = Game.cpu.getUsed();
+
+        // Manage cycles
+        CycleManager.checkPost();
+
+        const executionTimeCycles = Game.cpu.getUsed();
+
+        console.log(`Cycle ${Memory.cycle} Execution Time: ${executionTimeCycles - executionTime}`);
+        console.log(`   Remotes: ${executionTimeSpawner - executionTimeRemote}`);
+        console.log(`   CheckPre: ${executionTimeRemote - executionTimeCheckPre}`);
+        console.log(`   Spawning: ${executionTimeSpawner - executionTime}`);
+        console.log(`   Roles: ${executionTimeRoles - executionTimeSpawner}`);
+        console.log(`   Structures: ${executionTimeStructures - executionTimeRoles}`);
+        console.log(`   CheckPost: ${executionTimeCycles - executionTimeStructures}`);
     }
 
     private static manageRemotes(spawn: StructureSpawn) {
@@ -126,36 +176,5 @@ export class GameManager {
                 }
             }
         }
-    }
-
-    private static runLogging() {
-        const executionTime = Game.cpu.getUsed();
-
-        // Spawn creeps
-        Spawn.run();
-
-        const executionTimeSpawner = Game.cpu.getUsed();
-
-        // Manage roles
-        const rm: RolesManager = new RolesManager();
-        rm.run();
-
-        const executionTimeRoles = Game.cpu.getUsed();
-
-        // Manage structures
-        TowerManager.run();
-
-        const executionTimeStructures = Game.cpu.getUsed();
-
-        // Manage cycles
-        CycleManager.checkPost();
-
-        const executionTimeCycles = Game.cpu.getUsed();
-
-        console.log(`Cycle ${Memory.cycle} Execution Time: ${executionTimeCycles - executionTime}`);
-        console.log(`   Spawning: ${executionTimeSpawner - executionTime}`);
-        console.log(`   Roles: ${executionTimeRoles - executionTimeSpawner}`);
-        console.log(`   Structures: ${executionTimeStructures - executionTimeRoles}`);
-        console.log(`   Cycles: ${executionTimeCycles - executionTimeStructures}`);
     }
 }

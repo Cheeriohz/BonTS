@@ -97,7 +97,9 @@ interface Memory {
     structureDT?: string;
     roadAgDT?: string;
     log: any;
-    cycleLog: boolean;
+	cycleLog: boolean;
+	gameManagerLog: boolean;
+	creepLog: boolean;
     readyForExpansion: boolean;
 
     //* Integral Game Memory

@@ -83,8 +83,11 @@ export class RolesManager {
             if (!(name in Game.creeps)) {
                 delete Memory.creeps[name];
             } else {
-                this.manageRoles(Game.creeps[name]);
-                //this.manageRolesLogged(Game.creeps[name]);
+                if (Memory.creepLog) {
+                    this.manageRolesLogged(Game.creeps[name]);
+                } else {
+                    this.manageRoles(Game.creeps[name]);
+                }
             }
         }
     }
@@ -100,7 +103,7 @@ export class RolesManager {
             creep.memory.moved = null;
             return;
         } else if (creep.memory.activeTaxi) {
-			TaxiServiceManager.checkRequest(creep);
+            TaxiServiceManager.checkRequest(creep);
             return;
         } else if (this.mRC.pathHandling(creep)) {
             if (creep.memory.home) {
@@ -139,9 +142,11 @@ export class RolesManager {
                     }
                     case CreepRole.topper: {
                         this.manageTopper(creep);
+                        break;
                     }
                     case CreepRole.taxi: {
                         this.manageTaxi(creep);
+                        break;
                     }
                 }
             }
