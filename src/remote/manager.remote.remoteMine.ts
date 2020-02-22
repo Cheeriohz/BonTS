@@ -77,9 +77,9 @@ export class RemoteMineManager {
             this.requestMiner();
         }
         if (this.mine.haulers) {
-            this.removeUnusedHaulers();
-            if (this.mine.haulers.length < this.mine.haulerCount!) {
-                if (!this.creepInQueue(CreepRole.hauler)) {
+            if (!this.creepInQueue(CreepRole.hauler)) {
+                this.removeUnusedHaulers();
+                if (this.mine.haulers.length < this.mine.haulerCount!) {
                     if (this.haulerNeeded()) {
                         this.requestHauler();
                     }
