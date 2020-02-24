@@ -184,7 +184,7 @@ export class RemoteMineManager {
     // END TODO
 
     private creepInQueue(role: CreepRole) {
-        return _.find(this.spawn.memory.dedicatedCreepRequest, dc => {
+        return _.find(this.spawn.room.memory.dedicatedCreepRequest, dc => {
             return dc.dedication === this.mine.containerId && dc.role === role;
         });
     }

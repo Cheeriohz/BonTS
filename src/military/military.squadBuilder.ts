@@ -13,10 +13,10 @@ export class SquadBuilder {
     }
 
     private static requestSKFarmSquad(spawn: StructureSpawn, squadName: string) {
-        if (!spawn.memory.creepRequest) {
-            spawn.memory.creepRequest = [];
+        if (!spawn.room.memory.creepRequest) {
+            spawn.room.memory.creepRequest = [];
         }
-        spawn.memory.creepRequest.push({
+        spawn.room.memory.creepRequest.push({
             body: [
                 TOUGH,
                 TOUGH,
@@ -64,7 +64,7 @@ export class SquadBuilder {
             },
             role: CreepRole.knight
         });
-        spawn.memory.creepRequest.push({
+        spawn.room.memory.creepRequest.push({
             body: [MOVE, MOVE, MOVE, MOVE, MOVE, MOVE, HEAL, HEAL, HEAL, HEAL, HEAL, HEAL],
             memory: {
                 working: false,

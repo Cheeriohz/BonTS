@@ -27,13 +27,13 @@ export class DedicatedCreepRequester {
         reserved?: boolean;
         body?: BodyPartConstant[];
     }) {
-        if (!this.spawn.memory.dedicatedCreepRequest) {
-            this.spawn.memory.dedicatedCreepRequest = [];
+        if (!this.spawn.room.memory.dedicatedCreepRequest) {
+            this.spawn.room.memory.dedicatedCreepRequest = [];
         }
         switch (role) {
             case CreepRole.harvester: {
                 if (isRemote) {
-                    this.spawn.memory.dedicatedCreepRequest.push(
+                    this.spawn.room.memory.dedicatedCreepRequest.push(
                         this.createDedicatedRemoteHarvester(dedication, specifiedName, precious, orders)
                     );
                     break;
@@ -43,11 +43,11 @@ export class DedicatedCreepRequester {
             case CreepRole.builder: {
                 if (isRemote) {
                     if (body) {
-                        this.spawn.memory.dedicatedCreepRequest.push(
+                        this.spawn.room.memory.dedicatedCreepRequest.push(
                             this.createSpecificDedicatedRemoteBuilder(dedication, specifiedName, body)
                         );
                     } else {
-                        this.spawn.memory.dedicatedCreepRequest.push(
+                        this.spawn.room.memory.dedicatedCreepRequest.push(
                             this.createDedicatedRemoteBuilder(dedication, specifiedName)
                         );
                     }
@@ -58,17 +58,17 @@ export class DedicatedCreepRequester {
             case CreepRole.dropper: {
                 if (isRemote) {
                     if (reserved) {
-                        this.spawn.memory.dedicatedCreepRequest.push(
+                        this.spawn.room.memory.dedicatedCreepRequest.push(
                             this.createDedicatedReservedRemoteDropper(dedication, specifiedName, precious, orders)
                         );
                     } else {
-                        this.spawn.memory.dedicatedCreepRequest.push(
+                        this.spawn.room.memory.dedicatedCreepRequest.push(
                             this.createDedicatedRemoteDropper(dedication, specifiedName, precious, orders)
                         );
                     }
                     break;
                 } else {
-                    this.spawn.memory.dedicatedCreepRequest.push(
+                    this.spawn.room.memory.dedicatedCreepRequest.push(
                         this.createDedicatedDropper(dedication, specifiedName, precious)
                     );
                 }
@@ -77,27 +77,29 @@ export class DedicatedCreepRequester {
             case CreepRole.hauler: {
                 if (isRemote) {
                     if (body) {
-                        this.spawn.memory.dedicatedCreepRequest.push(
+                        this.spawn.room.memory.dedicatedCreepRequest.push(
                             this.createDedicatedRemoteHaulerSpecified(dedication, specifiedName, body, precious, orders)
                         );
                         break;
                     }
-                    this.spawn.memory.dedicatedCreepRequest.push(
+                    this.spawn.room.memory.dedicatedCreepRequest.push(
                         this.createDedicatedRemoteHauler(dedication, specifiedName, precious, orders)
                     );
                     break;
                 }
-                this.spawn.memory.dedicatedCreepRequest.push(this.createDedicatedHauler(dedication, specifiedName));
+                this.spawn.room.memory.dedicatedCreepRequest.push(
+                    this.createDedicatedHauler(dedication, specifiedName)
+                );
                 break;
             }
             case CreepRole.reserver: {
                 if (isRemote) {
                     if (body) {
-                        this.spawn.memory.dedicatedCreepRequest.push(
+                        this.spawn.room.memory.dedicatedCreepRequest.push(
                             this.createSpecificDedicatedRemoteReserver(dedication, specifiedName, body, orders)
                         );
                     } else {
-                        this.spawn.memory.dedicatedCreepRequest.push(
+                        this.spawn.room.memory.dedicatedCreepRequest.push(
                             this.createDedicatedRemoteReserver(dedication, specifiedName, orders)
                         );
                     }
@@ -109,18 +111,18 @@ export class DedicatedCreepRequester {
             case CreepRole.knight: {
                 if (isRemote) {
                     if (body) {
-                        this.spawn.memory.dedicatedCreepRequest.push(
+                        this.spawn.room.memory.dedicatedCreepRequest.push(
                             this.createSpecificDedicatedRemoteKnight(dedication, specifiedName, body, precious, orders)
                         );
                         break;
                     } else {
-                        this.spawn.memory.dedicatedCreepRequest.push(
+                        this.spawn.room.memory.dedicatedCreepRequest.push(
                             this.createDedicatedRemoteKnight(dedication, specifiedName, precious, orders)
                         );
                         break;
                     }
                 }
-                this.spawn.memory.dedicatedCreepRequest.push(
+                this.spawn.room.memory.dedicatedCreepRequest.push(
                     this.createDedicatedKnight(dedication, specifiedName, precious, orders)
                 );
                 break;
@@ -128,12 +130,12 @@ export class DedicatedCreepRequester {
             case CreepRole.archer: {
                 if (isRemote) {
                     if (body) {
-                        this.spawn.memory.dedicatedCreepRequest.push(
+                        this.spawn.room.memory.dedicatedCreepRequest.push(
                             this.createSpecificDedicatedRemoteArcher(dedication, specifiedName, body, precious, orders)
                         );
                         break;
                     } else {
-                        this.spawn.memory.dedicatedCreepRequest.push(
+                        this.spawn.room.memory.dedicatedCreepRequest.push(
                             this.createDedicatedRemoteArcher(dedication, specifiedName, precious, orders)
                         );
                         break;

@@ -14,7 +14,7 @@ export class Expander {
     public mineExpansion() {
         // If we have an untapped local container location, first expand to it.
         if (this.spawn.room.controller!.level > 2) {
-            if (!this.buildInProgress() && (this.spawn.memory.sourcesUtilized || !this.localSourceExpansion())) {
+            if (!this.buildInProgress() && this.spawn.memory.sourcesUtilized) {
                 // start a remote mine expansion request.
                 if (!this.spawn.memory.remoteMineExpansionInProgress) {
                     this.remoteMineExpansion();
@@ -29,35 +29,6 @@ export class Expander {
                 return true;
             }
         }
-        return false;
-    }
-
-    private localSourceExpansion(): boolean {
-        if (!this.spawn.memory.remoteMines) {
-            this.spawn.memory.remoteMines = [];
-        }
-        let containerUsage: number = 0;
-        if (this.spawn.room.memory.containerMap) {
-            containerUsage += this.spawn.room.memory.containerMap.length;
-        }
-        if (containerUsage === 2) {
-            this.spawn.memory.sourcesUtilized = true;
-            return false;
-        }
-        const sources: Source[] | null = this.getSources();
-        if (sources) {
-            if (containerUsage < sources.length) {
-                const containerExpansion: LocalExpansion = new LocalExpansion(
-                    this.spawn,
-                    this.spawn.room,
-                    this.spawn.pos,
-                    false
-                );
-                containerExpansion.checkForSourceExpansion(sources);
-                return true;
-            }
-        }
-        this.spawn.memory.sourcesUtilized = true;
         return false;
     }
 
@@ -124,10 +95,10 @@ export class Expander {
             body: [MOVE],
             memory: null
         };
-        if (!this.spawn.memory.creepRequest) {
-            this.spawn.memory.creepRequest = [];
+        if (!this.spawn.room.memory.creepRequest) {
+            this.spawn.room.memory.creepRequest = [];
         }
 
-        this.spawn.memory.creepRequest.push(creepRequest);
+        this.spawn.room.memory.creepRequest.push(creepRequest);
     }
 }

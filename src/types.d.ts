@@ -73,6 +73,8 @@ interface RoomMemory {
     //* Spawn Management
     templates?: RoomSpawnTemplates;
     roleTargets?: number[];
+    creepRequest: CreepRequest[] | null;
+    dedicatedCreepRequest: DedicatedCreepRequest[] | null;
 
     //* RCL Management
     rcl: number | null;
@@ -86,8 +88,6 @@ interface RoomMemory {
 
 interface SpawnMemory {
     reassess: boolean | null;
-    creepRequest: CreepRequest[] | null;
-    dedicatedCreepRequest: DedicatedCreepRequest[] | null;
     remoteMineExpansionInProgress: boolean | null;
     expeditionResults: IExpeditionResults[] | null;
     sourcesUtilized: boolean;

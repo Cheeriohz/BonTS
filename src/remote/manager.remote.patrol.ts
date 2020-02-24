@@ -73,7 +73,10 @@ export class RemotePatrolManager {
     private removeUnusedknights() {
         for (const knight of this.patrol.knights!) {
             if (!Game.creeps[knight]) {
-                if (_.filter(this.spawn.memory.dedicatedCreepRequest, cr => cr.specifiedName === knight).length === 0) {
+                if (
+                    _.filter(this.spawn.room.memory.dedicatedCreepRequest, cr => cr.specifiedName === knight).length ===
+                    0
+                ) {
                     _.remove(this.patrol.knights!, h => {
                         return h === knight;
                     });
@@ -83,7 +86,7 @@ export class RemotePatrolManager {
     }
 
     private creepInQueue(role: CreepRole) {
-        return _.find(this.spawn.memory.dedicatedCreepRequest, dc => {
+        return _.find(this.spawn.room.memory.dedicatedCreepRequest, dc => {
             return dc.orders && dc.orders.target === this.patrol.roomName && dc.role === role;
         });
     }

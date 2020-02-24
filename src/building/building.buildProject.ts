@@ -111,7 +111,7 @@ export class BuildProjectManager {
     }
 
     private creepInQueue(role: CreepRole) {
-        return _.find(this.spawn.memory.dedicatedCreepRequest, dc => {
+        return _.find(this.spawn.room.memory.dedicatedCreepRequest, dc => {
             return dc.dedication === this.project.roomName && dc.role === role;
         });
     }

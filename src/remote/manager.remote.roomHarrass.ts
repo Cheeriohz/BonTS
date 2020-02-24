@@ -119,7 +119,10 @@ export class RoomHarassManager {
     private removeUnusedknights() {
         for (const knight of this.harass.knights!) {
             if (!Game.creeps[knight]) {
-                if (_.filter(this.spawn.memory.dedicatedCreepRequest, cr => cr.specifiedName === knight).length === 0) {
+                if (
+                    _.filter(this.spawn.room.memory.dedicatedCreepRequest, cr => cr.specifiedName === knight).length ===
+                    0
+                ) {
                     _.remove(this.harass.knights!, h => {
                         return h === knight;
                     });
@@ -131,7 +134,10 @@ export class RoomHarassManager {
     private removeUnusedArchers() {
         for (const archer of this.harass.archers!) {
             if (!Game.creeps[archer]) {
-                if (_.filter(this.spawn.memory.dedicatedCreepRequest, cr => cr.specifiedName === archer).length === 0) {
+                if (
+                    _.filter(this.spawn.room.memory.dedicatedCreepRequest, cr => cr.specifiedName === archer).length ===
+                    0
+                ) {
                     _.remove(this.harass.archers!, h => {
                         return h === archer;
                     });
@@ -141,7 +147,7 @@ export class RoomHarassManager {
     }
 
     private creepInQueue(role: CreepRole) {
-        return _.find(this.spawn.memory.dedicatedCreepRequest, dc => {
+        return _.find(this.spawn.room.memory.dedicatedCreepRequest, dc => {
             return dc.orders && dc.orders.target === this.harass.roomName && dc.role === role;
         });
     }

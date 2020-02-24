@@ -24,10 +24,10 @@ export class CreepRequester {
             }
         };
         const scoutRequest: CreepRequest = { role: CreepRole.scout, body: [MOVE], memory: memory };
-        if (!this.spawn.memory.creepRequest) {
-            this.spawn.memory.creepRequest = [];
+        if (!this.spawn.room.memory.creepRequest) {
+            this.spawn.room.memory.creepRequest = [];
         }
-        this.spawn.memory.creepRequest.push(scoutRequest);
+        this.spawn.room.memory.creepRequest.push(scoutRequest);
     }
 
     public RequestScoutToRoom(roomName: string) {
@@ -46,10 +46,10 @@ export class CreepRequester {
             }
         };
         const scoutRequest: CreepRequest = { role: CreepRole.scout, body: [MOVE], memory: memory };
-        if (!this.spawn.memory.creepRequest) {
-            this.spawn.memory.creepRequest = [];
+        if (!this.spawn.room.memory.creepRequest) {
+            this.spawn.room.memory.creepRequest = [];
         }
-        this.spawn.memory.creepRequest.push(scoutRequest);
+        this.spawn.room.memory.creepRequest.push(scoutRequest);
     }
 
     public MaintainBuilder(): void {
@@ -83,8 +83,8 @@ export class CreepRequester {
                 return true;
             }
         }
-        if (this.spawn.memory.creepRequest) {
-            for (const rq of this.spawn.memory.creepRequest) {
+        if (this.spawn.room.memory.creepRequest) {
+            for (const rq of this.spawn.room.memory.creepRequest) {
                 if (rq.memory?.role === CreepRole.scout) {
                     if (rq.memory.orders && rq.memory.orders.target === roomName) {
                         return true;
@@ -111,10 +111,10 @@ export class CreepRequester {
             role: CreepRole.builder,
             body: this.spawn.room.memory.templates![CreepRole.builder]
         };
-        if (!this.spawn.memory.creepRequest) {
-            this.spawn.memory.creepRequest = [];
+        if (!this.spawn.room.memory.creepRequest) {
+            this.spawn.room.memory.creepRequest = [];
         }
-        this.spawn.memory.creepRequest.push(builderRequest);
+        this.spawn.room.memory.creepRequest.push(builderRequest);
     }
 
     private RequestBurnUpgrader() {
@@ -122,10 +122,10 @@ export class CreepRequester {
             role: CreepRole.upgrader,
             body: this.spawn.room.memory.templates![CreepRole.upgrader]
         };
-        if (!this.spawn.memory.creepRequest) {
-            this.spawn.memory.creepRequest = [];
+        if (!this.spawn.room.memory.creepRequest) {
+            this.spawn.room.memory.creepRequest = [];
         }
-        this.spawn.memory.creepRequest.push(builderRequest);
+        this.spawn.room.memory.creepRequest.push(builderRequest);
         this.EnableTopper();
     }
 

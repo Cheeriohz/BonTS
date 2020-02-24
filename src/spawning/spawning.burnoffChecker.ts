@@ -35,7 +35,7 @@ export class BurnoffChecker {
 
     private UpgraderRequested() {
         for (const spawn of _.values(Game.spawns).filter(s => s.room.name === this.room.name)) {
-            const creepRequest = _.filter(spawn.memory.creepRequest, cr => {
+            const creepRequest = _.filter(spawn.room.memory.creepRequest, cr => {
                 return cr.role === CreepRole.upgrader;
             });
             if (creepRequest) {

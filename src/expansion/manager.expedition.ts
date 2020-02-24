@@ -250,11 +250,11 @@ export class ExpeditionManager {
             body: [MOVE],
             memory: null
         };
-        if (!spawn.memory.creepRequest) {
-            spawn.memory.creepRequest = [];
+        if (!spawn.room.memory.creepRequest) {
+            spawn.room.memory.creepRequest = [];
         }
 
-        spawn.memory.creepRequest.push(creepRequest);
+        spawn.room.memory.creepRequest.push(creepRequest);
     }
 
     private searchForAssignee(assigneeName: string, tree: ScreepsSearchTree): boolean {

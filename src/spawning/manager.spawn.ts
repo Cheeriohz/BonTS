@@ -41,9 +41,9 @@ export class Spawn {
     }
 
     private static checkForSpawnRequest(spawn: StructureSpawn): boolean {
-        if (spawn.memory.creepRequest) {
-            if (spawn.memory.creepRequest.length > 0) {
-                const request: CreepRequest = spawn.memory.creepRequest[0];
+        if (spawn.room.memory.creepRequest) {
+            if (spawn.room.memory.creepRequest.length > 0) {
+                const request: CreepRequest = spawn.room.memory.creepRequest[0];
                 if (request.memory) {
                     if (
                         SpawnWrapper.spawnACreepWithMemory(
@@ -54,26 +54,26 @@ export class Spawn {
                             request.memory
                         ) == OK
                     ) {
-                        spawn.memory.creepRequest = _.takeRight(
-                            spawn.memory.creepRequest,
-                            spawn.memory.creepRequest.length - 1
+                        spawn.room.memory.creepRequest = _.takeRight(
+                            spawn.room.memory.creepRequest,
+                            spawn.room.memory.creepRequest.length - 1
                         );
                         return false;
                     }
                 } else {
                     if (SpawnWrapper.spawnACreep(spawn, request.body, CreepRole[request.role], request.role) == OK) {
-                        spawn.memory.creepRequest = _.takeRight(
-                            spawn.memory.creepRequest,
-                            spawn.memory.creepRequest.length - 1
+                        spawn.room.memory.creepRequest = _.takeRight(
+                            spawn.room.memory.creepRequest,
+                            spawn.room.memory.creepRequest.length - 1
                         );
                         return false;
                     }
                 }
             }
         }
-        if (spawn.memory.dedicatedCreepRequest) {
-            if (spawn.memory.dedicatedCreepRequest.length > 0) {
-                const request: DedicatedCreepRequest = spawn.memory.dedicatedCreepRequest[0];
+        if (spawn.room.memory.dedicatedCreepRequest) {
+            if (spawn.room.memory.dedicatedCreepRequest.length > 0) {
+                const request: DedicatedCreepRequest = spawn.room.memory.dedicatedCreepRequest[0];
                 if (
                     SpawnWrapper.spawnADedicatedCreep(
                         spawn,
@@ -86,9 +86,9 @@ export class Spawn {
                         request.orders
                     ) == OK
                 ) {
-                    spawn.memory.dedicatedCreepRequest = _.takeRight(
-                        spawn.memory.dedicatedCreepRequest,
-                        spawn.memory.dedicatedCreepRequest.length - 1
+                    spawn.room.memory.dedicatedCreepRequest = _.takeRight(
+                        spawn.room.memory.dedicatedCreepRequest,
+                        spawn.room.memory.dedicatedCreepRequest.length - 1
                     );
                     return false;
                 }

@@ -132,7 +132,7 @@ export class MineManager {
     }
 
     private creepNotInQueue(creepName: string) {
-        return _.find(this.spawn.memory.dedicatedCreepRequest, dc => {
+        return _.find(this.spawn.room.memory.dedicatedCreepRequest, dc => {
             return dc.specifiedName === creepName;
         });
     }

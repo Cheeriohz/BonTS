@@ -85,7 +85,7 @@ export class RemoteHarvestManager {
     }
 
     private creepInQueue(role: CreepRole) {
-        return _.find(this.spawn.memory.dedicatedCreepRequest, dc => {
+        return _.find(this.spawn.room.memory.dedicatedCreepRequest, dc => {
             return dc.dedication === this.harvest.vein && dc.role === role;
         });
     }
