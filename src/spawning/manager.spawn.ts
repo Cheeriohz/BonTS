@@ -23,19 +23,18 @@ export class Spawn {
             return;
         }
         const countMap = Memory.roleRoomMap[spawn.room.name];
+        let roleMapUnderFilled: boolean = false;
         if (countMap) {
             for (let i = 0; i < spawn.room.memory.roleTargets!.length; i++) {
                 if (countMap[i] < spawn.room.memory.roleTargets![i]) {
-                    SpawnWrapper.spawnGeneric(
-                        spawn.room,
-                        spawn.room.memory.templates![i],
-                        spawn.room.memory.roleTargets![i],
-                        i
-                    );
+                    roleMapUnderFilled = true;
+                    SpawnWrapper.spawnGeneric(spawn, spawn.room.memory.templates![i], i);
                     return;
                 }
             }
-            this.checkForSpawnRequest(spawn);
+            if (!roleMapUnderFilled) {
+                this.checkForSpawnRequest(spawn);
+            }
         } else {
             SpawnWrapper.spawnACreep(spawn, [WORK, CARRY, MOVE], CreepRole[0], 0);
         }
@@ -105,7 +104,15 @@ export class Spawn {
             if (!creep.memory.dedication && !creep.memory.home) {
                 if (CreepIsYouthful(creep)) {
                     if (roomCreepMap[creep.room.name]) {
-                        _.update(roomCreepMap, `${creep.room.name}[${creep.memory.role}]`, n => n + 1);
+                        if (creep.memory.role === CreepRole.taxi) {
+                            _.update(
+                                roomCreepMap,
+                                `${creep.room.name}[${creep.memory.taxi!.originalRole}]`,
+                                n => n + 1
+                            );
+                        } else {
+                            _.update(roomCreepMap, `${creep.room.name}[${creep.memory.role}]`, n => n + 1);
+                        }
                     } else {
                         _.assign(roomCreepMap, this.createCreepRoleMap(creep, this.createCreepRoleArray()));
                     }

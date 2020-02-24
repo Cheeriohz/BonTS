@@ -2,18 +2,8 @@ import { CreepRole } from "enums/enum.roles";
 import _ from "lodash";
 
 export class SpawnWrapper {
-    public static spawnGeneric(room: Room, body: any[], cap: number, role: CreepRole): boolean {
-        const roomRoleTracker = _.get(Memory.roleRoomMap, `[${room.name}][${role}]`, 0);
-
-        if (roomRoleTracker < cap) {
-            const spawns = room.find(FIND_MY_SPAWNS);
-
-            if (spawns.length > 0) {
-                this.spawnACreep(spawns[0], body, CreepRole[role], role);
-                return false;
-            }
-        }
-        return true;
+    public static spawnGeneric(spawn: StructureSpawn, body: any[], role: CreepRole): boolean {
+        return this.spawnACreep(spawn, body, CreepRole[role], role) === OK ? false : true;
     }
 
     public static spawnACreep(spawn: StructureSpawn, body: any[], name: string, assignedRole: number) {
@@ -43,7 +33,7 @@ export class SpawnWrapper {
     ) {
         const returnCode = spawn.spawnCreep(body, `${name}${Memory.creepTicker}`, { memory: memory });
         Memory.creepTicker++;
-        if (returnCode === 0) {
+        if (returnCode === OK) {
             this.updateRoomRoleMap(spawn, assignedRole);
         }
         return returnCode;

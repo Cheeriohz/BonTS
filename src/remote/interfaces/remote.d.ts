@@ -12,11 +12,13 @@ interface RemoteMine extends PathingLookup {
     vein: Id<Mineral> | Id<Deposit> | Id<Source>;
     roomName: string;
     reserved: boolean;
+    sk?: boolean;
     configured?: boolean;
     distance?: number;
     haulerCount?: number;
     haulerBody?: BodyPartConstant[];
     cycleIterator?: number;
+    hiatus?: boolean;
 }
 
 interface RemoteHarvest extends PathingLookup {

@@ -210,9 +210,9 @@ export class LabAddition extends GeneralBuilding {
         allRoadPositionsForConsideration: RoomPosition[]
     ): RoomPosition[] {
         //console.log(`Direction: ${orientDirection}`);
-        const fRP = this.getRoomPositionForDirection(sp, orientDirection);
+        const fRP = GeneralBuilding.getRoomPositionForDirection(sp, orientDirection);
         if (fRP && _.find(this.goodPositions, { x: fRP.x, y: fRP.y })) {
-            const sRP = this.getRoomPositionForDirection(fRP, orientDirection);
+            const sRP = GeneralBuilding.getRoomPositionForDirection(fRP, orientDirection);
             if (sRP && _.find(this.goodPositions, { x: sRP.x, y: sRP.y })) {
                 const dc = this.tryDirectionClockwise(sp, fRP, orientDirection, [this.goodPositions]);
                 if (dc) {
@@ -297,10 +297,10 @@ export class LabAddition extends GeneralBuilding {
         comparators: RoomPosition[][]
     ): RoomPosition[] | null {
         const searchArray = _.flatten(comparators);
-        const orientDirectionClockwise = this.directionClockwise(<DirectionConstant>orientDirection);
-        const tRP = this.getRoomPositionForDirection(sp, orientDirectionClockwise);
+        const orientDirectionClockwise = GeneralBuilding.directionClockwise(<DirectionConstant>orientDirection);
+        const tRP = GeneralBuilding.getRoomPositionForDirection(sp, orientDirectionClockwise);
         if (tRP && _.find(searchArray, { x: tRP.x, y: tRP.y })) {
-            const lRP = this.getRoomPositionForDirection(fRP, orientDirectionClockwise);
+            const lRP = GeneralBuilding.getRoomPositionForDirection(fRP, orientDirectionClockwise);
             if (lRP && _.find(searchArray, { x: lRP.x, y: lRP.y })) {
                 return [tRP, lRP];
             }
@@ -315,10 +315,12 @@ export class LabAddition extends GeneralBuilding {
         comparators: RoomPosition[][]
     ): RoomPosition[] | null {
         const searchArray = _.flatten(comparators);
-        const orientDirectionCounterClockwise = this.directionCounterClockwise(<DirectionConstant>orientDirection);
-        const tRP = this.getRoomPositionForDirection(sp, orientDirectionCounterClockwise);
+        const orientDirectionCounterClockwise = GeneralBuilding.directionCounterClockwise(
+            <DirectionConstant>orientDirection
+        );
+        const tRP = GeneralBuilding.getRoomPositionForDirection(sp, orientDirectionCounterClockwise);
         if (tRP && _.find(searchArray, { x: tRP.x, y: tRP.y })) {
-            const lRP = this.getRoomPositionForDirection(fRP, orientDirectionCounterClockwise);
+            const lRP = GeneralBuilding.getRoomPositionForDirection(fRP, orientDirectionCounterClockwise);
             if (lRP && _.find(searchArray, { x: lRP.x, y: lRP.y })) {
                 return [tRP, lRP];
             }

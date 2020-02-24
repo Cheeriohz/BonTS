@@ -31,7 +31,11 @@ export class RoleHauler extends RoleCreep {
             creep.say("🏗️ pickup");
         }
         if (!creep.memory.working && creep.store.getFreeCapacity() === 0) {
-            if (creep.store.getUsedCapacity()) creep.memory.working = true;
+            if (_.keys(creep.store).length > 1 && creep.room.storage) {
+                this.depositMoveUnspecified(creep, creep.room.storage);
+                return;
+            }
+            creep.memory.working = true;
             creep.say("💦");
         }
 

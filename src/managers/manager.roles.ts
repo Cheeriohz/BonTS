@@ -27,6 +27,9 @@ import { RoleRemoteArcher } from "roleDefinitions/remote/role.remote.archer";
 import { RoleCreep } from "roleDefinitions/base/role.creep";
 import { RoleTaxi } from "roleDefinitions/role.taxi";
 import { TaxiServiceManager } from "./manager.taxiService";
+import { RoleSquad } from "roleDefinitions/base/role.squad";
+import { RoleSquadKnight } from "roleDefinitions/squad/role.squad.knight";
+import { RoleSquadMedic } from "roleDefinitions/squad/role.squad.medic";
 
 export class RolesManager {
     private mRC!: RoleCreep;
@@ -53,6 +56,10 @@ export class RolesManager {
     private mRKnight!: RoleRemoteKnight;
     private mRArcher!: RoleRemoteArcher;
 
+    private mRoleSquad!: RoleSquad;
+    private mRoleSquadKnight!: RoleSquadKnight;
+    private mRoleSquadMedic!: RoleSquadMedic;
+
     constructor() {
         this.mRC = new RoleCreep();
         this.mHarvester = new RoleHarvester();
@@ -76,6 +83,10 @@ export class RolesManager {
         this.mRReserver = new RoleRemoteReserver();
         this.mRKnight = new RoleRemoteKnight();
         this.mRArcher = new RoleRemoteArcher();
+
+        this.mRoleSquad = new RoleSquad();
+        this.mRoleSquadKnight = new RoleSquadKnight();
+        this.mRoleSquadMedic = new RoleSquadMedic();
     }
 
     public run() {
@@ -106,7 +117,9 @@ export class RolesManager {
             TaxiServiceManager.checkRequest(creep);
             return;
         } else if (this.mRC.pathHandling(creep)) {
-            if (creep.memory.home) {
+            if (creep.memory.squad) {
+                this.manageSquadRole(creep);
+            } else if (creep.memory.home) {
                 this.manageRemoteCreepRole(creep);
             } else if (creep.memory.dedication) {
                 this.manageDedicatedCreepRole(creep, creep.memory.dedication);
@@ -149,6 +162,22 @@ export class RolesManager {
                         break;
                     }
                 }
+            }
+        }
+    }
+
+    private manageSquadRole(creep: Creep) {
+        switch (creep.memory.role) {
+            case CreepRole.knight: {
+                this.mRoleSquadKnight.run(creep);
+                break;
+            }
+            case CreepRole.medic: {
+                this.mRoleSquadMedic.run(creep);
+                break;
+            }
+            default: {
+                console.log(`No squad role exists for creep: ${creep.name}`);
             }
         }
     }

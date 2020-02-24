@@ -35,6 +35,7 @@ export class RoleRemoteHauler extends RoleRemote {
 
     protected depositRemoteHaul(creep: Creep) {
         if (creep.memory.home !== creep.room.name) {
+			console.log(`Early failure for: ${creep.name}`);
             this.travelToRoom(creep, creep.memory.home!, true);
         } else {
             const storage: StructureStorage | undefined = this.checkStorageForDeposit(creep.room);

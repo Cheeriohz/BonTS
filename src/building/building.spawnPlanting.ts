@@ -18,7 +18,7 @@ export class SpawnPlanting extends GeneralBuilding {
         if (this.roomScout) {
             let deserializedNaturalDistanceTransform: CostMatrix;
             if (!this.room.memory.naturalDistanceTransform) {
-                deserializedNaturalDistanceTransform = this.distanceTransformRaw(this.room.name, false);
+                deserializedNaturalDistanceTransform = GeneralBuilding.distanceTransformRaw(this.room.name, false);
                 this.room.memory.naturalDistanceTransform = deserializedNaturalDistanceTransform.serialize();
             } else {
                 deserializedNaturalDistanceTransform = PathFinder.CostMatrix.deserialize(

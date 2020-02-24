@@ -36,7 +36,7 @@ export class GeneralBuilding {
         ];
     }
 
-    protected getDirectionConstant(dx: number, dy: number): DirectionConstant {
+    protected static getDirectionConstant(dx: number, dy: number): DirectionConstant {
         switch (dx) {
             case 0: {
                 switch (dy) {
@@ -47,7 +47,7 @@ export class GeneralBuilding {
                         return TOP;
                     }
                     default: {
-                        console.log("Error invalid dy for a pathstep");
+                        console.log(`Error invalid dy for a pathstep, dx: ${dx}  dy: ${dy}`);
                     }
                 }
                 break;
@@ -64,7 +64,7 @@ export class GeneralBuilding {
                         return TOP_RIGHT;
                     }
                     default: {
-                        console.log("Error invalid dy for a pathstep");
+                        console.log(`Error invalid dy for a pathstep, dx: ${dx}  dy: ${dy}`);
                     }
                 }
                 break;
@@ -81,20 +81,20 @@ export class GeneralBuilding {
                         return TOP_LEFT;
                     }
                     default: {
-                        console.log("Error invalid dy for a pathstep");
+                        console.log(`Error invalid dy for a pathstep, dx: ${dx}  dy: ${dy}`);
                     }
                 }
                 break;
             }
             default: {
-                console.log("Error invalid dx for a pathstep");
+                console.log(`Error invalid dx for a pathstep, dx: ${dx}  dy: ${dy}`);
                 break;
             }
         }
         throw `dx: ${dx}  dy: ${dy} was invalid`;
     }
 
-    protected getRoomPositionForDirection(rp: RoomPosition, dc: DirectionConstant): RoomPosition | null {
+    protected static getRoomPositionForDirection(rp: RoomPosition, dc: DirectionConstant): RoomPosition | null {
         switch (dc) {
             case TOP: {
                 return new RoomPosition(rp.x, rp.y - 1, rp.roomName);
@@ -123,7 +123,7 @@ export class GeneralBuilding {
         }
     }
 
-    protected directionClockwise(dc: DirectionConstant): DirectionConstant {
+    protected static directionClockwise(dc: DirectionConstant): DirectionConstant {
         if (dc !== TOP_LEFT) {
             return <DirectionConstant>(<number>dc + 1);
         } else {
@@ -131,7 +131,7 @@ export class GeneralBuilding {
         }
     }
 
-    protected directionCounterClockwise(dc: DirectionConstant): DirectionConstant {
+    protected static directionCounterClockwise(dc: DirectionConstant): DirectionConstant {
         if (dc !== TOP) {
             return <DirectionConstant>(<number>dc - 1);
         } else {
@@ -161,6 +161,90 @@ export class GeneralBuilding {
             s.structureType === STRUCTURE_WALL ||
             s.structureType === STRUCTURE_ROAD
         );
+    }
+
+    //* Cross Room Pathing
+    protected static translateOneWay(rpPath: RoomPosition[], translatedStorage: RoomPathCostingRetainer[]) {
+        console.log(JSON.stringify(rpPath));
+        const groupedPaths = _.groupBy(rpPath, "roomName");
+        for (const roomName in groupedPaths) {
+            translatedStorage.push(this.mapRoomPath(roomName, groupedPaths[roomName]));
+        }
+        console.log(JSON.stringify(translatedStorage));
+        this.connectRoomPathsForTranslatedPath(translatedStorage);
+    }
+
+    protected static connectRoomPathsForTranslatedPath(translatedPaths: RoomPathCostingRetainer[]) {
+        if (translatedPaths.length > 1) {
+            for (let index = 0; index < translatedPaths.length - 1; index++) {
+                const peekAheadIndex = index + 1;
+                this.linkCrossRoom(translatedPaths[index], translatedPaths[peekAheadIndex]);
+            }
+        }
+    }
+
+    protected static linkCrossRoom(originRoom: RoomPathCostingRetainer, destinationRoom: RoomPathCostingRetainer) {
+        /*
+        (50, 25) | (0,24):(0,25):(0,26)      => +,+ : +,0 : +,-   |  1   1   1 |  |  1   0  -1 |
+        (0, 25) | (50,24):(50,25):(50,26)    => -,+ : -,0 : -,-   | -1  -1  -1 |  |  1   0  -1 |
+        (25, 50) | (24, 0):(25, 0):(26, 0)   => +,+ : 0,+ : -,+   |  1   0  -1 |  |  1   1   1 |
+        (25, 0) | (24, 50):(25, 50):(26, 50) => +,- : 0,- : -,-   |  1   0  -1 |  | -1  -1  -1 |
+        */
+        // (48, 36)  (1, 35)
+        let lastOriginPath = _.last(originRoom.path);
+        let psuedoBorderPath: PathStep = {
+            x: lastOriginPath!.x + lastOriginPath!.dx,
+            y: lastOriginPath!.y + lastOriginPath!.dy,
+            dx: 0,
+            dy: 0,
+            direction: 1
+        };
+
+        const firstDestinationPath = _.first(destinationRoom.path);
+        if (psuedoBorderPath!.x === 49) {
+            psuedoBorderPath!.dx = 1;
+            psuedoBorderPath.x = 0;
+        } else if (psuedoBorderPath!.x === 0) {
+            psuedoBorderPath!.dx = -1;
+            psuedoBorderPath.x = 49;
+        } else {
+            psuedoBorderPath!.dx = firstDestinationPath!.x - firstDestinationPath!.dx;
+        }
+        if (psuedoBorderPath!.y === 49) {
+            psuedoBorderPath!.dy = 1;
+            psuedoBorderPath!.y = 0;
+        } else if (psuedoBorderPath!.y === 0) {
+            psuedoBorderPath!.dy = -1;
+            psuedoBorderPath!.y = 49;
+        } else {
+            psuedoBorderPath!.dy = firstDestinationPath!.y - firstDestinationPath!.dy;
+        }
+        psuedoBorderPath!.direction = this.getDirectionConstant(lastOriginPath!.dx, lastOriginPath!.dy);
+        destinationRoom.path = _.concat([psuedoBorderPath], destinationRoom.path);
+    }
+
+    protected static mapRoomPath(roomName: string, positions: RoomPosition[]): RoomPathCostingRetainer {
+        let lastPosition: RoomPosition = positions[0];
+        let pathSteps: PathStep[] = new Array<PathStep>();
+        for (const pos of _.slice(positions, 1)) {
+            const dx: number = pos.x - lastPosition.x;
+            const dy: number = pos.y - lastPosition.y;
+            const ps: PathStep = {
+                x: pos.x,
+                y: pos.y,
+                dx: dx,
+                dy: dy,
+                direction: this.getDirectionConstant(dx, dy)
+            };
+            pathSteps.push(ps);
+            lastPosition = pos;
+        }
+        // Check to see if our final position is a border.
+        const finalPosition: PathStep | undefined = _.last(pathSteps);
+        if (finalPosition!.x === 0 || finalPosition!.y === 0 || finalPosition!.x === 49 || finalPosition!.y === 49) {
+            _.remove(pathSteps, finalPosition);
+        }
+        return { roomName: roomName, path: pathSteps };
     }
 
     //* Visualization helpers.
@@ -612,7 +696,38 @@ export class GeneralBuilding {
         return null;
     }
 
-    public distanceTransformRaw(roomName: string, logTransform: boolean) {
+    public static distanceTransformRawManhattan(roomName: string, logTransform: boolean) {
+        const roomTerrain = Game.map.getRoomTerrain(roomName);
+        let twoPass = new PathFinder.CostMatrix();
+        for (let y = 1; y <= 48; y++) {
+            for (let x = 1; x <= 48; x++) {
+                if (roomTerrain.get(x, y) === TERRAIN_MASK_WALL) {
+                    twoPass.set(x, y, 0);
+                } else {
+                    twoPass.set(x, y, 9);
+                }
+            }
+        }
+        for (let y = 1; y <= 48; y++) {
+            for (let x = 1; x <= 48; x++) {
+                twoPass.set(x, y, Math.min(twoPass.get(x, y), twoPass.get(x, y - 1) + 1, twoPass.get(x - 1, y) + 1));
+            }
+        }
+
+        for (let y = 48; y >= 0; y--) {
+            for (let x = 49; x >= 0; x--) {
+                let value = Math.min(twoPass.get(x, y), twoPass.get(x, y + 1) + 1, twoPass.get(x + 1, y) + 1);
+                twoPass.set(x, y, value);
+            }
+        }
+        if (logTransform) {
+            const visualizer: Visualizer = new Visualizer();
+            visualizer.visualizeCostMatrixDeserialized(roomName, twoPass);
+        }
+        return twoPass;
+    }
+
+    public static distanceTransformRaw(roomName: string, logTransform: boolean): CostMatrix {
         const roomTerrain = Game.map.getRoomTerrain(roomName);
         let twoPass = new PathFinder.CostMatrix();
         for (let y = 1; y <= 48; y++) {
@@ -651,7 +766,8 @@ export class GeneralBuilding {
             }
         }
         if (logTransform) {
-            this.logDistanceTransform(twoPass);
+            const visualizer: Visualizer = new Visualizer();
+            visualizer.visualizeCostMatrixDeserialized(roomName, twoPass);
         }
         return twoPass;
     }
@@ -698,7 +814,7 @@ export class GeneralBuilding {
             }
         }
         if (logTransform) {
-            this.logDistanceTransform(twoPass);
+            GeneralBuilding.logDistanceTransform(twoPass);
         }
         return twoPass;
     }
@@ -735,12 +851,12 @@ export class GeneralBuilding {
             }
         }
         if (logTransform) {
-            this.logDistanceTransform(twoPass);
+            GeneralBuilding.logDistanceTransform(twoPass);
         }
         return twoPass;
     }
 
-    private logDistanceTransform(matrix: CostMatrix) {
+    private static logDistanceTransform(matrix: CostMatrix) {
         for (let y = 0; y < 50; y++) {
             let buffer: string = "";
             for (let x = 0; x < 50; x++) {

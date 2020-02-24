@@ -10,5 +10,6 @@ export enum CreepRole {
     knight,
     topper,
     archer,
-    taxi
+    taxi,
+    medic
 }

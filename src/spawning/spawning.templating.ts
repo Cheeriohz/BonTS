@@ -262,9 +262,28 @@ export class SpawnTemplate {
             CARRY
         ];
 
+        room.memory.templates![CreepRole.upgrader] = [
+            WORK,
+            WORK,
+            WORK,
+            WORK,
+            WORK,
+            WORK,
+            WORK,
+            WORK,
+            WORK,
+            WORK,
+            WORK,
+            WORK,
+            WORK,
+            WORK,
+            WORK,
+            CARRY
+        ];
+
         // Switching to a single large hauler
         if (sourceCount > 1) {
-            room.memory.templates![CreepRole.hauler] = [CARRY, CARRY, CARRY, CARRY, MOVE, MOVE];
+            room.memory.templates![CreepRole.hauler] = [CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, MOVE, MOVE, MOVE];
         }
 
         room.memory.roleTargets![CreepRole.hauler] = 1;

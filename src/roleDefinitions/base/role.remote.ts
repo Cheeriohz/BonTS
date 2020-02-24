@@ -25,7 +25,7 @@ export class RoleRemote extends RoleCreep {
         if (target > 0) {
             const destination = creep.pos.findClosestByPath(<ExitConstant>target);
             if (destination) {
-                return this.cachedTravel(destination, creep, repairWhileMove, ignoreRoads);
+                return this.cachedTravel(destination, creep, repairWhileMove, ignoreRoads, 1);
             }
         }
         return false;
@@ -132,7 +132,7 @@ export class RoleRemote extends RoleCreep {
         if (creep.room.name === creep.memory.home) {
             this.fillUp(creep);
         } else {
-            this.travelToRoom(creep, creep.memory.home!, false, false, true);
+            this.travelToRoom(creep, creep.memory.home!, false, false, false);
         }
     }
 

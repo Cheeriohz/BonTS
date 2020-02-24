@@ -8,13 +8,11 @@ Game.spawns['A'].spawnCreep([WORK,WORK,CARRY,CARRY,MOVE,MOVE], "Builder" + Game.
 -- Remote Builder ---
 Game.spawns['A'].spawnCreep([WORK,WORK,WORK,WORK,CARRY,CARRY,CARRY,CARRY,MOVE,MOVE,MOVE,MOVE], "Builder" + Game.time.toString(), {memory: {role: 3, working: false, home: 'E34S13', dedication: 'E34S12'}});
 
-Game.spawns['A'].spawnCreep([WORK,WORK,WORK,WORK,WORK,WORK,CARRY,CARRY,MOVE,MOVE,MOVE,MOVE], "Bld" + Game.time.toString(), {memory: {role: 3, working: false}});
 
-Bronze Era Spawns
----------------------------
-Game.spawns['A'].spawnCreep([WORK, WORK, WORK, WORK, WORK, WORK, MOVE], "Dropper" + Game.time.toString(), {memory: {role: 3, working: false}});
 Game.spawns['A'].spawnCreep([CARRY,CARRY,MOVE], "Hauler" + Game.time.toString(), {memory: {role: 4, working: false}});
-Game.spawns['A'].spawnCreep([CARRY, CARRY, WORK, WORK, WORK, WORK, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE], "Drone" + Game.time.toString(), {memory: {role: 5, working: false}});
+Game.spawns['A'].spawnCreep([WORK,WORK,WORK,WORK,WORK,WORK,WORK,WORK,WORK,WORK,WORK,WORK,WORK,WORK,WORK,CARRY], "upgrader" + Game.time.toString(), {memory: {role: 4, working: false}});
+
+
 
 Game.spawns['A'].spawnCreep([MOVE,MOVE,MOVE,MOVE,MOVE,MOVE,WORK,WORK,WORK,WORK,WORK,WORK,WORK,WORK,WORK,WORK,CARRY,CARRY], "Drone" + Game.time.toString(), {memory: {role: 5, working: false}});
 

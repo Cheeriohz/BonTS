@@ -51,6 +51,7 @@ export class LinkAddition extends GeneralBuilding {
                         return false;
                     }
                 }
+                delete this.room.memory.structureDistanceTransform;
                 return true;
             }
         } else {
@@ -89,8 +90,8 @@ export class LinkAddition extends GeneralBuilding {
         if (this.containerPosA) {
             console.log("b");
             console.log(JSON.stringify(this.containerPosA));
-            const boundA = this.getRoomPositionForDirection(this.containerPosA, TOP_RIGHT)!;
-            const boundB = this.getRoomPositionForDirection(this.containerPosA, BOTTOM_LEFT)!;
+            const boundA = GeneralBuilding.getRoomPositionForDirection(this.containerPosA, TOP_RIGHT)!;
+            const boundB = GeneralBuilding.getRoomPositionForDirection(this.containerPosA, BOTTOM_LEFT)!;
             console.log(JSON.stringify(boundA));
             console.log(JSON.stringify(boundB));
             const linkA = this.traverseDistanceTransformBoundedDeserialized(this.containerPosA, sDT, 1, boundA, boundB);
@@ -106,8 +107,8 @@ export class LinkAddition extends GeneralBuilding {
                 this.room.controller.pos,
                 sDT,
                 1,
-                this.getRoomPositionForDirection(this.room.controller.pos, TOP_RIGHT)!,
-                this.getRoomPositionForDirection(this.room.controller.pos, BOTTOM_LEFT)!
+                GeneralBuilding.getRoomPositionForDirection(this.room.controller.pos, TOP_RIGHT)!,
+                GeneralBuilding.getRoomPositionForDirection(this.room.controller.pos, BOTTOM_LEFT)!
             );
             console.log("f");
             if (cont) {
@@ -121,8 +122,8 @@ export class LinkAddition extends GeneralBuilding {
                 this.containerPosB,
                 sDT,
                 1,
-                this.getRoomPositionForDirection(this.containerPosB, TOP_RIGHT)!,
-                this.getRoomPositionForDirection(this.containerPosB, BOTTOM_LEFT)!
+                GeneralBuilding.getRoomPositionForDirection(this.containerPosB, TOP_RIGHT)!,
+                GeneralBuilding.getRoomPositionForDirection(this.containerPosB, BOTTOM_LEFT)!
             );
             if (linkB) {
                 buildOrders.push({ x: linkB.x, y: linkB.y, type: STRUCTURE_LINK });

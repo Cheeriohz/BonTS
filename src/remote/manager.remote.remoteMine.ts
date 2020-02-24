@@ -18,6 +18,9 @@ export class RemoteMineManager {
     }
 
     public manageMine(checkPersonnel: boolean) {
+        if (this.mine.hiatus) {
+            return;
+        }
         this.checkForRoadMaintenance();
         if (!this.mine.configured) {
             this.configureMine();
@@ -238,6 +241,9 @@ export class RemoteMineManager {
         let multiplier = 1;
         if (this.mine.reserved) {
             multiplier = 2;
+        }
+        if (this.mine.sk) {
+            multiplier = 2.667;
         }
 
         const requiredCarry: number = Math.floor((distance * multiplier) / 5);

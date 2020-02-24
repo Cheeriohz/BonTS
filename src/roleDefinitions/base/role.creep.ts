@@ -133,9 +133,9 @@ export class RoleCreep {
         }
     }
 
-    protected withdrawMove(creep: Creep, structure: Structure) {
+    protected withdrawMove(creep: Creep, structure: Structure, amount?: number) {
         if (creep.pos.isNearTo(structure)) {
-            creep.withdraw(structure, RESOURCE_ENERGY);
+            creep.withdraw(structure, RESOURCE_ENERGY, amount);
             return;
         } else {
             creep.moveTo(structure, { reusePath: 10, ignoreCreeps: false });
@@ -180,9 +180,9 @@ export class RoleCreep {
             return true;
         }
         const terminal = creep.room.terminal;
-        if (terminal) {
+        if (terminal && terminal.store.getFreeCapacity() > 5000) {
             this.depositMove(creep, terminal);
-        }
+        }``
         if (fillUpgraders) {
             if (this.refillUpgraders(creep)) {
                 return true;
@@ -577,15 +577,35 @@ export class RoleCreep {
     protected checkForAdjacentDroppedResources(creep: Creep): boolean {
         const droppedResources = creep.pos.findInRange(FIND_DROPPED_RESOURCES, 1);
         if (droppedResources && droppedResources.length > 0) {
-            creep.pickup(_.last(droppedResources)!);
+            const droppedResource: Resource | undefined = _.last(droppedResources);
+            if (droppedResource) {
+                creep.pickup(droppedResource);
+                const remainingCap = creep.store.getFreeCapacity() - droppedResource.amount;
+                if (remainingCap > 0) {
+                    this.checkForContainerTopOff(creep, remainingCap);
+                }
+            }
+
             return true;
         }
         const tombStones = creep.pos.findInRange(FIND_TOMBSTONES, 1);
         if (tombStones && tombStones.length > 0) {
             const tombStone = _.last(tombStones);
             creep.withdraw(tombStone!, <ResourceConstant>_.last(_.keys(tombStone!.store)));
+            return true;
         }
         return false;
+    }
+
+    protected checkForContainerTopOff(creep: Creep, remainingAmount: number) {
+        const containers = creep.pos.findInRange(FIND_STRUCTURES, 1, {
+            filter: s => {
+                return s.structureType === STRUCTURE_CONTAINER && s.store.getUsedCapacity(RESOURCE_ENERGY) > 0;
+            }
+        });
+        if (containers && containers.length > 0) {
+            this.withdrawMove(creep, _.first(containers)!, remainingAmount);
+        }
     }
 
     protected repairRoad(creep: Creep) {
@@ -785,11 +805,13 @@ export class RoleCreep {
         destination: RoomPosition,
         creep: Creep,
         repairWhileMove: boolean,
-        ignoreRoads?: boolean
+        ignoreRoads?: boolean,
+        roomCount?: number
     ): boolean {
         const path = creep.pos.findPathTo(destination, {
             ignoreCreeps: true,
-            ignoreRoads: ignoreRoads ?? false
+            ignoreRoads: ignoreRoads ?? false,
+            maxRooms: roomCount
         });
         if (path && path.length > 0) {
             this.travelByCachedPath(repairWhileMove, creep, path);

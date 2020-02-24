@@ -14,6 +14,7 @@ interface CreepMemory {
     preciousPosition?: { x: number; y: number } | null;
     dropOffLocation?: { x: number; y: number } | null;
     home?: string | null;
+    squad?: string | null;
     repair?: string | null;
     adjLink?: Id<StructureLink> | null;
 
@@ -56,6 +57,7 @@ interface RoomMemory {
     remoteMines: RemoteMine[] | null;
     remoteReservations: RemoteReservation[] | null;
     remotePatrols: RemotePatrol[] | null;
+    theatres: string[] | null;
 
     //* Building
     reservedBuilds?: BuildOrder[] | null;
@@ -119,6 +121,10 @@ interface Memory {
 
     //* Market
     market: Market;
+
+    //* Military
+    squads: Dictionary<Squad>;
+    theatres: Dictionary<Theatre>;
 }
 
 interface Dictionary<T> {

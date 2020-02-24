@@ -72,9 +72,9 @@ export class TowerAddition extends GeneralBuilding {
                         y: this.storagePos.y + 2 * card[1],
                         type: STRUCTURE_TOWER
                     });
-                    const clockWise: RoomPosition | null = this.getRoomPositionForDirection(
+                    const clockWise: RoomPosition | null = GeneralBuilding.getRoomPositionForDirection(
                         this.storagePos,
-                        this.directionClockwise(this.getDirectionConstant(card[0], card[1]))
+                        GeneralBuilding.directionClockwise(GeneralBuilding.getDirectionConstant(card[0], card[1]))
                     );
                     if (clockWise) {
                         buildOrders.push({
@@ -83,9 +83,11 @@ export class TowerAddition extends GeneralBuilding {
                             type: STRUCTURE_TOWER
                         });
                     }
-                    const counterClockWise: RoomPosition | null = this.getRoomPositionForDirection(
+                    const counterClockWise: RoomPosition | null = GeneralBuilding.getRoomPositionForDirection(
                         this.storagePos,
-                        this.directionCounterClockwise(this.getDirectionConstant(card[0], card[1]))
+                        GeneralBuilding.directionCounterClockwise(
+                            GeneralBuilding.getDirectionConstant(card[0], card[1])
+                        )
                     );
                     if (counterClockWise) {
                         buildOrders.push({

@@ -18,6 +18,7 @@ import { RemoteMineHandler } from "remote/remote.remoteMineHandler";
 import { RemoteMineExpansion } from "expansion/expansion.remoteMine";
 import { remoteMineExpeditionHandler } from "expansion/manager.remoteMineExpedition";
 import { MarketSellOverflow } from "market/market.sellOverflow";
+import { TheatreCreation } from "military/military.theatreCreation";
 
 export class CycleManager {
     public static checkPre() {
@@ -49,7 +50,6 @@ export class CycleManager {
     }
 
     private static manageLongTermTasksPost() {
-        SpawnTemplate.RCL6Improvements(Game.rooms["E34S13"]);
         this.roomLevelTasksLongTermPost();
         this.spawnLevelTasksLongTermPost();
         this.manageMediumTermTasksPost();
@@ -68,6 +68,8 @@ export class CycleManager {
     }
 
     private static everyCycle() {
+        Memory.squads = Memory.squads;
+        Memory.theatres = Memory.theatres;
         if (Memory.showReserved) {
             this.drawReservedConstruction(Memory.showReserved);
         }
@@ -211,8 +213,7 @@ export class CycleManager {
     }
 
     private static distanceTransformRoom(roomName: string) {
-        const bg: GeneralBuilding = new GeneralBuilding();
-        bg.distanceTransformRaw(roomName, false);
+        GeneralBuilding.distanceTransformRaw(roomName, false);
     }
 
     private static createRemoteSpawnBuildProjectHelper(x: number, y: number, roomName: string, spawnName: string) {
@@ -251,5 +252,9 @@ export class CycleManager {
         })) {
             console.log(JSON.stringify(order));
         }
+    }
+
+    private static skTest(spawnName: string, roomName: string) {
+        TheatreCreation.createSKFarmTheatre(Game.spawns[spawnName], roomName);
     }
 }

@@ -11,6 +11,10 @@ import { RemoteHarvestManager } from "remote/manager.remote.remoteHarvest";
 import { ReservationManager } from "remote/manager.remote.reservation";
 import { RoomHarassManager } from "remote/manager.remote.roomHarrass";
 import { RemotePatrolManager } from "remote/manager.remote.patrol";
+import { SquadManager } from "military/military.squadManager";
+import { SquadBuilder } from "military/military.squadBuilder";
+import { SquadTypes } from "enums/enum.squads";
+import { TheatreDrafting } from "military/military.theatreDrafting";
 
 export class GameManager {
     public static run() {
@@ -41,6 +45,10 @@ export class GameManager {
 
         // Manage cycle intermittent pre-and post actions
         CycleManager.checkPre();
+
+        // Manage Squads
+        const squadManager: SquadManager = new SquadManager();
+        squadManager.manageSquads();
 
         // Spawn creeps
         Spawn.run();
@@ -77,6 +85,12 @@ export class GameManager {
         CycleManager.checkPre();
 
         const executionTimeCheckPre = Game.cpu.getUsed();
+
+        // Manage Squads
+        const squadManager: SquadManager = new SquadManager();
+        squadManager.manageSquads();
+        const executionTimeSquad = Game.cpu.getUsed();
+
         // Spawn creeps
         Spawn.run();
 
@@ -100,7 +114,8 @@ export class GameManager {
 
         console.log(`Cycle ${Memory.cycle} Execution Time: ${executionTimeCycles - executionTime}`);
         console.log(`   Remotes: ${executionTimeSpawner - executionTimeRemote}`);
-        console.log(`   CheckPre: ${executionTimeRemote - executionTimeCheckPre}`);
+        console.log(`   CheckPre: ${executionTimeRemote - executionTimeSquad}`);
+        console.log(`   Squads: ${executionTimeSquad - executionTimeCheckPre}`);
         console.log(`   Spawning: ${executionTimeSpawner - executionTime}`);
         console.log(`   Roles: ${executionTimeRoles - executionTimeSpawner}`);
         console.log(`   Structures: ${executionTimeStructures - executionTimeRoles}`);
@@ -113,6 +128,15 @@ export class GameManager {
         this.manageRemoteHarvests(spawn);
         this.manageRoomHarass(spawn);
         this.managePatrol(spawn);
+        this.manageTheatres(spawn);
+    }
+
+    private static manageTheatres(spawn: StructureSpawn) {
+        if (spawn.room.memory.theatres && spawn.room.memory.theatres.length > 0) {
+            for (const theatreName of spawn.room.memory.theatres) {
+                TheatreDrafting.draftSquad(spawn, theatreName);
+            }
+        }
     }
 
     private static managePatrol(spawn: StructureSpawn) {
