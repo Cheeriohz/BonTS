@@ -104,7 +104,11 @@ export class Spawn {
             if (!creep.memory.dedication && !creep.memory.home) {
                 if (CreepIsYouthful(creep)) {
                     if (roomCreepMap[creep.room.name]) {
-                        if (creep.memory.role === CreepRole.taxi) {
+                        if (
+                            creep.memory.role === CreepRole.taxi &&
+                            creep.memory.taxi &&
+                            creep.memory.taxi.originalRole
+                        ) {
                             _.update(
                                 roomCreepMap,
                                 `${creep.room.name}[${creep.memory.taxi!.originalRole}]`,

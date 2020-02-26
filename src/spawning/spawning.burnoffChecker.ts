@@ -14,12 +14,24 @@ export class BurnoffChecker {
         const storage = this.room.storage;
         if (storage) {
             if (storage.store.getUsedCapacity(RESOURCE_ENERGY) > this.burnoffThreshold) {
-                if (!this.AlreadyBurning()) {
-                    return true;
-                }
+                this.ToggleBurnOn();
+            } else {
+                this.ToggleBurnOff();
             }
         }
         return false;
+    }
+
+    private ToggleBurnOn() {
+        if (this.room.controller && this.room.controller.level != 8 && this.room.memory.roleTargets) {
+            this.room.memory.roleTargets[CreepRole.upgrader] = 2;
+        }
+    }
+
+    private ToggleBurnOff() {
+        if (this.room.controller && this.room.controller.level != 8 && this.room.memory.roleTargets) {
+            this.room.memory.roleTargets[CreepRole.upgrader] = 1;
+        }
     }
 
     private AlreadyBurning() {

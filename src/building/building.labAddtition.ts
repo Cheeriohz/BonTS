@@ -351,7 +351,7 @@ export class LabAddition extends GeneralBuilding {
                         // valid position
                         if (
                             this.rt.get(nX, nY) !== TERRAIN_MASK_WALL &&
-                            !this.existingDisqualifyingStructure(nX, nY, this.spawn.room)
+                            !LabAddition.existingDisqualifyingStructure(nX, nY, this.spawn.room)
                         ) {
                             this.goodPositions.push(new RoomPosition(nX, nY, this.spawn.room.name));
                         }

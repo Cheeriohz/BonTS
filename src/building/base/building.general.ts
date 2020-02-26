@@ -94,7 +94,7 @@ export class GeneralBuilding {
         throw `dx: ${dx}  dy: ${dy} was invalid`;
     }
 
-    protected static getRoomPositionForDirection(rp: RoomPosition, dc: DirectionConstant): RoomPosition | null {
+    public static getRoomPositionForDirection(rp: RoomPosition, dc: DirectionConstant): RoomPosition {
         switch (dc) {
             case TOP: {
                 return new RoomPosition(rp.x, rp.y - 1, rp.roomName);
@@ -123,7 +123,7 @@ export class GeneralBuilding {
         }
     }
 
-    protected static directionClockwise(dc: DirectionConstant): DirectionConstant {
+    public static directionClockwise(dc: DirectionConstant): DirectionConstant {
         if (dc !== TOP_LEFT) {
             return <DirectionConstant>(<number>dc + 1);
         } else {
@@ -131,7 +131,7 @@ export class GeneralBuilding {
         }
     }
 
-    protected static directionCounterClockwise(dc: DirectionConstant): DirectionConstant {
+    public static directionCounterClockwise(dc: DirectionConstant): DirectionConstant {
         if (dc !== TOP) {
             return <DirectionConstant>(<number>dc - 1);
         } else {
@@ -139,7 +139,16 @@ export class GeneralBuilding {
         }
     }
 
-    protected existingDisqualifyingStructure(x: number, y: number, room: Room): boolean {
+    public static existingDisqualifyingStructureRP(pos: RoomPosition): boolean {
+        const structure = pos.lookFor(LOOK_STRUCTURES).find(s => this.doesStructureDisqualify(s));
+        if (structure) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    public static existingDisqualifyingStructure(x: number, y: number, room: Room): boolean {
         const structure = room.lookForAt(LOOK_STRUCTURES, x, y).find(s => this.doesStructureDisqualify(s));
         if (structure) {
             return true;
@@ -148,7 +157,7 @@ export class GeneralBuilding {
         }
     }
 
-    protected doesStructureDisqualify(s: Structure): boolean {
+    protected static doesStructureDisqualify(s: Structure): boolean {
         return (
             s.structureType === STRUCTURE_SPAWN ||
             s.structureType === STRUCTURE_TOWER ||

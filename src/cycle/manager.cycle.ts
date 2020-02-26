@@ -145,10 +145,12 @@ export class CycleManager {
     private static spawnLevelTasksMediumTermPre() {
         for (const spawn of _.uniqBy(_.values(Game.spawns), s => s.room.name)) {
             if (spawn.room.memory.rcl) {
-                if (spawn.room.memory.rcl >= 4) {
-                    const creepRequester: CreepRequester = new CreepRequester(spawn);
+                const creepRequester: CreepRequester = new CreepRequester(spawn);
+                if (spawn.room.memory.rcl >= 3) {
                     creepRequester.CheckForRepairNeed();
-                    //creepRequester.CheckForUpgraderDumping();
+                }
+                if (spawn.room.memory.rcl >= 5) {
+                    creepRequester.CheckForUpgraderDumping();
                 }
             }
         }

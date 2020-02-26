@@ -68,9 +68,7 @@ export class CreepRequester {
 
     public CheckForUpgraderDumping(): void {
         const burnChecker: BurnoffChecker = new BurnoffChecker(this.spawn.room);
-        if (burnChecker.CheckForBurnoff()) {
-            this.RequestBurnUpgrader();
-        }
+        burnChecker.CheckForBurnoff();
     }
 
     private scoutAlreadyRequested(roomName: string): boolean {

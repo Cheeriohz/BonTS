@@ -70,6 +70,9 @@ interface RoomMemory {
     //* Combat
     target?: string | null;
 
+    //* Market
+    transit?: RoomTransitLogistics;
+
     //* Spawn Management
     templates?: RoomSpawnTemplates;
     roleTargets?: number[];
